@@ -1,0 +1,20 @@
+{
+	"compilerOptions": {
+		"forceConsistentCasingInFileNames": true,
+		"lib": [ "es5" ],
+		"noFallthroughCasesInSwitch": true,
+		"noImplicitAny": true,
+		"noImplicitOverride": true,
+		"noImplicitReturns": true,
+		"noImplicitThis": true,
+		"noUnusedLocals": true,
+		"noUnusedParameters": true,
+		"strict": true,
+		"target": "es5",
+	},
+	"include": [
+		"./lib/**/*.ts",
+		"./src/**/*.ts"
+	],
+	"noEmit": true
+}
