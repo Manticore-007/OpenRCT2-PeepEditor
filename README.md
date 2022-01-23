@@ -2,7 +2,7 @@
 
 This plugin lets you modify the properties of your park guests and staff members.
 
-![(Video example of using PeepEditor)](https://raw.githubusercontent.com/Manticore-007/OpenRCT2-PeepEditor/57fe197a60497fa9b9ca4ed62d4cb9eb1da5c37a/img/v1.1.gif)
+![(Video example of using PeepEditor)](https://github.com/Manticore-007/OpenRCT2-PeepEditor/blob/f0ecdd90da8fe1422447e7b99d988c7e1e21b853/img/v1.1.gif)
 
 This is my first experience with any actual coding. I got interested by using the Ride Vehicle Editor from Basssiiie. I wanted to make something similar, but with peeps. I thought it would be a cool project to learn how to code.
 
