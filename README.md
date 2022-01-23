@@ -2,7 +2,7 @@
 
 This plugin lets you modify the properties of your park guests and staff members.
 
-![(Video example of using PeepEditor)](https://raw.githubusercontent.com/Manticore-007/OpenRCT2-PeepEditor/57fe197a60497fa9b9ca4ed62d4cb9eb1da5c37a/img/staff.gif)
+![(Video example of using PeepEditor)](https://raw.githubusercontent.com/Manticore-007/OpenRCT2-PeepEditor/57fe197a60497fa9b9ca4ed62d4cb9eb1da5c37a/img/v1.1.gif)
 
 This is my first experience with any actual coding. I got interested by using the Ride Vehicle Editor from Basssiiie. I wanted to make something similar, but with peeps. I thought it would be a cool project to learn how to code.
 
@@ -11,6 +11,7 @@ There are a few different tabs:
 Staff:
 Freeze/unfreeze staff members, so you can use the as scenery objects around your map
 Give each individual staff member their own colour
+Change their appearance or their stafftype.
 
 Colours
     Give all the guests on the map the same colour for their shirts, trousers, balloons,
