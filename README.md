@@ -4,29 +4,28 @@ This plugin lets you modify the properties of your park guests and staff members
 
 ![(Video example of using PeepEditor)](https://raw.githubusercontent.com/Manticore-007/OpenRCT2-PeepEditor/57fe197a60497fa9b9ca4ed62d4cb9eb1da5c37a/img/staff.gif)
 
-This is my first experience with any actual coding. I got interested by using the Ride Vehicle Editor from Basssiiie. I wanted to make something similar, but with peeps. I thought it would be a cool project to learn how to code. It is still a work-in-progress, and it's my personal learning-to-code project, so my code is probably a mess to actual programmers.
+This is my first experience with any actual coding. I got interested by using the Ride Vehicle Editor from Basssiiie. I wanted to make something similar, but with peeps. I thought it would be a cool project to learn how to code.
 
 There are a few different tabs:
 
-### Staff:  
+Staff:
 Freeze/unfreeze staff members, so you can use the as scenery objects around your map
 Give each individual staff member their own colour
 
-### Colours:  
-Give all the guests on the map the same colour for their shirts, trousers, balloons,
-hats and umbrellas respectively.
+Colours
+    Give all the guests on the map the same colour for their shirts, trousers, balloons,
+    hats and umbrellas respectively.
 
-*This is the actual origin story of this plugin; I wanted to have all the guests in swimming trunks in the waterpark contest from Deurklink's DKMP, so the first prototype was salmon pink shirts with the push of a button.*
+Flags
+    Here you can make your guests do different kind of stuff; like littering or exploding to name two.
 
-### Flags:  
-Here you can make your guests do different kind of stuff; like littering or exploding to name two.
+Conditions
+    This is a planned feature, here I want the option to set your guests conditions, like happiness or thirst, this is already possible at the Cheats menu.
 
-### Conditions:  
-This is a planned feature, here I want the option to set your guests conditions, like happiness or thirst, this is already possible at the Cheats menu.
+About
+    Just some info about me and the plug-in.
 
-### About:  
-Just some info about me and the plug-in.
-
+Thanks to Basssiiie for let me use his Proxy Pather and readme file as a template, and showing me the ways of writing plug-ins.
 
 
 ## Installation
@@ -54,7 +53,6 @@ This project is based on [wisnia74's Typescript modding template](https://github
     - Default output folder for develop builds: `(documents)/OpenRCT2/plugins`
     - If your plugin folder is located elsewhere (on for example a non-Windows OS), you can modify it in `rollup.config.js`.
 
-
 ### Hot reload
 
 This project supports the [OpenRCT2 hot reload feature](https://github.com/OpenRCT2/OpenRCT2/blob/master/distribution/scripting.md#writing-scripts) for development.
@@ -73,5 +71,4 @@ This project supports the [OpenRCT2 hot reload feature](https://github.com/OpenR
 
 Don't touch `app.js`, even though it's just an empty file. Its existence makes Nodemon happy, and Nodemon is what watches your files for changes & fires off new dev builds for hot reloading.
 
-Thanks to [wisnia74](https://github.com/wisnia74/openrct2-typescript-mod-template) for providing the template for this mod and readme.  
-Thanks to Basssiiie for let me use his Proxy Pather as a template, and showing me the ways of writing plug-ins.
+Thanks to [wisnia74](https://github.com/wisnia74/openrct2-typescript-mod-template) for providing the template for this mod and readme.
