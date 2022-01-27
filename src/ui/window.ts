@@ -1,76 +1,144 @@
-import { debug } from "../helpers/logger";
-import { isDevelopment, pluginVersion } from "../helpers/environment";
-import { main } from "../main";
+/* eslint-disable prefer-const */
+/* eslint-disable @typescript-eslint/explicit-function-return-type */
+import { debug } from '../helpers/logger';
+import { isDevelopment, pluginVersion } from '../helpers/environment';
 
+const windowOptions = {
+	windowId: 'guest-editor-window',
+	widgetLineHeight: 14,
+	windowColour: 19,
+};
+
+//Enumerate the possible Guest properties we're going to modify
+type GuestColourOptions = 'tshirtColour' | 'trousersColour' | 'balloonColour' | 'umbrellaColour' | 'hatColour';
+let guestColourOptions: { [Keys in GuestColourOptions]: { id: string; colour: number | null } } = {
+	tshirtColour: {
+		id: 'guest-editor-tshirts',
+		colour: windowOptions.windowColour,
+	},
+	trousersColour: {
+		id: 'guest-editor-trousers',
+		colour: windowOptions.windowColour,
+	},
+	balloonColour: {
+		id: 'guest-editor-balloons',
+		colour: windowOptions.windowColour,
+	},
+	umbrellaColour: {
+		id: 'guest-editor-umbrellas',
+		colour: windowOptions.windowColour,
+	},
+	hatColour: {
+		id: 'guest-editor-hats',
+		colour: windowOptions.windowColour,
+	},
+};
 
 // Settings for the window
-const windowId = "guest-editor-window";
-const widgetLineHeight = 14;
-const colourpickershirts = "guest-editor-tshirts";
-const colourpickertrousers = "guest-editor-trousers";
-const colourpickerballoons = "guest-editor-balloons";
-const colourpickerhats = "guest-editor-hats";
-const colourpickerumbrellas = "guest-editor-umbrellas";
-const littering = "guest-editor-littering";
-const explode = "guest-editor-explode";
-const leavingPark = "guest-editor-leaving-park";
-const slowWalk = "guest-editor-slow-walk";
-const tracking = "guest-editor-tracking";
-const waving = "guest-editor-waving";
-const photo = "guest-editor-photo";
-const painting = "guest-editor-painting";
-const wow = "guest-editor-wow";
-const hereweare = "guest-editor-here-we-are";
-const iceCream = "guest-editor-ice-cream";
-const pizza = "guest-editor-pizza";
-const joy = "guest-editor-joy";
-const angry = "guest-editor-angry";
-const costumeDropdown = "guest-editor-dropdown-costume";
-const stafftypeDropdown = "guest-editor-dropdown-stafftype";
-const buttonTest: string = "guest-editor-button-test";
-const staffLabel: string = "guest-editor-staff-label";
-const toolSelectStaff: string = "guest-editor-tool-select-staff";
-const buttonLocateStaff: string = "guest-editor-button-locate-staff";
-const freeze: string = "guest-editor-checkbox-freeze-staff";
-const viewport: string = "guest-editor-viewport";
-const staffColourPicker: string = "guest-editor-staff-colour-picker";
-const staffTypeLabel: string = "guest-editor-staff-type-label";
-const costumeLabel: string = "guest-editor-costume-label";
-const blackViewport: CoordsXY = {x: -9000, y: -9000};
+let costumeDropdown = { id: 'guest-editor-dropdown-costume', items: [
+	'Panda', //0
+	'Tiger', //1
+	'Elephant', //2
+	'Gladiator', //3
+	'Gorilla', //4
+	'Snowman', //5
+	'Knight', //6
+	'Astronaut', //7
+	'Bandit', //8
+	'Sheriff', //9
+	'Pirate', //10
+	'Icecream', //11
+	'Chips', //12
+	'Burger', //13
+	'Soda can', //14
+	'Balloon', //15
+	'Candyfloss', //16
+	'Umbrella', //17
+	'Pizza', //18
+	'Security', //19
+	'Popcorn', //20
+	'Arms crossed', //21
+	'Head down', //22
+	'Nauseous', //23
+	'Very nauseous', //24
+	'Needs toilet', //25
+	'Hat', //26
+	'Hotdog', //27
+	'Tentacle', //28
+	'Toffee apple', //29
+	'Donut', //30
+	'Coffee', //31
+	'Nuggets', //32
+	'Lemonade', //33
+	'Walking', //34
+	'Pretzel', //35
+	'Sunglasses', //36
+	'Sujongkwa', //37
+	'Juice', //38
+	'Funnel cake', //39
+	'Noodles', //40
+	'Sausage', //41
+	'Soup', //42
+	'Sandwich', //43
+	'Guest', //252
+	'Handyman', //253
+	'Mechanic', //254
+	'Security guard', //255
+] };
+let stafftypeDropdown = { id: 'guest-editor-dropdown-stafftype', items: ['Handyman', 'Mechanic', 'Security Guard', 'Entertainer'] };
+let buttonTest = { id: 'guest-editor-button-test', value: 0 };
+let staffLabel = { id: 'guest-editor-staff-label', value: 0 };
+let toolSelectStaff = { id: 'guest-editor-tool-select-staff', value: 0 };
+let buttonLocateStaff = { id: 'guest-editor-button-locate-staff', value: 0 };
+let freeze = { id: 'guest-editor-checkbox-freeze-staff', value: 0 };
+let viewport = { id: 'guest-editor-viewport', value: 0 };
+let staffColourPicker = { id: 'guest-editor-staff-colour-picker', value: 0 };
+let staffTypeLabel = { id: 'guest-editor-staff-type-label', value: 0 };
+let costumeLabel = { id: 'guest-editor-costume-label', value: 0 };
+let blackViewport: CoordsXY = { x: -9000, y: -9000 };
 
+let widgetProps: { [K in PeepFlags]: { id: string; toggle: boolean } } = {
+	leavingPark: { id: 'guest-editor-leaving-park', toggle: false },
+	slowWalk: { id: 'guest-editor-slow-walk', toggle: false },
+	tracking: { id: 'guest-editor-tracking', toggle: false },
+	waving: { id: 'guest-editor-waving', toggle: false },
+	hasPaidForParkEntry: { id: 'N/A', toggle: false },
+	painting: { id: 'guest-editor-painting', toggle: false },
+	wow: { id: 'guest-editor-wow', toggle: false },
+	litter: { id: 'guest-editor-littering', toggle: false },
+	pizza: { id: 'guest-editor-pizza', toggle: false },
+	explode: { id: 'guest-editor-explode', toggle: false },
+	contagious: { id: 'N/A', toggle: false },
+	joy: { id: 'guest-editor-joy', toggle: false },
+	angry: { id: 'guest-editor-angry', toggle: false },
+	iceCream: { id: 'guest-editor-ice-cream', toggle: false },
+	hereWeAre: { id: 'guest-editor-here-we-are', toggle: false },
+	photo: { id: 'guest-editor-photo', toggle: false },
+	lost: { id: 'N/A', toggle: false },//Not used
+	hunger: { id: 'N/A', toggle: false },//Not used
+	toilet: { id: 'N/A', toggle: false },//Not used
+	crowded: { id: 'N/A', toggle: false },//Not used
+	happiness: { id: 'N/A', toggle: false },//Not used
+	nausea: { id: 'N/A', toggle: false },//Not used
+	purple: { id: 'N/A', toggle: false },//Not used
+	rideShouldBeMarkedAsFavourite: { id: 'N/A', toggle: false },//Not used
+	parkEntranceChosen: { id: 'N/A', toggle: false },//Not used
 
-const windowColour: number = 19;
-let widgetcolourshirts: number = windowColour;
-let widgetcolourtrousers: number = windowColour;
-let widgetcolourballoons: number = windowColour;
-let widgetcolourhats: number = windowColour;
-let widgetcolourumbrellas: number = windowColour;
-let widgetLitteringChecked: boolean = false;
-let widgetExplodeChecked: boolean = false;
-let widgetLeavingPark: boolean = false;
-let widgetSlowWalk: boolean = false;
-let widgetTracking: boolean = false;
-let widgetWaving: boolean = false;
-let widgetPhoto: boolean = false;
-let widgetPainting: boolean = false;
-let widgetWow: boolean = false;
-let widgetHereWeAre: boolean = false;
-let widgetIceCream: boolean = false;
-let widgetPizza: boolean = false;
-let widgetJoy: boolean = false;
-let widgetAngry: boolean = false;
+};
+
+//Probably could move these variables somewhere cleaner, but I can't quite figure out how ATM.
 const guestsEnergy: number = 0;
-const staffName: string = "no staff selected";
+const staffName: string = 'no staff selected';
 let toggle: boolean = false;
 let toggleDisabled: boolean = true;
-const coords: CoordsXYZ = { z: 0, y: 0, x: 0 }
+const coords: CoordsXYZ = { z: 0, y: 0, x: 0 };
 let widgetFreeze: boolean = false;
 let staffMember: Entity;
 let energyStaff: number;
 let idStaff: Staff;
 let checkboxDisabled: boolean = true;
 let colourPickerDisabled: boolean = true;
-let update: (IDisposable | null) = null;
+let update: IDisposable | null = null;
 let toggleFreeze: boolean = false;
 const staffTypeNumber: number = -1;
 let selectedIndexCostume: number = -1;
@@ -81,168 +149,118 @@ export class PeepEditorWindow {
 	 */
 
 	open(): void {
-		const window = ui.getWindow(windowId);
+		const window = ui.getWindow(windowOptions.windowId);
 		if (window) {
-			debug("The Peep Editor window is already shown.");
+			debug('The Peep Editor window is already shown.');
 			window.bringToFront();
-		}
-		else {
+		} else {
 			let windowTitle = `Peep Editor (v${pluginVersion})`;
 			if (isDevelopment) {
-				windowTitle += " [DEBUG]";
+				windowTitle += ' [DEBUG]';
 			}
 
 			ui.openWindow({
 				onClose: () => {
-					toggle = false
-					toggleDisabled = true
-					toggleFreeze = false
-					checkboxDisabled = true
-					colourPickerDisabled = true
-					widgetFreeze = false
-					ui.tool?.cancel()
+					toggle = false;
+					toggleDisabled = true;
+					toggleFreeze = false;
+					checkboxDisabled = true;
+					colourPickerDisabled = true;
+					widgetFreeze = false;
+					ui.tool?.cancel();
 				},
-				classification: windowId,
+				classification: windowOptions.windowId,
 				title: windowTitle,
 				width: 260,
 				height: 250,
-				colours: [windowColour, windowColour],
+				colours: [windowOptions.windowColour, windowOptions.windowColour],
 				tabs: [
 					{
 						image: 5628, //staff
 						widgets: [
 							<LabelWidget>{
-								type: "label",
+								type: 'label',
 								x: 0,
 								y: 232,
 								width: 260,
-								height: widgetLineHeight,
-								textAlign: "centred",
-								text: "Manticore-007",
-								tooltip: "Powered by Basssiiie",
-								isDisabled: true
+								height: windowOptions.widgetLineHeight,
+								textAlign: 'centred',
+								text: 'Manticore-007 + lts Smitty',
+								tooltip: 'Powered by Basssiiie',
+								isDisabled: true,
 							},
 							<GroupBoxWidget>{
-								type: "groupbox",
+								type: 'groupbox',
 								x: 10,
 								y: 55,
 								width: 240,
 								height: 170,
-								text: "Staff",
+								text: 'Staff',
 							},
 							<GroupBoxWidget>{
-								type: "groupbox",
+								type: 'groupbox',
 								x: 10,
 								y: 95,
 								width: 240,
 								height: 130,
 							},
 							<LabelWidget>{
-								name: staffLabel,
-								type: "label",
+								name: staffLabel.id,
+								type: 'label',
 								x: 20,
 								y: 73,
 								width: 260,
-								height: widgetLineHeight,
+								height: windowOptions.widgetLineHeight,
 								text: `Name: {RED}${staffName}`,
-								isDisabled: false
+								isDisabled: false,
 							},
 							<LabelWidget>{
-								name: staffTypeLabel,
-								type: "label",
+								name: staffTypeLabel.id,
+								type: 'label',
 								x: 20,
 								y: 110,
 								width: 140,
-								height: widgetLineHeight,
+								height: windowOptions.widgetLineHeight,
 								text: `Type:`,
 								isDisabled: true,
 							},
 							<DropdownWidget>{
-								name: stafftypeDropdown,
-								type: "dropdown",
+								name: stafftypeDropdown.id,
+								type: 'dropdown',
 								x: 75,
 								y: 110,
 								width: 95,
-								height: widgetLineHeight,
-								items: ["Handyman", "Mechanic", "Security Guard", "Entertainer"],
+								height: windowOptions.widgetLineHeight,
+								items: stafftypeDropdown.items,
 								selectedIndex: staffTypeNumber,
 								isDisabled: true,
-								onChange: (number) => setStaffType(number)
+								onChange: (number) => setStaffType(number),
 							},
 							<LabelWidget>{
-								name: costumeLabel,
-								type: "label",
+								name: costumeLabel.id,
+								type: 'label',
 								x: 20,
 								y: 125,
 								width: 140,
-								height: widgetLineHeight,
+								height: windowOptions.widgetLineHeight,
 								text: `Costume:`,
 								isDisabled: true,
 							},
 							<DropdownWidget>{
-								name: costumeDropdown,
-								type: "dropdown",
+								name: costumeDropdown.id,
+								type: 'dropdown',
 								x: 75,
 								y: 125,
 								width: 95,
-								height: widgetLineHeight,
-								items: [
-									"Panda",				//0
-									"Tiger",				//1
-									"Elephant",				//2
-									"Gladiator",			//3
-									"Gorilla",				//4
-									"Snowman",				//5
-									"Knight",				//6
-									"Astronaut",			//7
-									"Bandit",				//8
-									"Sheriff",				//9
-									"Pirate",				//10
-									"Icecream",				//11
-									"Chips",				//12
-									"Burger",				//13
-									"Soda can",				//14
-									"Balloon",				//15
-									"Candyfloss",			//16
-									"Umbrella",				//17
-									"Pizza",				//18
-									"Security",				//19
-									"Popcorn",				//20
-									"Arms crossed",			//21
-									"Head down",			//22
-									"Nauseous",				//23
-									"Very nauseous",		//24
-									"Needs toilet",			//25
-									"Hat",					//26
-									"Hotdog",				//27
-									"Tentacle",				//28
-									"Toffee apple",			//29
-									"Donut",				//30
-									"Coffee",				//31
-									"Nuggets",				//32
-									"Lemonade",				//33
-									"Walking",				//34
-									"Pretzel",				//35
-									"Sunglasses",			//36
-									"Sujongkwa",			//37
-									"Juice",				//38
-									"Funnel cake",			//39
-									"Noodles",				//40
-									"Sausage",				//41
-									"Soup",					//42
-									"Sandwich",				//43
-									"Guest",				//252
-									"Handyman",				//253
-									"Mechanic",				//254
-									"Security guard",		//255
-								],
+								height: windowOptions.widgetLineHeight,
+								items: costumeDropdown.items,
 								selectedIndex: selectedIndexCostume,
 								isDisabled: true,
-								onChange: (number) => setCostume(number)
+								onChange: (number) => setCostume(number),
 							},
 							<ButtonWidget>{
-								name: buttonTest,
-								type: "button",
+								name: buttonTest.id,
+								type: 'button',
 								border: true,
 								x: 185,
 								y: 165,
@@ -250,11 +268,11 @@ export class PeepEditorWindow {
 								height: 24,
 								image: 29467,
 								isPressed: toggle,
-								onClick: () => selectStaff()
+								onClick: () => selectStaff(),
 							},
 							<ButtonWidget>{
-								name: buttonLocateStaff,
-								type: "button",
+								name: buttonLocateStaff.id,
+								type: 'button',
 								border: true,
 								x: 211,
 								y: 165,
@@ -263,11 +281,11 @@ export class PeepEditorWindow {
 								image: 5167, //locate icon
 								isPressed: false,
 								isDisabled: toggleDisabled,
-								onClick: () => gotoStaff()
+								onClick: () => gotoStaff(),
 							},
 							<ButtonWidget>{
-								name: freeze,
-								type: "button",
+								name: freeze.id,
+								type: 'button',
 								border: true,
 								x: 185,
 								y: 191,
@@ -276,23 +294,23 @@ export class PeepEditorWindow {
 								image: 5182, //red/green flag
 								isPressed: toggleFreeze,
 								isDisabled: toggleDisabled,
-								onClick: () => buttonFreeze()
+								onClick: () => buttonFreeze(),
 							},
 							<ColourPickerWidget>{
-								type: "colourpicker",
+								type: 'colourpicker',
 								x: 220,
 								y: 73,
 								width: 100,
-								height: widgetLineHeight,
-								name: staffColourPicker,
-								tooltip: "Change staff colour",
+								height: windowOptions.widgetLineHeight,
+								name: staffColourPicker.id,
+								tooltip: 'Change staff colour',
 								isDisabled: colourPickerDisabled,
 								colour: 0,
 								onChange: (colour) => staffColourSet(colour),
 							},
 							<ViewportWidget>{
-								type: "viewport",
-								name: viewport,
+								type: 'viewport',
+								name: viewport.id,
 								x: 185,
 								y: 110,
 								width: 50,
@@ -300,801 +318,632 @@ export class PeepEditorWindow {
 								viewport: {
 									left: blackViewport.x,
 									top: blackViewport.y,
-								}
+								},
 							},
-						]
+						],
 					},
 					{
-						image: { frameBase: 5221, frameCount: 8, frameDuration: 4, },
+						image: { frameBase: 5221, frameCount: 8, frameDuration: 4 },
 						widgets: [
 							<LabelWidget>{
-								type: "label",
+								type: 'label',
 								x: 0,
 								y: 232,
 								width: 260,
-								height: widgetLineHeight,
-								textAlign: "centred",
-								text: "Manticore-007",
-								tooltip: "Powered by Basssiiie",
-								isDisabled: true
+								height: windowOptions.widgetLineHeight,
+								textAlign: 'centred',
+								text: 'Manticore-007',
+								tooltip: 'Powered by Basssiiie',
+								isDisabled: true,
 							},
 							<GroupBoxWidget>{
-								type: "groupbox",
+								type: 'groupbox',
 								x: 10,
 								y: 55,
 								width: 240,
 								height: 170,
-								text: "Colours",
+								text: 'Colours',
 							},
 							<ColourPickerWidget>{
-								type: "colourpicker",
+								type: 'colourpicker',
 								x: 20,
 								y: 80,
 								width: 100,
-								height: widgetLineHeight,
-								name: colourpickershirts,
-								tooltip: "Change guests shirts",
+								height: windowOptions.widgetLineHeight,
+								name: guestColourOptions.tshirtColour.id,
+								tooltip: 'Change guests shirts',
 								isDisabled: false,
-								colour: widgetcolourshirts,
-								onChange: (colour: number) => this.SetColourShirt(colour),
+								colour: guestColourOptions.tshirtColour.colour,
+								onChange: (colour: number) => this.SetGuestFeatureColour('tshirtColour', colour),
 							},
 							<LabelWidget>{
-								type: "label",
+								type: 'label',
 								x: 40,
 								y: 80,
 								width: 275,
-								height: widgetLineHeight,
-								text: "Shirts",
-								isDisabled: false
+								height: windowOptions.widgetLineHeight,
+								text: 'Shirts',
+								isDisabled: false,
 							},
 							<ColourPickerWidget>{
-								type: "colourpicker",
+								type: 'colourpicker',
 								x: 20,
 								y: 100,
 								width: 100,
-								height: widgetLineHeight,
-								name: colourpickertrousers,
-								tooltip: "Change guests trousers",
+								height: windowOptions.widgetLineHeight,
+								name: guestColourOptions.trousersColour.id,
+								tooltip: 'Change guests trousers',
 								isDisabled: false,
-								colour: widgetcolourtrousers,
-								onChange: (colour: number) => this.SetColourTrousers(colour),
+								colour: guestColourOptions.trousersColour.colour,
+								onChange: (colour: number) => this.SetGuestFeatureColour('trousersColour', colour),
 							},
 							<LabelWidget>{
-								type: "label",
+								type: 'label',
 								x: 40,
 								y: 100,
 								width: 275,
-								height: widgetLineHeight,
-								text: "Trousers",
-								isDisabled: false
+								height: windowOptions.widgetLineHeight,
+								text: 'Trousers',
+								isDisabled: false,
 							},
 							<ColourPickerWidget>{
-								type: "colourpicker",
+								type: 'colourpicker',
 								x: 20,
 								y: 120,
 								width: 100,
-								height: widgetLineHeight,
-								name: colourpickerballoons,
-								tooltip: "Change guests balloons",
+								height: windowOptions.widgetLineHeight,
+								name: guestColourOptions.balloonColour.id,
+								tooltip: 'Change guests balloons',
 								isDisabled: false,
-								colour: widgetcolourballoons,
-								onChange: (colour: number) => this.SetColourBalloons(colour),
+								colour: guestColourOptions.balloonColour.colour,
+								onChange: (colour: number) => this.SetGuestFeatureColour('balloonColour', colour),
 							},
 							<LabelWidget>{
-								type: "label",
+								type: 'label',
 								x: 40,
 								y: 120,
 								width: 275,
-								height: widgetLineHeight,
-								text: "Balloons",
-								isDisabled: false
+								height: windowOptions.widgetLineHeight,
+								text: 'Balloons',
+								isDisabled: false,
 							},
 							<ColourPickerWidget>{
-								type: "colourpicker",
+								type: 'colourpicker',
 								x: 20,
 								y: 140,
 								width: 100,
-								height: widgetLineHeight,
-								name: colourpickerhats,
-								tooltip: "Change guests hats",
+								height: windowOptions.widgetLineHeight,
+								name: guestColourOptions.hatColour.id,
+								tooltip: 'Change guests hats',
 								isDisabled: false,
-								colour: widgetcolourhats,
-								onChange: (colour: number) => this.SetColourHats(colour),
+								colour: guestColourOptions.hatColour.colour,
+								onChange: (colour: number) => this.SetGuestFeatureColour('hatColour', colour),
 							},
 							<LabelWidget>{
-								type: "label",
+								type: 'label',
 								x: 40,
 								y: 140,
 								width: 275,
-								height: widgetLineHeight,
-								text: "Hats",
-								isDisabled: false
+								height: windowOptions.widgetLineHeight,
+								text: 'Hats',
+								isDisabled: false,
 							},
 							<ColourPickerWidget>{
-								type: "colourpicker",
+								type: 'colourpicker',
 								x: 20,
 								y: 160,
 								width: 100,
-								height: widgetLineHeight,
-								name: colourpickerumbrellas,
-								tooltip: "Change guests umbrellas",
+								height: windowOptions.widgetLineHeight,
+								name: guestColourOptions.umbrellaColour.id,
+								tooltip: 'Change guests umbrellas',
 								isDisabled: false,
-								colour: widgetcolourumbrellas,
-								onChange: (colour: number) => this.SetColourUmbrellas(colour),
+								colour: guestColourOptions.balloonColour.colour,
+								onChange: (colour: number) => this.SetGuestFeatureColour('umbrellaColour', colour),
 							},
 							<LabelWidget>{
-								type: "label",
+								type: 'label',
 								x: 40,
 								y: 160,
 								width: 275,
-								height: widgetLineHeight,
-								text: "Umbrellas",
-								isDisabled: false
+								height: windowOptions.widgetLineHeight,
+								text: 'Umbrellas',
+								isDisabled: false,
 							},
 						],
 					},
 					{
 						image: {
-							frameBase: 5318,	//pointing hand
+							frameBase: 5318, //pointing hand
 							frameCount: 8,
 							frameDuration: 2,
 						},
 						widgets: [
 							<LabelWidget>{
-								type: "label",
+								type: 'label',
 								x: 0,
 								y: 232,
 								width: 260,
-								height: widgetLineHeight,
-								textAlign: "centred",
-								text: "Manticore-007",
-								tooltip: "Powered by Basssiiie",
-								isDisabled: true
+								height: windowOptions.widgetLineHeight,
+								textAlign: 'centred',
+								text: 'Manticore-007',
+								tooltip: 'Powered by Basssiiie',
+								isDisabled: true,
 							},
 							<GroupBoxWidget>{
-								type: "groupbox",
+								type: 'groupbox',
 								x: 10,
 								y: 55,
 								width: 240,
 								height: 170,
-								text: "Flags",
+								text: 'Flags',
 							},
 							<CheckboxWidget>{
-								name: littering,
-								type: "checkbox",
+								name: widgetProps.litter.id,
+								type: 'checkbox',
 								x: 20,
 								y: 78,
 								width: 100,
 								height: 15,
-								text: "Litter",
-								tooltip: "Lets guests behave like pigs",
-								isChecked: widgetLitteringChecked,
-								onChange: (isChecked: boolean) => this.LitterCheckbox(isChecked),
+								text: 'Litter',
+								tooltip: 'Lets guests behave like pigs',
+								isChecked: widgetProps.litter.toggle,
+								onChange: () => this.ToggleGuestFlags('litter'),
 							},
 							<CheckboxWidget>{
-								name: explode,
-								type: "checkbox",
+								name: widgetProps.explode.id,
+								type: 'checkbox',
 								x: 20,
 								y: 98,
 								width: 100,
 								height: 15,
-								text: "Explode",
-								tooltip: "Execute Order 66",
-								isChecked: widgetExplodeChecked,
-								onChange: (isChecked: boolean) => this.ExplodeCheckbox(isChecked),
+								text: 'Explode',
+								tooltip: 'Execute Order 66',
+								isChecked: widgetProps.explode.toggle,
+								onChange: () => this.ToggleGuestFlags('explode'),
 							},
 							<CheckboxWidget>{
-								name: leavingPark,
-								type: "checkbox",
+								name: widgetProps.leavingPark.id,
+								type: 'checkbox',
 								x: 20,
 								y: 118,
 								width: 100,
 								height: 15,
-								text: "Leave park",
-								tooltip: "Evacuate park",
-								isChecked: widgetLeavingPark,
-								onChange: (isChecked: boolean) => this.LeaveCheckbox(isChecked),
+								text: 'Leave park',
+								tooltip: 'Evacuate park',
+								isChecked: widgetProps.leavingPark.toggle,
+								onChange: () => this.ToggleGuestFlags('leavingPark'),
 							},
 							<CheckboxWidget>{
-								name: slowWalk,
-								type: "checkbox",
+								name: widgetProps.slowWalk.id,
+								type: 'checkbox',
 								x: 20,
 								y: 138,
 								width: 100,
 								height: 15,
-								text: "Slow walk",
+								text: 'Slow walk',
 								tooltip: "Give the guests the Iron Boots from 'Ocarina of Time'",
-								isChecked: widgetSlowWalk,
-								onChange: (isChecked: boolean) => this.SlowWalkCheckbox(isChecked),
+								isChecked: widgetProps.slowWalk.toggle,
+								onChange: () => this.ToggleGuestFlags('slowWalk'),
 							},
 							<CheckboxWidget>{
-								name: tracking,
-								type: "checkbox",
+								name: widgetProps.tracking.id,
+								type: 'checkbox',
 								x: 20,
 								y: 158,
 								width: 100,
 								height: 15,
-								text: "Track your guests",
-								tooltip: "Vaccinate all of your guests with tracking chips",
-								isChecked: widgetTracking,
-								onChange: (isChecked: boolean) => this.TrackingCheckbox(isChecked),
+								text: 'Track your guests',
+								tooltip: 'Vaccinate all of your guests with tracking chips',
+								isChecked: widgetProps.tracking.toggle,
+								onChange: () => this.ToggleGuestFlags('tracking'),
 							},
 							<CheckboxWidget>{
-								name: waving,
-								type: "checkbox",
+								name: widgetProps.waving.id,
+								type: 'checkbox',
 								x: 20,
 								y: 178,
 								width: 100,
 								height: 15,
-								text: "Wave",
+								text: 'Wave',
 								tooltip: "'Hey Everyone'",
-								isChecked: widgetWaving,
-								onChange: (isChecked: boolean) => this.WavingCheckbox(isChecked),
+								isChecked: widgetProps.waving.toggle,
+								onChange: () => this.ToggleGuestFlags('waving'),
 							},
 							<CheckboxWidget>{
-								name: photo,
-								type: "checkbox",
+								name: widgetProps.photo.id,
+								type: 'checkbox',
 								x: 20,
 								y: 198,
 								width: 100,
 								height: 15,
-								text: "Make photos",
-								tooltip: "Guests documenting their good time at your park",
-								isChecked: widgetPhoto,
-								onChange: (isChecked: boolean) => this.PhotoCheckbox(isChecked),
+								text: 'Make photos',
+								tooltip: 'Guests documenting their good time at your park',
+								isChecked: widgetProps.photo.toggle,
+								onChange: () => this.ToggleGuestFlags('photo'),
 							},
 							<CheckboxWidget>{
-								name: painting,
-								type: "checkbox",
+								name: widgetProps.painting.id,
+								type: 'checkbox',
 								x: 150,
 								y: 78,
 								width: 100,
 								height: 15,
-								text: "Paint",
-								tooltip: "Guests painting happy accidents",
-								isChecked: widgetPainting,
-								onChange: (isChecked: boolean) => this.PaintingCheckbox(isChecked),
+								text: 'Paint',
+								tooltip: 'Guests painting happy accidents',
+								isChecked: widgetProps.painting.toggle,
+								onChange: () => this.ToggleGuestFlags('painting'),
 							},
 							<CheckboxWidget>{
-								name: wow,
-								type: "checkbox",
+								name: widgetProps.wow.id,
+								type: 'checkbox',
 								x: 150,
 								y: 98,
 								width: 100,
 								height: 15,
-								text: "Wow",
-								tooltip: "Guests think they are Owen Wilson",
-								isChecked: widgetWow,
-								onChange: (isChecked: boolean) => this.WowCheckbox(isChecked),
+								text: 'Wow',
+								tooltip: 'Guests think they are Owen Wilson',
+								isChecked: widgetProps.wow.toggle,
+								onChange: () => this.ToggleGuestFlags('wow'),
 							},
 							<CheckboxWidget>{
-								name: hereweare,
-								type: "checkbox",
+								name: widgetProps.hereWeAre.id,
+								type: 'checkbox',
 								x: 150,
 								y: 118,
 								width: 100,
 								height: 15,
-								text: "Here we are",
-								tooltip: "Guests think they are working for CNN",
-								isChecked: widgetHereWeAre,
-								onChange: (isChecked: boolean) => this.HereWeAreCheckbox(isChecked),
+								text: 'Here we are',
+								tooltip: 'Guests think they are working for CNN',
+								isChecked: widgetProps.hereWeAre.toggle,
+								onChange: () => this.ToggleGuestFlags('hereWeAre'),
 							},
 							<CheckboxWidget>{
-								name: iceCream,
-								type: "checkbox",
+								name: widgetProps.iceCream.id,
+								type: 'checkbox',
 								x: 150,
 								y: 138,
 								width: 100,
 								height: 15,
-								text: "Ice cream",
-								tooltip: "Luitenant Dan, ice cream!",
-								isChecked: widgetIceCream,
-								onChange: (isChecked: boolean) => this.IceCreamCheckbox(isChecked),
+								text: 'Ice cream',
+								tooltip: 'Luitenant Dan, ice cream!',
+								isChecked: widgetProps.iceCream.toggle,
+								onChange: () => this.ToggleGuestFlags('iceCream'),
 							},
 							<CheckboxWidget>{
-								name: pizza,
-								type: "checkbox",
+								name: widgetProps.pizza.id,
+								type: 'checkbox',
 								x: 150,
 								y: 158,
 								width: 100,
 								height: 15,
-								text: "Pizza",
+								text: 'Pizza',
 								tooltip: "'A cheese pizza, just for me'",
-								isChecked: widgetPizza,
-								onChange: (isChecked: boolean) => this.PizzaCheckbox(isChecked),
+								isChecked: widgetProps.pizza.toggle,
+								onChange: () => this.ToggleGuestFlags('pizza'),
 							},
 							<CheckboxWidget>{
-								name: joy,
-								type: "checkbox",
+								name: widgetProps.joy.id,
+								type: 'checkbox',
 								x: 150,
 								y: 178,
 								width: 100,
 								height: 15,
-								text: "Joy",
-								tooltip: "Press A to jump",
-								isChecked: widgetJoy,
-								onChange: (isChecked: boolean) => this.JoyCheckbox(isChecked),
+								text: 'Joy',
+								tooltip: 'Press A to jump',
+								isChecked: widgetProps.joy.toggle,
+								onChange: () => this.ToggleGuestFlags('joy'),
 							},
 							<CheckboxWidget>{
-								name: angry,
-								type: "checkbox",
+								name: widgetProps.angry.id,
+								type: 'checkbox',
 								x: 150,
 								y: 198,
 								width: 100,
 								height: 15,
-								text: "Angry",
-								tooltip: "Turn the guests into Karens",
-								isChecked: widgetAngry,
-								onChange: (isChecked: boolean) => this.AngryCheckbox(isChecked),
+								text: 'Angry',
+								tooltip: 'Turn the guests into Karens',
+								isChecked: widgetProps.angry.toggle,
+								onChange: () => this.ToggleGuestFlags('angry'),
 							},
-						]
+						],
 					},
 					{
 						image: {
-							frameBase: 5245,	// rising graph
+							frameBase: 5245, // rising graph
 							frameCount: 8,
 							frameDuration: 4,
 						},
 						widgets: [
 							<LabelWidget>{
-								type: "label",
+								type: 'label',
 								x: 0,
 								y: 232,
 								width: 260,
-								height: widgetLineHeight,
-								textAlign: "centred",
-								text: "Manticore-007",
-								tooltip: "Powered by Basssiiie",
-								isDisabled: true
+								height: windowOptions.widgetLineHeight,
+								textAlign: 'centred',
+								text: 'Manticore-007',
+								tooltip: 'Powered by Basssiiie',
+								isDisabled: true,
 							},
 							<GroupBoxWidget>{
-								type: "groupbox",
+								type: 'groupbox',
 								x: 10,
 								y: 55,
 								width: 240,
 								height: 170,
-								text: "Conditions",
+								text: 'Conditions',
 							},
 							<LabelWidget>{
-								type: "label",
+								type: 'label',
 								x: 0,
 								y: 140,
 								width: 260,
-								height: widgetLineHeight,
-								textAlign: "centred",
-								text: "Not yet available",
-								isDisabled: true
+								height: windowOptions.widgetLineHeight,
+								textAlign: 'centred',
+								text: 'Not yet available',
+								isDisabled: true,
 							},
-						]
+						],
 					},
 					{
 						image: {
-							frameBase: 5367,	//rotating info box
+							frameBase: 5367, //rotating info box
 							frameCount: 8,
 							frameDuration: 4,
 						},
 						widgets: [
 							<LabelWidget>{
-								type: "label",
+								type: 'label',
 								x: 0,
 								y: 232,
 								width: 260,
-								height: widgetLineHeight,
-								textAlign: "centred",
-								text: "Manticore-007",
-								tooltip: "Powered by Basssiiie",
-								isDisabled: true
+								height: windowOptions.widgetLineHeight,
+								textAlign: 'centred',
+								text: 'Manticore-007',
+								tooltip: 'Powered by Basssiiie',
+								isDisabled: true,
 							},
 							<GroupBoxWidget>{
-								type: "groupbox",
+								type: 'groupbox',
 								x: 10,
 								y: 55,
 								width: 240,
 								height: 70,
-								text: "About",
+								text: 'About',
 							},
 							<LabelWidget>{
-								type: "label",
+								type: 'label',
 								x: 0,
 								y: 85,
 								width: 260,
-								height: widgetLineHeight,
-								textAlign: "centred",
-								text: "My first plugin made by me, Manticore-007 \n Built with coaching from Basssiiie \n Based on his Proxy Pather Plugin",
+								height: windowOptions.widgetLineHeight,
+								textAlign: 'centred',
+								text: 'My first plugin made by me, Manticore-007 \n Built with coaching from Basssiiie \n Based on his Proxy Pather Plugin',
 							},
 							<GroupBoxWidget>{
-								type: "groupbox",
+								type: 'groupbox',
 								x: 10,
 								y: 140,
 								width: 240,
 								height: 40,
-								text: "GitHub",
+								text: 'GitHub',
 							},
 							<LabelWidget>{
-								type: "label",
+								type: 'label',
 								x: 0,
 								y: 157,
 								width: 260,
-								height: widgetLineHeight,
-								textAlign: "centred",
-								text: "https://github.com/Manticore-007",
+								height: windowOptions.widgetLineHeight,
+								textAlign: 'centred',
+								text: 'https://github.com/Manticore-007',
 							},
-						]
+						],
 					},
-				]
+				],
 			});
 		}
 	}
+
+	SetGuestFeatureColour(feature: GuestColourOptions, colour: number) {
+		console.log(`Changing ${feature}`);
+		const guests = map.getAllEntities('guest');
+		guests.forEach((guest) => {
+			guest[feature] = colour;
+		});
+		guestColourOptions[feature].colour = colour;
+	}
+
+	/**
+	 * Flips the value for @param guestFlag
+	 */
+	ToggleGuestFlags(guestFlag: PeepFlags) {
+		const guests = map.getAllEntities('guest');
+		guests.forEach((guest) => {
+			//Flip the flag from being true <> false per https://stackoverflow.com/questions/11604409/how-to-toggle-a-boolean
+			guest.setFlag(guestFlag, !guest.getFlag(guestFlag));
+		});
+		//Update the UI?
+		//The original code updated this var every loop, not sure why.
+		//I've opted to just set it equal to whatever the 0th guest is.
+		widgetProps[guestFlag].toggle = guests[0].getFlag(guestFlag);
+		return widgetProps[guestFlag];
+	}
+
 	SetEnergy(energy: number) {
-		const guest = map.getAllEntities("guest");
-		guest.forEach(guest => {
+		const guest = map.getAllEntities('guest');
+		guest.forEach((guest) => {
 			guest.energy = energy;
 			guest.energyTarget = 0;
 			energy = guestsEnergy;
 		});
 	}
-	SetColourShirt(tshirtcolour: number) {
-		const guest = map.getAllEntities("guest");
-		guest.forEach(guest => {
-			guest.tshirtColour = tshirtcolour;
-			widgetcolourshirts = tshirtcolour;
-		});
-	}
-	SetColourTrousers(trouserscolour: number) {
-		const guest = map.getAllEntities("guest");
-		guest.forEach(guest => {
-			guest.trousersColour = trouserscolour;
-			widgetcolourtrousers = trouserscolour;
-		});
-	}
-	SetColourBalloons(balloonscolour: number) {
-		const guest = map.getAllEntities("guest");
-		guest.forEach(guest => {
-			guest.balloonColour = balloonscolour;
-			widgetcolourballoons = balloonscolour;
-		});
-	}
-	SetColourHats(hatscolour: number) {
-		const guest = map.getAllEntities("guest");
-		guest.forEach(guest => {
-			guest.hatColour = hatscolour;
-			widgetcolourhats = hatscolour;
-		});
-	}
-	SetColourUmbrellas(umbrellascolour: number) {
-		const guest = map.getAllEntities("guest");
-		guest.forEach(guest => {
-			guest.umbrellaColour = umbrellascolour;
-			widgetcolourumbrellas = umbrellascolour;
-		});
-	}
-	LitterCheckbox(guestslittering: boolean) {
-		const guest = map.getAllEntities("guest");
-		guest.forEach(guest => {
-			if (guest.getFlag("litter") === false) {
-				guest.setFlag("litter", true);
-				guestslittering = guest.getFlag("litter");
-			}
-			else guest.setFlag("litter", false);
-			widgetLitteringChecked = guest.getFlag("litter");
-		});
-	}
-	ExplodeCheckbox(guestsExploding: boolean): void {
-		const guest = map.getAllEntities("guest");
-		guest.forEach(guest => {
-			if (guest.getFlag("explode") === false) {
-				guest.setFlag("explode", true);
-				guestsExploding = guest.getFlag("explode");
-			}
-			else guest.setFlag("explode", false);
-			widgetExplodeChecked = guest.getFlag("explode");
-		});
-	}
-	LeaveCheckbox(guestsLeavingPark: boolean): void {
-		const guest = map.getAllEntities("guest");
-		guest.forEach(guest => {
-			if (guest.getFlag("leavingPark") === false) {
-				guest.setFlag("leavingPark", true);
-				guestsLeavingPark = guest.getFlag("leavingPark");
-			}
-			else guest.setFlag("leavingPark", false);
-			widgetLeavingPark = guest.getFlag("leavingPark");
-		});
-	}
-	SlowWalkCheckbox(guestsSlowWalk: boolean) {
-		const guest = map.getAllEntities("guest");
-		guest.forEach(guest => {
-			if (guest.getFlag("slowWalk") === false) {
-				guest.setFlag("slowWalk", true);
-				guestsSlowWalk = guest.getFlag("slowWalk");
-			}
-			else guest.setFlag("slowWalk", false);
-			widgetSlowWalk = guest.getFlag("slowWalk");
-		});
-	}
-	TrackingCheckbox(guestTracking: boolean) {
-		const guest = map.getAllEntities("guest");
-		guest.forEach(guest => {
-			if (guest.getFlag("tracking") === false) {
-				guest.setFlag("tracking", true);
-				guestTracking = guest.getFlag("tracking");
-			}
-			else guest.setFlag("tracking", false);
-			widgetTracking = guest.getFlag("tracking");
-		});
-	}
-	WavingCheckbox(guestsWaving: boolean) {
-		const guest = map.getAllEntities("guest");
-		guest.forEach(guest => {
-			if (guest.getFlag("waving") === false) {
-				guest.setFlag("waving", true);
-				guestsWaving = guest.getFlag("waving");
-			}
-			else guest.setFlag("waving", false);
-			widgetWaving = guest.getFlag("waving");
-		});
-	}
-	PhotoCheckbox(guestsPhoto: boolean) {
-		const guest = map.getAllEntities("guest");
-		guest.forEach(guest => {
-			if (guest.getFlag("photo") === false) {
-				guest.setFlag("photo", true);
-				guestsPhoto = guest.getFlag("photo");
-			}
-			else guest.setFlag("photo", false);
-			widgetPhoto = guest.getFlag("photo");
-		});
-	}
-	PaintingCheckbox(guestsPainting: boolean) {
-		const guest = map.getAllEntities("guest");
-		guest.forEach(guest => {
-			if (guest.getFlag("painting") === false) {
-				guest.setFlag("painting", true);
-				guestsPainting = guest.getFlag("painting");
-			}
-			else guest.setFlag("painting", false);
-			widgetPainting = guest.getFlag("painting");
-		});
-	}
-	WowCheckbox(guestsWow: boolean) {
-		const guest = map.getAllEntities("guest");
-		guest.forEach(guest => {
-			if (guest.getFlag("wow") === false) {
-				guest.setFlag("wow", true);
-				guestsWow = guest.getFlag("wow");
-			}
-			else guest.setFlag("wow", false);
-			widgetWow = guest.getFlag("wow");
-		});
-	}
-	HereWeAreCheckbox(guestsHereWeAre: boolean) {
-		const guest = map.getAllEntities("guest");
-		guest.forEach(guest => {
-			if (guest.getFlag("hereWeAre") === false) {
-				guest.setFlag("hereWeAre", true);
-				guestsHereWeAre = guest.getFlag("hereWeAre");
-			}
-			else guest.setFlag("hereWeAre", false);
-			widgetHereWeAre = guest.getFlag("hereWeAre");
-		});
-	}
-	IceCreamCheckbox(guestsIceCream: boolean) {
-		const guest = map.getAllEntities("guest");
-		guest.forEach(guest => {
-			if (guest.getFlag("iceCream") === false) {
-				guest.setFlag("iceCream", true);
-				guestsIceCream = guest.getFlag("iceCream");
-			}
-			else guest.setFlag("iceCream", false);
-			widgetIceCream = guest.getFlag("iceCream");
-		});
-	}
-	PizzaCheckbox(guestsPizza: boolean) {
-		const guest = map.getAllEntities("guest");
-		guest.forEach(guest => {
-			if (guest.getFlag("pizza") === false) {
-				guest.setFlag("pizza", true);
-				guestsPizza = guest.getFlag("pizza");
-			}
-			else guest.setFlag("pizza", false);
-			widgetPizza = guest.getFlag("pizza");
-		});
-	}
-	JoyCheckbox(guestsJoy: boolean) {
-		const guest = map.getAllEntities("guest");
-		guest.forEach(guest => {
-			if (guest.getFlag("joy") === false) {
-				guest.setFlag("joy", true);
-				guestsJoy = guest.getFlag("joy");
-			}
-			else guest.setFlag("joy", false);
-			widgetJoy = guest.getFlag("joy");
-		});
-	}
-	AngryCheckbox(guestsAngry: boolean) {
-		const guest = map.getAllEntities("guest");
-		guest.forEach(guest => {
-			if (guest.getFlag("angry") === false) {
-				guest.setFlag("angry", true);
-				guestsAngry = guest.getFlag("angry");
-			}
-			else guest.setFlag("angry", false);
-			widgetAngry = guest.getFlag("angry");
-		});
-	}
 }
 function setStaffName(name: string) {
-	const win = ui.getWindow(windowId);
+	const win = ui.getWindow(windowOptions.windowId);
 	if (win) {
-		const label = win.findWidget<LabelWidget>(staffLabel);
+		const label = win.findWidget<LabelWidget>(staffLabel.id);
 		label.text = `Name: {WHITE}${name}`;
 	}
 }
-function getStaffType(type: string){
-	const win = ui.getWindow(windowId);
-	const staffTypeNumber = [
-		"handyman", "mechanic", "security", "entertainer"
-	]
+function getStaffType(type: string) {
+	const win = ui.getWindow(windowOptions.windowId);
+	const staffTypeNumber = ['handyman', 'mechanic', 'security', 'entertainer'];
 	if (win) {
-		const dropdown = win.findWidget<DropdownWidget>(stafftypeDropdown);
-		const dropdownCostume = win.findWidget<DropdownWidget>(costumeDropdown);
-		const typeLabel = win.findWidget<LabelWidget>(staffTypeLabel);
-		const staffcostumeLabel = win.findWidget<LabelWidget>(costumeLabel);
-		if (dropdown.items !== undefined){
-		dropdown.selectedIndex = staffTypeNumber.indexOf(type);
+		const dropdown = win.findWidget<DropdownWidget>(stafftypeDropdown.id);
+		const dropdownCostume = win.findWidget<DropdownWidget>(costumeDropdown.id);
+		const typeLabel = win.findWidget<LabelWidget>(staffTypeLabel.id);
+		const staffcostumeLabel = win.findWidget<LabelWidget>(costumeLabel.id);
+		if (dropdown.items !== undefined) {
+			dropdown.selectedIndex = staffTypeNumber.indexOf(type);
 		}
-		dropdownCostume.isDisabled = false,
-		dropdown.isDisabled = false;
+		(dropdownCostume.isDisabled = false), (dropdown.isDisabled = false);
 		typeLabel.isDisabled = false;
 		staffcostumeLabel.isDisabled = false;
-		
 	}
 }
-function setStaffType(number: number){
-	const staffTypeList: StaffType[] = ["handyman", "mechanic", "security", "entertainer"]
-		idStaff.staffType = staffTypeList[number]	
+function setStaffType(number: number) {
+	const staffTypeList: StaffType[] = ['handyman', 'mechanic', 'security', 'entertainer'];
+	idStaff.staffType = staffTypeList[number];
 }
 function getCostume(number: number) {
-	const win = ui.getWindow(windowId);
-	const dropdownCostume = win.findWidget<DropdownWidget>(costumeDropdown);
-		if (number > 251) {
-			selectedIndexCostume = number - 208
-			dropdownCostume.selectedIndex = selectedIndexCostume
-		}
-		else {
-			selectedIndexCostume = number
-			dropdownCostume.selectedIndex = selectedIndexCostume
-		}
+	const win = ui.getWindow(windowOptions.windowId);
+	const dropdownCostume = win.findWidget<DropdownWidget>(costumeDropdown.id);
+	if (number > 251) {
+		selectedIndexCostume = number - 208;
+		dropdownCostume.selectedIndex = selectedIndexCostume;
+	} else {
+		selectedIndexCostume = number;
+		dropdownCostume.selectedIndex = selectedIndexCostume;
+	}
 }
 function setCostume(number: number) {
-	const win = ui.getWindow(windowId);
-	const dropdownCostume = win.findWidget<DropdownWidget>(costumeDropdown);
-	if (number === 0 && idStaff.staffType != "entertainer"){
+	const win = ui.getWindow(windowOptions.windowId);
+	const dropdownCostume = win.findWidget<DropdownWidget>(costumeDropdown.id);
+	if (number === 0 && idStaff.staffType != 'entertainer') {
 		selectedIndexCostume = -1;
-		dropdownCostume.selectedIndex = selectedIndexCostume
-		return
-	}
-	else {
+		dropdownCostume.selectedIndex = selectedIndexCostume;
+		return;
+	} else {
 		if (number > 43) {
-			selectedIndexCostume = number + 208
-			idStaff.costume = selectedIndexCostume
-		}
-		else {
-			selectedIndexCostume = number
-			idStaff.costume = selectedIndexCostume
+			selectedIndexCostume = number + 208;
+			idStaff.costume = selectedIndexCostume;
+		} else {
+			selectedIndexCostume = number;
+			idStaff.costume = selectedIndexCostume;
 		}
 	}
 }
 function buttonFreeze() {
-	const win = ui.getWindow(windowId);
+	const win = ui.getWindow(windowOptions.windowId);
 	if (win) {
-		const button = win.findWidget<ButtonWidget>(freeze);
+		const button = win.findWidget<ButtonWidget>(freeze.id);
 		if (energyStaff === 0) {
-			energyStaff = 96			
-			idStaff.energy = energyStaff
-			toggleFreeze = false
-			button.isPressed = toggleFreeze
-		}
-		else {
-			energyStaff = 0
-			idStaff.energy = energyStaff
-			toggleFreeze = true
-			button.isPressed = toggleFreeze
+			energyStaff = 96;
+			idStaff.energy = energyStaff;
+			toggleFreeze = false;
+			button.isPressed = toggleFreeze;
+		} else {
+			energyStaff = 0;
+			idStaff.energy = energyStaff;
+			toggleFreeze = true;
+			button.isPressed = toggleFreeze;
 		}
 	}
 }
-function staffColourSet(colour: number){
-	idStaff.colour = colour
+function staffColourSet(colour: number) {
+	idStaff.colour = colour;
 }
 function gotoStaff() {
-	coords.x = staffMember.x
-	coords.y = staffMember.y
-	coords.z = staffMember.z
-	ui.mainViewport.scrollTo(coords)
+	coords.x = staffMember.x;
+	coords.y = staffMember.y;
+	coords.z = staffMember.z;
+	ui.mainViewport.scrollTo(coords);
 }
 function selectStaff() {
-	const window = ui.getWindow(windowId);
-	const buttonPicker = window.findWidget<ButtonWidget>(buttonTest);
-	const buttonLocate = window.findWidget<ButtonWidget>(buttonLocateStaff);
-	const buttonFreeze = window.findWidget<ButtonWidget>(freeze);
-	const staffColourCurrent = window.findWidget<ColourPickerWidget>(staffColourPicker);
-	const pluginViewport = window.findWidget<ViewportWidget>(viewport);
-	const dropdownType = window.findWidget<DropdownWidget>(stafftypeDropdown);
-	const dropdownCostume = window.findWidget<DropdownWidget>(costumeDropdown);
-	const label = window.findWidget<LabelWidget>(staffTypeLabel);
+	const window = ui.getWindow(windowOptions.windowId);
+	const buttonPicker = window.findWidget<ButtonWidget>(buttonTest.id);
+	const buttonLocate = window.findWidget<ButtonWidget>(buttonLocateStaff.id);
+	const buttonFreeze = window.findWidget<ButtonWidget>(freeze.id);
+	const staffColourCurrent = window.findWidget<ColourPickerWidget>(staffColourPicker.id);
+	const pluginViewport = window.findWidget<ViewportWidget>(viewport.id);
+	const dropdownType = window.findWidget<DropdownWidget>(stafftypeDropdown.id);
+	const dropdownCostume = window.findWidget<DropdownWidget>(costumeDropdown.id);
+	const label = window.findWidget<LabelWidget>(staffTypeLabel.id);
 	if (!window) {
-		return
-	}
-	else {
+		return;
+	} else {
 		if (toggle !== false) {
-			toggle = false
-			buttonPicker.isPressed = toggle
+			toggle = false;
+			buttonPicker.isPressed = toggle;
 			ui.tool?.cancel();
-		}
-		else {
-			toggle = true
-			buttonPicker.isPressed = toggle
+		} else {
+			toggle = true;
+			buttonPicker.isPressed = toggle;
 			ui.activateTool({
-				id: toolSelectStaff,
-				cursor: "cross_hair",
-				filter: ["entity"],
-				onDown: e => {
+				id: toolSelectStaff.id,
+				cursor: 'cross_hair',
+				filter: ['entity'],
+				onDown: (e) => {
 					if (e.entityId !== undefined) {
-						console.log(e.entityId)
+						console.log(e.entityId);
 						const entity = map.getEntity(e.entityId);
 						const staff = <Staff>entity;
 						idStaff = staff;
-						if (!entity || entity.type !== "staff") {
+						if (!entity || entity.type !== 'staff') {
 							dropdownType.selectedIndex = -1;
-							toggle = false							
-							toggleDisabled = true,
-							toggleFreeze = false,
-							colourPickerDisabled = true,
-							label.isDisabled = true,
-							dropdownType.isDisabled = true,
-							dropdownCostume.isDisabled = true,
-							buttonPicker.isPressed = toggle,
-							buttonLocate.isDisabled = toggleDisabled,
-							buttonFreeze.isDisabled = toggleDisabled,
-							buttonFreeze.isPressed = toggleFreeze,
-							staffColourCurrent.isDisabled = colourPickerDisabled;
+							toggle = false;
+							(toggleDisabled = true),
+								(toggleFreeze = false),
+								(colourPickerDisabled = true),
+								(label.isDisabled = true),
+								(dropdownType.isDisabled = true),
+								(dropdownCostume.isDisabled = true),
+								(buttonPicker.isPressed = toggle),
+								(buttonLocate.isDisabled = toggleDisabled),
+								(buttonFreeze.isDisabled = toggleDisabled),
+								(buttonFreeze.isPressed = toggleFreeze),
+								(staffColourCurrent.isDisabled = colourPickerDisabled);
 							if (update !== null) {
 								update.dispose();
 								update = null;
 							}
 							pluginViewport.viewport?.moveTo(blackViewport);
 							ui.tool?.cancel();
-							ui.showError("You have to select", "a staff member")
-							setStaffName("{RED}No staff selected")
-							debug("invalid entity selected");
-						}
-						else {
+							ui.showError('You have to select', 'a staff member');
+							setStaffName('{RED}No staff selected');
+							debug('invalid entity selected');
+						} else {
 							if (staff.energy !== 0) {
-								buttonFreeze.isPressed = false
-							}
-							else {
-								buttonFreeze.isPressed = true
+								buttonFreeze.isPressed = false;
+							} else {
+								buttonFreeze.isPressed = true;
 							}
 							ui.tool?.cancel(),
-								toggle = false,
-								toggleDisabled = false,
-								colourPickerDisabled = false,
-								staffColourCurrent.isDisabled = colourPickerDisabled,
-								staffColourCurrent.colour = staff.colour,
-								buttonLocate.isDisabled = toggleDisabled,
-								buttonPicker.isPressed = toggle,
-								buttonFreeze.isDisabled = toggleDisabled,
+								(toggle = false),
+								(toggleDisabled = false),
+								(colourPickerDisabled = false),
+								(staffColourCurrent.isDisabled = colourPickerDisabled),
+								(staffColourCurrent.colour = staff.colour),
+								(buttonLocate.isDisabled = toggleDisabled),
+								(buttonPicker.isPressed = toggle),
+								(buttonFreeze.isDisabled = toggleDisabled),
 								getCostume(staff.costume);
-								getStaffType(staff.staffType);
-								setStaffName(staff.name);
-									const pluginViewport = window.findWidget<ViewportWidget>(viewport);
-									update = context.subscribe("interval.tick", () => pluginViewport.viewport?.moveTo({x: staff.x, y: staff.y, z: staff.z}));
+							getStaffType(staff.staffType);
+							setStaffName(staff.name);
+							const pluginViewport = window.findWidget<ViewportWidget>(viewport.id);
+							update = context.subscribe('interval.tick', () =>
+								pluginViewport.viewport?.moveTo({
+									x: staff.x,
+									y: staff.y,
+									z: staff.z,
+								})
+							);
 						}
-						return energyStaff = staff.energy, staffMember = entity
+						return (energyStaff = staff.energy), (staffMember = entity);
 					}
-					return
+					return;
 				},
-			})
+			});
 		}
 	}
 }
