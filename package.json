@@ -14,7 +14,7 @@
     },
     "repository": {
         "type": "git",
-        "url": "git+https://github.com/Manticore-007/OpenRCT2-PeepEditor.git"
+        "url": "git+https://github.com/thesm17/OpenRCT2-PeepEditor.git"
     },
     "homepage": "https://github.com/Manticore-007/OpenRCT2-PeepEditor#readme",
     "bugs": {
@@ -23,7 +23,7 @@
     "devDependencies": {
         "@rollup/plugin-replace": "^3.0.0",
         "@rollup/plugin-typescript": "^8.2.5",
-        "@typescript-eslint/eslint-plugin": "5.4",
+        "@typescript-eslint/eslint-plugin": "^5.10.1",
         "@typescript-eslint/parser": "5.4",
         "eslint": "8.3",
         "eslint-plugin-import": "^2.24.0",
