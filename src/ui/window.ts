@@ -33,7 +33,6 @@ let guestColourOptions: { [Keys in GuestColourOptions]: { id: string; colour: nu
 		colour: windowOptions.windowColour,
 	},
 };
-
 // Settings for the window
 let costumeDropdown = { id: 'guest-editor-dropdown-costume', items: [
 	'Panda', //0
