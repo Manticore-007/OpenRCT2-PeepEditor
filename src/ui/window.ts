@@ -1,16 +1,14 @@
+
 import { debug } from "../helpers/logger";
 import { isDevelopment, pluginVersion } from "../helpers/environment";
-import { main } from "../main";
+import { SetColour, guestColourOptions } from "../functions/guests";
 
 
 // Settings for the window
 const windowId = "guest-editor-window";
 const widgetLineHeight = 14;
-const colourpickershirts = "guest-editor-tshirts";
-const colourpickertrousers = "guest-editor-trousers";
-const colourpickerballoons = "guest-editor-balloons";
-const colourpickerhats = "guest-editor-hats";
-const colourpickerumbrellas = "guest-editor-umbrellas";
+const windowColour = 19;
+
 const littering = "guest-editor-littering";
 const explode = "guest-editor-explode";
 const leavingPark = "guest-editor-leaving-park";
@@ -27,28 +25,24 @@ const joy = "guest-editor-joy";
 const angry = "guest-editor-angry";
 const costumeDropdown = "guest-editor-dropdown-costume";
 const stafftypeDropdown = "guest-editor-dropdown-stafftype";
-const buttonTest: string = "guest-editor-button-test";
-const staffLabel: string = "guest-editor-staff-label";
-const toolSelectStaff: string = "guest-editor-tool-select-staff";
+const buttonPipette: string = "guest-editor-button-pipette";
+const peepLabel: string = "guest-editor-staff-label";
+const guestLabel: string = "guest-editor-guest-label";
+const toolSelectPeep: string = "guest-editor-tool-select-staff";
 const buttonLocateStaff: string = "guest-editor-button-locate-staff";
+const buttonLocateGuest: string = "guest-editor-button-locate-guest";
 const freeze: string = "guest-editor-checkbox-freeze-staff";
 const viewport: string = "guest-editor-viewport";
 const staffColourPicker: string = "guest-editor-staff-colour-picker";
 const staffTypeLabel: string = "guest-editor-staff-type-label";
 const costumeLabel: string = "guest-editor-costume-label";
 const blackViewport: CoordsXY = {x: -9000, y: -9000};
+const allGuests: string = "guest-editor-select-all-guests";
 
 
-const windowColour: number = 19;
-let widgetcolourshirts: number = windowColour;
-let widgetcolourtrousers: number = windowColour;
-let widgetcolourballoons: number = windowColour;
-let widgetcolourhats: number = windowColour;
-let widgetcolourumbrellas: number = windowColour;
-let widgetLitteringChecked: boolean = false;
 let widgetExplodeChecked: boolean = false;
 let widgetLeavingPark: boolean = false;
-let widgetSlowWalk: boolean = false;
+let widgetSlowCheck: boolean = false;
 let widgetTracking: boolean = false;
 let widgetWaving: boolean = false;
 let widgetPhoto: boolean = false;
@@ -60,7 +54,8 @@ let widgetPizza: boolean = false;
 let widgetJoy: boolean = false;
 let widgetAngry: boolean = false;
 const guestsEnergy: number = 0;
-const staffName: string = "no staff selected";
+const peepName: string = "no staff selected";
+const guestName: string = "no guest selected";
 let toggle: boolean = false;
 let toggleDisabled: boolean = true;
 const coords: CoordsXYZ = { z: 0, y: 0, x: 0 }
@@ -138,13 +133,13 @@ export class PeepEditorWindow {
 								height: 130,
 							},
 							<LabelWidget>{
-								name: staffLabel,
+								name: peepLabel,
 								type: "label",
 								x: 20,
 								y: 73,
 								width: 260,
 								height: widgetLineHeight,
-								text: `Name: {RED}${staffName}`,
+								text: `Name: {RED}${peepName}`,
 								isDisabled: false
 							},
 							<LabelWidget>{
@@ -241,16 +236,16 @@ export class PeepEditorWindow {
 								onChange: (number) => setCostume(number)
 							},
 							<ButtonWidget>{
-								name: buttonTest,
+								name: buttonPipette,
 								type: "button",
 								border: true,
 								x: 185,
 								y: 165,
 								width: 24,
 								height: 24,
-								image: 29467,
+								image: 29467,	//pipette
 								isPressed: toggle,
-								onClick: () => selectStaff()
+								onClick: () => selectPeep("staff")
 							},
 							<ButtonWidget>{
 								name: buttonLocateStaff,
@@ -304,8 +299,116 @@ export class PeepEditorWindow {
 							},
 						]
 					},
+					/*{
+						image: {
+							frameBase: 5568,
+							frameCount: 8,
+							frameDuration: 4,
+						}, //group of guests
+						widgets: [
+							<LabelWidget>{
+								type: "label",
+								x: 0,
+								y: 232,
+								width: 260,
+								height: widgetLineHeight,
+								textAlign: "centred",
+								text: "Manticore-007",
+								tooltip: "Powered by Basssiiie",
+								isDisabled: true
+							},
+							<GroupBoxWidget>{
+								type: "groupbox",
+								x: 10,
+								y: 55,
+								width: 240,
+								height: 170,
+								text: "Guests",
+							},
+							<GroupBoxWidget>{
+								type: "groupbox",
+								x: 10,
+								y: 95,
+								width: 240,
+								height: 130,
+							},
+							<LabelWidget>{
+								name: guestLabel,
+								type: "label",
+								x: 20,
+								y: 73,
+								width: 260,
+								height: widgetLineHeight,
+								text: `Name: {RED}${guestName}`,
+								isDisabled: false
+							},
+							<ButtonWidget>{
+								name: buttonPipette,
+								type: "button",
+								border: true,
+								x: 185,
+								y: 165,
+								width: 24,
+								height: 24,
+								image: 29467,	//pipette
+								isPressed: toggle,
+								onClick: () => selectPeep("guest")
+							},
+							<ButtonWidget>{
+								name: buttonLocateGuest,
+								type: "button",
+								border: true,
+								x: 211,
+								y: 165,
+								width: 24,
+								height: 24,
+								image: 5167, //locate icon
+								isPressed: false,
+								isDisabled: false,
+								onClick: () => gotoPeep("guest")
+							},
+							<ButtonWidget>{
+								name: freeze,
+								type: "button",
+								border: true,
+								x: 185,
+								y: 191,
+								width: 24,
+								height: 24,
+								image: 5182, //red/green flag
+								isPressed: toggleFreeze,
+								isDisabled: false,
+								onClick: () => buttonFreeze()
+							},
+							<ButtonWidget>{
+								name: allGuests,
+								type: "button",
+								border: true,
+								x: 211,
+								y: 191,
+								width: 24,
+								height: 24,
+								image: 5193, //group of peeps
+								isPressed: false,
+								isDisabled: false,
+								onClick: () => buttonAllGuests()
+							},
+							<ViewportWidget>{
+								type: "viewport",
+								name: viewport,
+								x: 185,
+								y: 110,
+								width: 50,
+								height: 50,
+								viewport: {
+									left: blackViewport.x,
+									top: blackViewport.y,
+								},
+							},
+						]
+					},*/
 					{
-						image: { frameBase: 5221, frameCount: 8, frameDuration: 4, },
+						image: { frameBase: 5221, frameCount: 8, frameDuration: 4, }, //paintbrush
 						widgets: [
 							<LabelWidget>{
 								type: "label",
@@ -332,11 +435,11 @@ export class PeepEditorWindow {
 								y: 80,
 								width: 100,
 								height: widgetLineHeight,
-								name: colourpickershirts,
+								name: guestColourOptions.tshirtColour.id,
 								tooltip: "Change guests shirts",
 								isDisabled: false,
-								colour: widgetcolourshirts,
-								onChange: (colour: number) => this.SetColourShirt(colour),
+								colour: guestColourOptions.tshirtColour.colour,
+								onChange: (colour: number) => SetColour(colour, "tshirtColour"),
 							},
 							<LabelWidget>{
 								type: "label",
@@ -353,11 +456,11 @@ export class PeepEditorWindow {
 								y: 100,
 								width: 100,
 								height: widgetLineHeight,
-								name: colourpickertrousers,
+								name: guestColourOptions.trousersColour.id,
 								tooltip: "Change guests trousers",
 								isDisabled: false,
-								colour: widgetcolourtrousers,
-								onChange: (colour: number) => this.SetColourTrousers(colour),
+								colour: guestColourOptions.trousersColour.colour,
+								onChange: (colour: number) => SetColour(colour, "trousersColour"),
 							},
 							<LabelWidget>{
 								type: "label",
@@ -374,11 +477,11 @@ export class PeepEditorWindow {
 								y: 120,
 								width: 100,
 								height: widgetLineHeight,
-								name: colourpickerballoons,
+								name: guestColourOptions.balloonColour.id,
 								tooltip: "Change guests balloons",
 								isDisabled: false,
-								colour: widgetcolourballoons,
-								onChange: (colour: number) => this.SetColourBalloons(colour),
+								colour: guestColourOptions.balloonColour.colour,
+								onChange: (colour: number) => SetColour(colour, "balloonColour"),
 							},
 							<LabelWidget>{
 								type: "label",
@@ -395,11 +498,11 @@ export class PeepEditorWindow {
 								y: 140,
 								width: 100,
 								height: widgetLineHeight,
-								name: colourpickerhats,
+								name: guestColourOptions.hatColour.id,
 								tooltip: "Change guests hats",
 								isDisabled: false,
-								colour: widgetcolourhats,
-								onChange: (colour: number) => this.SetColourHats(colour),
+								colour: guestColourOptions.hatColour.colour,
+								onChange: (colour: number) => SetColour(colour, "hatColour"),
 							},
 							<LabelWidget>{
 								type: "label",
@@ -416,11 +519,11 @@ export class PeepEditorWindow {
 								y: 160,
 								width: 100,
 								height: widgetLineHeight,
-								name: colourpickerumbrellas,
+								name: guestColourOptions.umbrellaColour.id,
 								tooltip: "Change guests umbrellas",
 								isDisabled: false,
-								colour: widgetcolourumbrellas,
-								onChange: (colour: number) => this.SetColourUmbrellas(colour),
+								colour: guestColourOptions.umbrellaColour.colour,
+								onChange: (colour: number) => SetColour(colour, "umbrellaColour"),
 							},
 							<LabelWidget>{
 								type: "label",
@@ -468,8 +571,8 @@ export class PeepEditorWindow {
 								height: 15,
 								text: "Litter",
 								tooltip: "Lets guests behave like pigs",
-								isChecked: widgetLitteringChecked,
-								onChange: (isChecked: boolean) => this.LitterCheckbox(isChecked),
+								isChecked: false,
+								onChange: () => checkbox("litter", littering),
 							},
 							<CheckboxWidget>{
 								name: explode,
@@ -481,7 +584,7 @@ export class PeepEditorWindow {
 								text: "Explode",
 								tooltip: "Execute Order 66",
 								isChecked: widgetExplodeChecked,
-								onChange: (isChecked: boolean) => this.ExplodeCheckbox(isChecked),
+								onChange: () => checkbox("explode", explode),
 							},
 							<CheckboxWidget>{
 								name: leavingPark,
@@ -493,7 +596,7 @@ export class PeepEditorWindow {
 								text: "Leave park",
 								tooltip: "Evacuate park",
 								isChecked: widgetLeavingPark,
-								onChange: (isChecked: boolean) => this.LeaveCheckbox(isChecked),
+								onChange: () => checkbox("leavingPark", leavingPark),
 							},
 							<CheckboxWidget>{
 								name: slowWalk,
@@ -504,8 +607,8 @@ export class PeepEditorWindow {
 								height: 15,
 								text: "Slow walk",
 								tooltip: "Give the guests the Iron Boots from 'Ocarina of Time'",
-								isChecked: widgetSlowWalk,
-								onChange: (isChecked: boolean) => this.SlowWalkCheckbox(isChecked),
+								isChecked: false,
+								onChange: () => checkbox("slowWalk", slowWalk),
 							},
 							<CheckboxWidget>{
 								name: tracking,
@@ -517,7 +620,7 @@ export class PeepEditorWindow {
 								text: "Track your guests",
 								tooltip: "Vaccinate all of your guests with tracking chips",
 								isChecked: widgetTracking,
-								onChange: (isChecked: boolean) => this.TrackingCheckbox(isChecked),
+								onChange: () => checkbox("tracking", tracking),
 							},
 							<CheckboxWidget>{
 								name: waving,
@@ -529,7 +632,7 @@ export class PeepEditorWindow {
 								text: "Wave",
 								tooltip: "'Hey Everyone'",
 								isChecked: widgetWaving,
-								onChange: (isChecked: boolean) => this.WavingCheckbox(isChecked),
+								onChange: () => checkbox("waving", waving),
 							},
 							<CheckboxWidget>{
 								name: photo,
@@ -541,7 +644,7 @@ export class PeepEditorWindow {
 								text: "Make photos",
 								tooltip: "Guests documenting their good time at your park",
 								isChecked: widgetPhoto,
-								onChange: (isChecked: boolean) => this.PhotoCheckbox(isChecked),
+								onChange: () => checkbox("photo", photo),
 							},
 							<CheckboxWidget>{
 								name: painting,
@@ -553,7 +656,7 @@ export class PeepEditorWindow {
 								text: "Paint",
 								tooltip: "Guests painting happy accidents",
 								isChecked: widgetPainting,
-								onChange: (isChecked: boolean) => this.PaintingCheckbox(isChecked),
+								onChange: () => checkbox("painting", painting),
 							},
 							<CheckboxWidget>{
 								name: wow,
@@ -565,7 +668,7 @@ export class PeepEditorWindow {
 								text: "Wow",
 								tooltip: "Guests think they are Owen Wilson",
 								isChecked: widgetWow,
-								onChange: (isChecked: boolean) => this.WowCheckbox(isChecked),
+								onChange: () => checkbox("wow", wow),
 							},
 							<CheckboxWidget>{
 								name: hereweare,
@@ -577,7 +680,7 @@ export class PeepEditorWindow {
 								text: "Here we are",
 								tooltip: "Guests think they are working for CNN",
 								isChecked: widgetHereWeAre,
-								onChange: (isChecked: boolean) => this.HereWeAreCheckbox(isChecked),
+								onChange: () => checkbox("hereWeAre", hereweare),
 							},
 							<CheckboxWidget>{
 								name: iceCream,
@@ -589,7 +692,7 @@ export class PeepEditorWindow {
 								text: "Ice cream",
 								tooltip: "Luitenant Dan, ice cream!",
 								isChecked: widgetIceCream,
-								onChange: (isChecked: boolean) => this.IceCreamCheckbox(isChecked),
+								onChange: () => checkbox("iceCream", iceCream),
 							},
 							<CheckboxWidget>{
 								name: pizza,
@@ -601,7 +704,7 @@ export class PeepEditorWindow {
 								text: "Pizza",
 								tooltip: "'A cheese pizza, just for me'",
 								isChecked: widgetPizza,
-								onChange: (isChecked: boolean) => this.PizzaCheckbox(isChecked),
+								onChange: () => checkbox("pizza", pizza),
 							},
 							<CheckboxWidget>{
 								name: joy,
@@ -613,7 +716,7 @@ export class PeepEditorWindow {
 								text: "Joy",
 								tooltip: "Press A to jump",
 								isChecked: widgetJoy,
-								onChange: (isChecked: boolean) => this.JoyCheckbox(isChecked),
+								onChange: () => checkbox("joy", joy),
 							},
 							<CheckboxWidget>{
 								name: angry,
@@ -625,11 +728,11 @@ export class PeepEditorWindow {
 								text: "Angry",
 								tooltip: "Turn the guests into Karens",
 								isChecked: widgetAngry,
-								onChange: (isChecked: boolean) => this.AngryCheckbox(isChecked),
+								onChange: () => checkbox("angry", angry),
 							},
 						]
 					},
-					{
+					/*{
 						image: {
 							frameBase: 5245,	// rising graph
 							frameCount: 8,
@@ -666,7 +769,7 @@ export class PeepEditorWindow {
 								isDisabled: true
 							},
 						]
-					},
+					},*/
 					{
 						image: {
 							frameBase: 5367,	//rotating info box
@@ -690,22 +793,22 @@ export class PeepEditorWindow {
 								x: 10,
 								y: 55,
 								width: 240,
-								height: 70,
+								height: 110,
 								text: "About",
 							},
 							<LabelWidget>{
 								type: "label",
 								x: 0,
-								y: 85,
+								y: 105,
 								width: 260,
 								height: widgetLineHeight,
 								textAlign: "centred",
-								text: "My first plugin made by me, Manticore-007 \n Built with coaching from Basssiiie \n Based on his Proxy Pather Plugin",
+								text: "First plugin made by me, Manticore-007 \n Built with coaching from Basssiiie \n Based on his Proxy Pather Plugin \n \n Special thank you to Smitty \n for introducing me to refactoring and DRY",
 							},
 							<GroupBoxWidget>{
 								type: "groupbox",
 								x: 10,
-								y: 140,
+								y: 185,
 								width: 240,
 								height: 40,
 								text: "GitHub",
@@ -713,7 +816,7 @@ export class PeepEditorWindow {
 							<LabelWidget>{
 								type: "label",
 								x: 0,
-								y: 157,
+								y: 202,
 								width: 260,
 								height: widgetLineHeight,
 								textAlign: "centred",
@@ -733,200 +836,28 @@ export class PeepEditorWindow {
 			energy = guestsEnergy;
 		});
 	}
-	SetColourShirt(tshirtcolour: number) {
-		const guest = map.getAllEntities("guest");
-		guest.forEach(guest => {
-			guest.tshirtColour = tshirtcolour;
-			widgetcolourshirts = tshirtcolour;
-		});
-	}
-	SetColourTrousers(trouserscolour: number) {
-		const guest = map.getAllEntities("guest");
-		guest.forEach(guest => {
-			guest.trousersColour = trouserscolour;
-			widgetcolourtrousers = trouserscolour;
-		});
-	}
-	SetColourBalloons(balloonscolour: number) {
-		const guest = map.getAllEntities("guest");
-		guest.forEach(guest => {
-			guest.balloonColour = balloonscolour;
-			widgetcolourballoons = balloonscolour;
-		});
-	}
-	SetColourHats(hatscolour: number) {
-		const guest = map.getAllEntities("guest");
-		guest.forEach(guest => {
-			guest.hatColour = hatscolour;
-			widgetcolourhats = hatscolour;
-		});
-	}
-	SetColourUmbrellas(umbrellascolour: number) {
-		const guest = map.getAllEntities("guest");
-		guest.forEach(guest => {
-			guest.umbrellaColour = umbrellascolour;
-			widgetcolourumbrellas = umbrellascolour;
-		});
-	}
-	LitterCheckbox(guestslittering: boolean) {
-		const guest = map.getAllEntities("guest");
-		guest.forEach(guest => {
-			if (guest.getFlag("litter") === false) {
-				guest.setFlag("litter", true);
-				guestslittering = guest.getFlag("litter");
-			}
-			else guest.setFlag("litter", false);
-			widgetLitteringChecked = guest.getFlag("litter");
-		});
-	}
-	ExplodeCheckbox(guestsExploding: boolean): void {
-		const guest = map.getAllEntities("guest");
-		guest.forEach(guest => {
-			if (guest.getFlag("explode") === false) {
-				guest.setFlag("explode", true);
-				guestsExploding = guest.getFlag("explode");
-			}
-			else guest.setFlag("explode", false);
-			widgetExplodeChecked = guest.getFlag("explode");
-		});
-	}
-	LeaveCheckbox(guestsLeavingPark: boolean): void {
-		const guest = map.getAllEntities("guest");
-		guest.forEach(guest => {
-			if (guest.getFlag("leavingPark") === false) {
-				guest.setFlag("leavingPark", true);
-				guestsLeavingPark = guest.getFlag("leavingPark");
-			}
-			else guest.setFlag("leavingPark", false);
-			widgetLeavingPark = guest.getFlag("leavingPark");
-		});
-	}
-	SlowWalkCheckbox(guestsSlowWalk: boolean) {
-		const guest = map.getAllEntities("guest");
-		guest.forEach(guest => {
-			if (guest.getFlag("slowWalk") === false) {
-				guest.setFlag("slowWalk", true);
-				guestsSlowWalk = guest.getFlag("slowWalk");
-			}
-			else guest.setFlag("slowWalk", false);
-			widgetSlowWalk = guest.getFlag("slowWalk");
-		});
-	}
-	TrackingCheckbox(guestTracking: boolean) {
-		const guest = map.getAllEntities("guest");
-		guest.forEach(guest => {
-			if (guest.getFlag("tracking") === false) {
-				guest.setFlag("tracking", true);
-				guestTracking = guest.getFlag("tracking");
-			}
-			else guest.setFlag("tracking", false);
-			widgetTracking = guest.getFlag("tracking");
-		});
-	}
-	WavingCheckbox(guestsWaving: boolean) {
-		const guest = map.getAllEntities("guest");
-		guest.forEach(guest => {
-			if (guest.getFlag("waving") === false) {
-				guest.setFlag("waving", true);
-				guestsWaving = guest.getFlag("waving");
-			}
-			else guest.setFlag("waving", false);
-			widgetWaving = guest.getFlag("waving");
-		});
-	}
-	PhotoCheckbox(guestsPhoto: boolean) {
-		const guest = map.getAllEntities("guest");
-		guest.forEach(guest => {
-			if (guest.getFlag("photo") === false) {
-				guest.setFlag("photo", true);
-				guestsPhoto = guest.getFlag("photo");
-			}
-			else guest.setFlag("photo", false);
-			widgetPhoto = guest.getFlag("photo");
-		});
-	}
-	PaintingCheckbox(guestsPainting: boolean) {
-		const guest = map.getAllEntities("guest");
-		guest.forEach(guest => {
-			if (guest.getFlag("painting") === false) {
-				guest.setFlag("painting", true);
-				guestsPainting = guest.getFlag("painting");
-			}
-			else guest.setFlag("painting", false);
-			widgetPainting = guest.getFlag("painting");
-		});
-	}
-	WowCheckbox(guestsWow: boolean) {
-		const guest = map.getAllEntities("guest");
-		guest.forEach(guest => {
-			if (guest.getFlag("wow") === false) {
-				guest.setFlag("wow", true);
-				guestsWow = guest.getFlag("wow");
-			}
-			else guest.setFlag("wow", false);
-			widgetWow = guest.getFlag("wow");
-		});
-	}
-	HereWeAreCheckbox(guestsHereWeAre: boolean) {
-		const guest = map.getAllEntities("guest");
-		guest.forEach(guest => {
-			if (guest.getFlag("hereWeAre") === false) {
-				guest.setFlag("hereWeAre", true);
-				guestsHereWeAre = guest.getFlag("hereWeAre");
-			}
-			else guest.setFlag("hereWeAre", false);
-			widgetHereWeAre = guest.getFlag("hereWeAre");
-		});
-	}
-	IceCreamCheckbox(guestsIceCream: boolean) {
-		const guest = map.getAllEntities("guest");
-		guest.forEach(guest => {
-			if (guest.getFlag("iceCream") === false) {
-				guest.setFlag("iceCream", true);
-				guestsIceCream = guest.getFlag("iceCream");
-			}
-			else guest.setFlag("iceCream", false);
-			widgetIceCream = guest.getFlag("iceCream");
-		});
-	}
-	PizzaCheckbox(guestsPizza: boolean) {
-		const guest = map.getAllEntities("guest");
-		guest.forEach(guest => {
-			if (guest.getFlag("pizza") === false) {
-				guest.setFlag("pizza", true);
-				guestsPizza = guest.getFlag("pizza");
-			}
-			else guest.setFlag("pizza", false);
-			widgetPizza = guest.getFlag("pizza");
-		});
-	}
-	JoyCheckbox(guestsJoy: boolean) {
-		const guest = map.getAllEntities("guest");
-		guest.forEach(guest => {
-			if (guest.getFlag("joy") === false) {
-				guest.setFlag("joy", true);
-				guestsJoy = guest.getFlag("joy");
-			}
-			else guest.setFlag("joy", false);
-			widgetJoy = guest.getFlag("joy");
-		});
-	}
-	AngryCheckbox(guestsAngry: boolean) {
-		const guest = map.getAllEntities("guest");
-		guest.forEach(guest => {
-			if (guest.getFlag("angry") === false) {
-				guest.setFlag("angry", true);
-				guestsAngry = guest.getFlag("angry");
-			}
-			else guest.setFlag("angry", false);
-			widgetAngry = guest.getFlag("angry");
-		});
-	}
+	
+	
 }
-function setStaffName(name: string) {
+function checkbox(flag: PeepFlags, name: string) {
+	const win = ui.getWindow(windowId);
+	const widget = win.findWidget<CheckboxWidget>(name);
+	const guest = map.getAllEntities("guest");
+	guest.forEach(guest => {
+		if (guest.getFlag(flag) === false) {
+			guest.setFlag(flag, true);
+			widget.isChecked = true;
+		}
+		else {
+			guest.setFlag(flag, false);
+			widget.isChecked = false;;
+		}
+	});
+}
+function setPeepName(name: string) {
 	const win = ui.getWindow(windowId);
 	if (win) {
-		const label = win.findWidget<LabelWidget>(staffLabel);
+		const label = win.findWidget<LabelWidget>(peepLabel);
 		label.text = `Name: {WHITE}${name}`;
 	}
 }
@@ -1012,9 +943,9 @@ function gotoStaff() {
 	coords.z = staffMember.z
 	ui.mainViewport.scrollTo(coords)
 }
-function selectStaff() {
+function selectPeep(peepType: EntityType) {
 	const window = ui.getWindow(windowId);
-	const buttonPicker = window.findWidget<ButtonWidget>(buttonTest);
+	const buttonPicker = window.findWidget<ButtonWidget>(buttonPipette);
 	const buttonLocate = window.findWidget<ButtonWidget>(buttonLocateStaff);
 	const buttonFreeze = window.findWidget<ButtonWidget>(freeze);
 	const staffColourCurrent = window.findWidget<ColourPickerWidget>(staffColourPicker);
@@ -1035,16 +966,16 @@ function selectStaff() {
 			toggle = true
 			buttonPicker.isPressed = toggle
 			ui.activateTool({
-				id: toolSelectStaff,
+				id: toolSelectPeep,
 				cursor: "cross_hair",
 				filter: ["entity"],
 				onDown: e => {
 					if (e.entityId !== undefined) {
-						console.log(e.entityId)
+						console.log(`Entity ID: ${e.entityId}`)
 						const entity = map.getEntity(e.entityId);
 						const staff = <Staff>entity;
 						idStaff = staff;
-						if (!entity || entity.type !== "staff") {
+						if (!entity || entity.type !== peepType) {
 							dropdownType.selectedIndex = -1;
 							toggle = false							
 							toggleDisabled = true,
@@ -1064,9 +995,8 @@ function selectStaff() {
 							}
 							pluginViewport.viewport?.moveTo(blackViewport);
 							ui.tool?.cancel();
-							ui.showError("You have to select", "a staff member")
-							setStaffName("{RED}No staff selected")
-							debug("invalid entity selected");
+							ui.showError(`You have to`, `select ${peepType}`)
+							setPeepName(`{RED}No ${peepType} selected`)
 						}
 						else {
 							if (staff.energy !== 0) {
@@ -1086,7 +1016,7 @@ function selectStaff() {
 								buttonFreeze.isDisabled = toggleDisabled,
 								getCostume(staff.costume);
 								getStaffType(staff.staffType);
-								setStaffName(staff.name);
+								setPeepName(staff.name);
 									const pluginViewport = window.findWidget<ViewportWidget>(viewport);
 									update = context.subscribe("interval.tick", () => pluginViewport.viewport?.moveTo({x: staff.x, y: staff.y, z: staff.z}));
 						}
