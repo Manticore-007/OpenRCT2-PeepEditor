@@ -1,69 +1,62 @@
 
 import { debug } from "../helpers/logger";
 import { isDevelopment, pluginVersion } from "../helpers/environment";
-import { SetColour, guestColourOptions } from "../functions/guests";
 
 
 // Settings for the window
-const windowId = "guest-editor-window";
+export const windowId = "guest-editor-window";
 const widgetLineHeight = 14;
 const windowColour = 19;
 
-const littering = "guest-editor-littering";
-const explode = "guest-editor-explode";
-const leavingPark = "guest-editor-leaving-park";
-const slowWalk = "guest-editor-slow-walk";
-const tracking = "guest-editor-tracking";
-const waving = "guest-editor-waving";
-const photo = "guest-editor-photo";
-const painting = "guest-editor-painting";
-const wow = "guest-editor-wow";
-const hereweare = "guest-editor-here-we-are";
-const iceCream = "guest-editor-ice-cream";
-const pizza = "guest-editor-pizza";
-const joy = "guest-editor-joy";
-const angry = "guest-editor-angry";
+let widgetFlags: { [key in PeepFlags]: {id: string, toggle: boolean} } = {
+	leavingPark: { id: "guest-editor-leaving-park", toggle: false },
+	slowWalk: { id: "guest-editor-slow-walk", toggle: false },
+	tracking: { id: "guest-editor-tracking", toggle: false },
+	waving: { id: "guest-editor-waving", toggle: false },
+	hasPaidForParkEntry: {id: "guest-editor-has-paid", toggle: false },
+	painting: { id: "guest-editor-painting", toggle: false },
+	photo: { id: "guest-editor-photo", toggle: false },
+	wow: { id: "guest-editor-wow", toggle: false },
+    litter: { id: "guest-editor-littering", toggle: false },
+	lost: { id: "guest-editor-lost", toggle: false },
+	hunger: { id: "guest-editor-hunger", toggle: false },
+	toilet: { id: "guest-editor-toilet", toggle: false },
+	crowded: { id: "guest-editor-crowded", toggle: false },
+	happiness: { id: "guest-editor-happiness", toggle: false },
+	nausea: { id: "guest-editor-nausea", toggle: false },
+	purple: { id: "guest-editor-purple", toggle: false },
+	pizza: { id: "guest-editor-pizza", toggle: false },
+ 	explode: { id: "guest-editor-explode", toggle: false },
+	rideShouldBeMarkedAsFavourite: { id: "guest-editor-ride-should-be-marked", toggle: false },
+	parkEntranceChosen: { id: "guest-editor-park-entrance-chosen", toggle: false },
+	contagious: {id: "guest-editor-contagious", toggle: false },
+	joy: { id: "guest-editor-joy", toggle: false },
+	angry: { id: "guest-editor-angry", toggle: false },
+	iceCream: { id: "guest-editor-ice-cream", toggle: false },
+ 	hereWeAre: { id: "guest-editor-here-we-are", toggle: false },
+};
+
 const costumeDropdown = "guest-editor-dropdown-costume";
 const stafftypeDropdown = "guest-editor-dropdown-stafftype";
 const buttonPipette: string = "guest-editor-button-pipette";
 const peepLabel: string = "guest-editor-staff-label";
-const guestLabel: string = "guest-editor-guest-label";
 const toolSelectPeep: string = "guest-editor-tool-select-staff";
 const buttonLocateStaff: string = "guest-editor-button-locate-staff";
-const buttonLocateGuest: string = "guest-editor-button-locate-guest";
 const freeze: string = "guest-editor-checkbox-freeze-staff";
 const viewport: string = "guest-editor-viewport";
 const staffColourPicker: string = "guest-editor-staff-colour-picker";
 const staffTypeLabel: string = "guest-editor-staff-type-label";
 const costumeLabel: string = "guest-editor-costume-label";
 const blackViewport: CoordsXY = {x: -9000, y: -9000};
-const allGuests: string = "guest-editor-select-all-guests";
 
-
-let widgetExplodeChecked: boolean = false;
-let widgetLeavingPark: boolean = false;
-let widgetSlowCheck: boolean = false;
-let widgetTracking: boolean = false;
-let widgetWaving: boolean = false;
-let widgetPhoto: boolean = false;
-let widgetPainting: boolean = false;
-let widgetWow: boolean = false;
-let widgetHereWeAre: boolean = false;
-let widgetIceCream: boolean = false;
-let widgetPizza: boolean = false;
-let widgetJoy: boolean = false;
-let widgetAngry: boolean = false;
 const guestsEnergy: number = 0;
 const peepName: string = "no staff selected";
-const guestName: string = "no guest selected";
 let toggle: boolean = false;
 let toggleDisabled: boolean = true;
 const coords: CoordsXYZ = { z: 0, y: 0, x: 0 }
-let widgetFreeze: boolean = false;
 let staffMember: Entity;
 let energyStaff: number;
 let idStaff: Staff;
-let checkboxDisabled: boolean = true;
 let colourPickerDisabled: boolean = true;
 let update: (IDisposable | null) = null;
 let toggleFreeze: boolean = false;
@@ -92,9 +85,7 @@ export class PeepEditorWindow {
 					toggle = false
 					toggleDisabled = true
 					toggleFreeze = false
-					checkboxDisabled = true
 					colourPickerDisabled = true
-					widgetFreeze = false
 					ui.tool?.cancel()
 				},
 				classification: windowId,
@@ -563,7 +554,7 @@ export class PeepEditorWindow {
 								text: "Flags",
 							},
 							<CheckboxWidget>{
-								name: littering,
+								name: widgetFlags.litter.id,
 								type: "checkbox",
 								x: 20,
 								y: 78,
@@ -571,11 +562,11 @@ export class PeepEditorWindow {
 								height: 15,
 								text: "Litter",
 								tooltip: "Lets guests behave like pigs",
-								isChecked: false,
-								onChange: () => checkbox("litter", littering),
+								isChecked: widgetFlags.litter.toggle,
+								onChange: () => checkbox("litter", widgetFlags.litter.id),
 							},
 							<CheckboxWidget>{
-								name: explode,
+								name: widgetFlags.explode.id,
 								type: "checkbox",
 								x: 20,
 								y: 98,
@@ -583,11 +574,11 @@ export class PeepEditorWindow {
 								height: 15,
 								text: "Explode",
 								tooltip: "Execute Order 66",
-								isChecked: widgetExplodeChecked,
-								onChange: () => checkbox("explode", explode),
+								isChecked: widgetFlags.explode.toggle,
+								onChange: () => checkbox("explode", widgetFlags.explode.id),
 							},
 							<CheckboxWidget>{
-								name: leavingPark,
+								name: widgetFlags.leavingPark.id,
 								type: "checkbox",
 								x: 20,
 								y: 118,
@@ -595,11 +586,11 @@ export class PeepEditorWindow {
 								height: 15,
 								text: "Leave park",
 								tooltip: "Evacuate park",
-								isChecked: widgetLeavingPark,
-								onChange: () => checkbox("leavingPark", leavingPark),
+								isChecked: widgetFlags.leavingPark.toggle,
+								onChange: () => checkbox("leavingPark", widgetFlags.leavingPark.id),
 							},
 							<CheckboxWidget>{
-								name: slowWalk,
+								name: widgetFlags.slowWalk.id,
 								type: "checkbox",
 								x: 20,
 								y: 138,
@@ -607,11 +598,11 @@ export class PeepEditorWindow {
 								height: 15,
 								text: "Slow walk",
 								tooltip: "Give the guests the Iron Boots from 'Ocarina of Time'",
-								isChecked: false,
-								onChange: () => checkbox("slowWalk", slowWalk),
+								isChecked: widgetFlags.slowWalk.toggle,
+								onChange: () => checkbox("slowWalk", widgetFlags.slowWalk.id),
 							},
 							<CheckboxWidget>{
-								name: tracking,
+								name: widgetFlags.tracking.id,
 								type: "checkbox",
 								x: 20,
 								y: 158,
@@ -619,11 +610,11 @@ export class PeepEditorWindow {
 								height: 15,
 								text: "Track your guests",
 								tooltip: "Vaccinate all of your guests with tracking chips",
-								isChecked: widgetTracking,
-								onChange: () => checkbox("tracking", tracking),
+								isChecked: widgetFlags.tracking.toggle,
+								onChange: () => checkbox("tracking", widgetFlags.tracking.id),
 							},
 							<CheckboxWidget>{
-								name: waving,
+								name: widgetFlags.waving.id,
 								type: "checkbox",
 								x: 20,
 								y: 178,
@@ -631,11 +622,11 @@ export class PeepEditorWindow {
 								height: 15,
 								text: "Wave",
 								tooltip: "'Hey Everyone'",
-								isChecked: widgetWaving,
-								onChange: () => checkbox("waving", waving),
+								isChecked: widgetFlags.waving.toggle,
+								onChange: () => checkbox("waving", widgetFlags.waving.id),
 							},
 							<CheckboxWidget>{
-								name: photo,
+								name: widgetFlags.photo.id,
 								type: "checkbox",
 								x: 20,
 								y: 198,
@@ -643,11 +634,11 @@ export class PeepEditorWindow {
 								height: 15,
 								text: "Make photos",
 								tooltip: "Guests documenting their good time at your park",
-								isChecked: widgetPhoto,
-								onChange: () => checkbox("photo", photo),
+								isChecked: widgetFlags.photo.toggle,
+								onChange: () => checkbox("photo", widgetFlags.photo.id),
 							},
 							<CheckboxWidget>{
-								name: painting,
+								name: widgetFlags.painting.id,
 								type: "checkbox",
 								x: 150,
 								y: 78,
@@ -655,11 +646,11 @@ export class PeepEditorWindow {
 								height: 15,
 								text: "Paint",
 								tooltip: "Guests painting happy accidents",
-								isChecked: widgetPainting,
-								onChange: () => checkbox("painting", painting),
+								isChecked: widgetFlags.painting.toggle,
+								onChange: () => checkbox("painting", widgetFlags.painting.id),
 							},
 							<CheckboxWidget>{
-								name: wow,
+								name: widgetFlags.wow.id,
 								type: "checkbox",
 								x: 150,
 								y: 98,
@@ -667,11 +658,11 @@ export class PeepEditorWindow {
 								height: 15,
 								text: "Wow",
 								tooltip: "Guests think they are Owen Wilson",
-								isChecked: widgetWow,
-								onChange: () => checkbox("wow", wow),
+								isChecked: widgetFlags.wow.toggle,
+								onChange: () => checkbox("wow", widgetFlags.wow.id),
 							},
 							<CheckboxWidget>{
-								name: hereweare,
+								name: widgetFlags.hereWeAre.id,
 								type: "checkbox",
 								x: 150,
 								y: 118,
@@ -679,11 +670,11 @@ export class PeepEditorWindow {
 								height: 15,
 								text: "Here we are",
 								tooltip: "Guests think they are working for CNN",
-								isChecked: widgetHereWeAre,
-								onChange: () => checkbox("hereWeAre", hereweare),
+								isChecked: widgetFlags.hereWeAre.toggle,
+								onChange: () => checkbox("hereWeAre", widgetFlags.hereWeAre.id),
 							},
 							<CheckboxWidget>{
-								name: iceCream,
+								name: widgetFlags.iceCream.id,
 								type: "checkbox",
 								x: 150,
 								y: 138,
@@ -691,11 +682,11 @@ export class PeepEditorWindow {
 								height: 15,
 								text: "Ice cream",
 								tooltip: "Luitenant Dan, ice cream!",
-								isChecked: widgetIceCream,
-								onChange: () => checkbox("iceCream", iceCream),
+								isChecked: widgetFlags.iceCream.toggle,
+								onChange: () => checkbox("iceCream", widgetFlags.iceCream.id),
 							},
 							<CheckboxWidget>{
-								name: pizza,
+								name: widgetFlags.pizza.id,
 								type: "checkbox",
 								x: 150,
 								y: 158,
@@ -703,11 +694,11 @@ export class PeepEditorWindow {
 								height: 15,
 								text: "Pizza",
 								tooltip: "'A cheese pizza, just for me'",
-								isChecked: widgetPizza,
-								onChange: () => checkbox("pizza", pizza),
+								isChecked: widgetFlags.pizza.toggle,
+								onChange: () => checkbox("pizza", widgetFlags.pizza.id),
 							},
 							<CheckboxWidget>{
-								name: joy,
+								name: widgetFlags.joy.id,
 								type: "checkbox",
 								x: 150,
 								y: 178,
@@ -715,11 +706,11 @@ export class PeepEditorWindow {
 								height: 15,
 								text: "Joy",
 								tooltip: "Press A to jump",
-								isChecked: widgetJoy,
-								onChange: () => checkbox("joy", joy),
+								isChecked: widgetFlags.joy.toggle,
+								onChange: () => checkbox("joy", widgetFlags.joy.id),
 							},
 							<CheckboxWidget>{
-								name: angry,
+								name: widgetFlags.angry.id,
 								type: "checkbox",
 								x: 150,
 								y: 198,
@@ -727,8 +718,8 @@ export class PeepEditorWindow {
 								height: 15,
 								text: "Angry",
 								tooltip: "Turn the guests into Karens",
-								isChecked: widgetAngry,
-								onChange: () => checkbox("angry", angry),
+								isChecked: widgetFlags.angry.toggle,
+								onChange: () => checkbox("angry", widgetFlags.angry.id),
 							},
 						]
 					},
@@ -839,21 +830,7 @@ export class PeepEditorWindow {
 	
 	
 }
-function checkbox(flag: PeepFlags, name: string) {
-	const win = ui.getWindow(windowId);
-	const widget = win.findWidget<CheckboxWidget>(name);
-	const guest = map.getAllEntities("guest");
-	guest.forEach(guest => {
-		if (guest.getFlag(flag) === false) {
-			guest.setFlag(flag, true);
-			widget.isChecked = true;
-		}
-		else {
-			guest.setFlag(flag, false);
-			widget.isChecked = false;;
-		}
-	});
-}
+
 function setPeepName(name: string) {
 	const win = ui.getWindow(windowId);
 	if (win) {
@@ -1028,3 +1005,50 @@ function selectPeep(peepType: EntityType) {
 		}
 	}
 }
+type GuestColoursOptions = "tshirtColour" | "trousersColour" | "balloonColour" | "umbrellaColour" | "hatColour";
+let guestColourOptions: { [Keys in GuestColoursOptions]: { id: string; colour: number | null } } = {
+	tshirtColour: {
+		id: 'guest-editor-tshirts',
+		colour: windowColour,
+	},
+	trousersColour: {
+		id: 'guest-editor-trousers',
+		colour: windowColour,
+	},
+	balloonColour: {
+		id: 'guest-editor-balloons',
+		colour: windowColour,
+	},
+	umbrellaColour: {
+		id: 'guest-editor-umbrellas',
+		colour: windowColour,
+	},
+	hatColour: {
+		id: 'guest-editor-hats',
+		colour: windowColour,
+	},
+};
+
+function SetColour(colour: number, property: GuestColoursOptions) {
+    const guest = map.getAllEntities("guest");
+    guest.forEach(guest => {
+        guest[property] = colour;
+    });
+    guestColourOptions[property].colour = colour;
+};
+
+function checkbox(flag: PeepFlags, name: string) {
+	const win = ui.getWindow(windowId);
+	const widget = win.findWidget<CheckboxWidget>(name);
+	const guest = map.getAllEntities("guest");
+	guest.forEach(guest => {
+		if (guest.getFlag(flag) === false) {
+			guest.setFlag(flag, true)
+			widget.isChecked = true
+		}
+		else {
+			guest.setFlag(flag, false)
+			widget.isChecked = false
+		}
+	});
+};
