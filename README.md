@@ -31,7 +31,7 @@ Thanks to Basssiiie for let me use his Proxy Pather and readme file as a templat
 
 ## Installation
 
-2. Download the latest version of the plugin from the [Releases page](https://github.com/Manticore-007/OpenRCT2-PeepEditor/releases/tag/v1.0).
+2. Download the latest version of the plugin from the [Releases page](https://github.com/Manticore-007/OpenRCT2-PeepEditor/releases/tag/v1.1).
 3. To install it, put the downloaded `*.js` file into your `/OpenRCT2/plugin` folder.
     - Easiest way to find the OpenRCT2-folder is by launching the OpenRCT2 game, click and hold on the red toolbox in the main menu, and select "Open custom content folder".
     - Otherwise this folder is commonly found in `C:/Users/<YOUR NAME>/Documents/OpenRCT2/plugin` on Windows.
