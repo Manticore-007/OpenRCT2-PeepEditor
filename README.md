@@ -1,6 +1,7 @@
 # PeepEditor plugin for OpenRCT2
 
 This plugin lets you modify the properties of your park guests and staff members.
+
 v1.2:
 ![(Video example of using PeepEditor)](https://raw.githubusercontent.com/Manticore-007/OpenRCT2-PeepEditor/main/img/v1.2.gif)
 
