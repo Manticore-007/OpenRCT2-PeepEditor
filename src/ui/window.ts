@@ -8,16 +8,16 @@ export const windowId = "guest-editor-window";
 const widgetLineHeight = 14;
 const windowColour = 19;
 
-let widgetFlags: { [key in PeepFlags]: {id: string, toggle: boolean} } = {
+const widgetFlags: { [key in PeepFlags]: { id: string, toggle: boolean } } = {
 	leavingPark: { id: "guest-editor-leaving-park", toggle: false },
 	slowWalk: { id: "guest-editor-slow-walk", toggle: false },
 	tracking: { id: "guest-editor-tracking", toggle: false },
 	waving: { id: "guest-editor-waving", toggle: false },
-	hasPaidForParkEntry: {id: "guest-editor-has-paid", toggle: false },
+	hasPaidForParkEntry: { id: "guest-editor-has-paid", toggle: false },
 	painting: { id: "guest-editor-painting", toggle: false },
 	photo: { id: "guest-editor-photo", toggle: false },
 	wow: { id: "guest-editor-wow", toggle: false },
-    litter: { id: "guest-editor-littering", toggle: false },
+	litter: { id: "guest-editor-littering", toggle: false },
 	lost: { id: "guest-editor-lost", toggle: false },
 	hunger: { id: "guest-editor-hunger", toggle: false },
 	toilet: { id: "guest-editor-toilet", toggle: false },
@@ -26,17 +26,17 @@ let widgetFlags: { [key in PeepFlags]: {id: string, toggle: boolean} } = {
 	nausea: { id: "guest-editor-nausea", toggle: false },
 	purple: { id: "guest-editor-purple", toggle: false },
 	pizza: { id: "guest-editor-pizza", toggle: false },
- 	explode: { id: "guest-editor-explode", toggle: false },
+	explode: { id: "guest-editor-explode", toggle: false },
 	rideShouldBeMarkedAsFavourite: { id: "guest-editor-ride-should-be-marked", toggle: false },
 	parkEntranceChosen: { id: "guest-editor-park-entrance-chosen", toggle: false },
-	contagious: {id: "guest-editor-contagious", toggle: false },
+	contagious: { id: "guest-editor-contagious", toggle: false },
 	joy: { id: "guest-editor-joy", toggle: false },
 	angry: { id: "guest-editor-angry", toggle: false },
 	iceCream: { id: "guest-editor-ice-cream", toggle: false },
- 	hereWeAre: { id: "guest-editor-here-we-are", toggle: false },
+	hereWeAre: { id: "guest-editor-here-we-are", toggle: false },
 };
 
-const sackStaffWindow = "sack-staff"
+const sackStaffWindow = "sack-staff";
 const costumeDropdown = "guest-editor-dropdown-costume";
 const stafftypeDropdown = "guest-editor-dropdown-stafftype";
 const buttonPipette: string = "guest-editor-button-pipette";
@@ -49,7 +49,7 @@ const viewport: string = "guest-editor-viewport";
 const staffColourPicker: string = "guest-editor-staff-colour-picker";
 const staffTypeLabel: string = "guest-editor-staff-type-label";
 const costumeLabel: string = "guest-editor-costume-label";
-const blackViewport: CoordsXY = {x: -9000, y: -9000};
+const blackViewport: CoordsXY = { x: -9000, y: -9000 };
 const xPositionLabel: string = "guest-editor-x-position-label";
 const yPositionLabel: string = "guest-editor-y-position-label";
 const zPositionLabel: string = "guest-editor-z-position-label";
@@ -88,15 +88,15 @@ export class PeepEditorWindow {
 				windowTitle += " [DEBUG]";
 			}
 
-			ui.openWindow({				
+			ui.openWindow({
 				onTabChange: () => ui.getWindow(sackStaffWindow).close(),
 				onClose: () => {
-					toggle = false
-					toggleDisabled = true
-					toggleFreeze = false
-					colourPickerDisabled = true
-					ui.tool?.cancel()
-					ui.getWindow(sackStaffWindow).close()
+					toggle = false;
+					toggleDisabled = true;
+					toggleFreeze = false;
+					colourPickerDisabled = true;
+					ui.tool?.cancel();
+					ui.getWindow(sackStaffWindow).close();
 				},
 				classification: windowId,
 				title: windowTitle,
@@ -253,10 +253,10 @@ export class PeepEditorWindow {
 								y: 165,
 								width: 85,
 								height: widgetLineHeight,
-								isDisabled: false,
-								text: "0",
-								onDecrement: () => staffMember.x -1,
-								onIncrement: () => staffMember.x +1,
+								isDisabled: true,
+								text: `0`,
+								onDecrement: () => --idStaff.x,
+								onIncrement: () => ++idStaff.x,
 							},
 							<LabelWidget>{
 								name: yPositionLabel,
@@ -275,8 +275,10 @@ export class PeepEditorWindow {
 								y: 180,
 								width: 85,
 								height: widgetLineHeight,
-								text: "0",
-								isDisabled: false,
+								text: `0`,
+								isDisabled: true,
+								onDecrement: () => --idStaff.y,
+								onIncrement: () => ++idStaff.y,
 							},
 							<LabelWidget>{
 								name: zPositionLabel,
@@ -295,8 +297,10 @@ export class PeepEditorWindow {
 								y: 195,
 								width: 85,
 								height: widgetLineHeight,
-								text: "0",
-								isDisabled: false,
+								text: `0`,
+								isDisabled: true,
+								onDecrement: () => --idStaff.z,
+								onIncrement: () => ++idStaff.z,
 							},
 							<ButtonWidget>{
 								name: buttonPipette,
@@ -912,8 +916,8 @@ export class PeepEditorWindow {
 			energy = guestsEnergy;
 		});
 	}
-	
-	
+
+
 }
 
 function setPeepName(name: string) {
@@ -923,7 +927,7 @@ function setPeepName(name: string) {
 		label.text = `Name: {WHITE}${name}`;
 	}
 }
-function getStaffType(type: string){
+function getStaffType(type: string) {
 	const win = ui.getWindow(windowId);
 	const staffTypeNumber = [
 		"handyman", "mechanic", "security", "entertainer"
@@ -933,48 +937,48 @@ function getStaffType(type: string){
 		const dropdownCostume = win.findWidget<DropdownWidget>(costumeDropdown);
 		const typeLabel = win.findWidget<LabelWidget>(staffTypeLabel);
 		const staffcostumeLabel = win.findWidget<LabelWidget>(costumeLabel);
-		if (dropdown.items !== undefined){
-		dropdown.selectedIndex = staffTypeNumber.indexOf(type);
+		if (dropdown.items !== undefined) {
+			dropdown.selectedIndex = staffTypeNumber.indexOf(type);
 		}
 		dropdownCostume.isDisabled = false,
-		dropdown.isDisabled = false;
+			dropdown.isDisabled = false;
 		typeLabel.isDisabled = false;
 		staffcostumeLabel.isDisabled = false;
-		
+
 	}
 }
-function setStaffType(number: number){
-	const staffTypeList: StaffType[] = ["handyman", "mechanic", "security", "entertainer"]
-		idStaff.staffType = staffTypeList[number]	
+function setStaffType(number: number) {
+	const staffTypeList: StaffType[] = ["handyman", "mechanic", "security", "entertainer"];
+	idStaff.staffType = staffTypeList[number];
 }
 function getCostume(number: number) {
 	const win = ui.getWindow(windowId);
 	const dropdownCostume = win.findWidget<DropdownWidget>(costumeDropdown);
-		if (number > 251) {
-			selectedIndexCostume = number - 208
-			dropdownCostume.selectedIndex = selectedIndexCostume
-		}
-		else {
-			selectedIndexCostume = number
-			dropdownCostume.selectedIndex = selectedIndexCostume
-		}
+	if (number > 251) {
+		selectedIndexCostume = number - 208;
+		dropdownCostume.selectedIndex = selectedIndexCostume;
+	}
+	else {
+		selectedIndexCostume = number;
+		dropdownCostume.selectedIndex = selectedIndexCostume;
+	}
 }
 function setCostume(number: number) {
 	const win = ui.getWindow(windowId);
 	const dropdownCostume = win.findWidget<DropdownWidget>(costumeDropdown);
-	if (number === 0 && idStaff.staffType != "entertainer"){
+	if (number === 0 && idStaff.staffType != "entertainer") {
 		selectedIndexCostume = -1;
-		dropdownCostume.selectedIndex = selectedIndexCostume
-		return
+		dropdownCostume.selectedIndex = selectedIndexCostume;
+		return;
 	}
 	else {
 		if (number > 43) {
-			selectedIndexCostume = number + 208
-			idStaff.costume = selectedIndexCostume
+			selectedIndexCostume = number + 208;
+			idStaff.costume = selectedIndexCostume;
 		}
 		else {
-			selectedIndexCostume = number
-			idStaff.costume = selectedIndexCostume
+			selectedIndexCostume = number;
+			idStaff.costume = selectedIndexCostume;
 		}
 	}
 }
@@ -983,16 +987,16 @@ function buttonFreeze() {
 	if (win) {
 		const button = win.findWidget<ButtonWidget>(freeze);
 		if (energyStaff === 0) {
-			energyStaff = 96			
-			idStaff.energy = energyStaff
-			toggleFreeze = false
-			button.isPressed = toggleFreeze
+			energyStaff = 96;
+			idStaff.energy = energyStaff;
+			toggleFreeze = false;
+			button.isPressed = toggleFreeze;
 		}
 		else {
-			energyStaff = 0
-			idStaff.energy = energyStaff
-			toggleFreeze = true
-			button.isPressed = toggleFreeze
+			energyStaff = 0;
+			idStaff.energy = energyStaff;
+			toggleFreeze = true;
+			button.isPressed = toggleFreeze;
 		}
 	}
 }
@@ -1003,61 +1007,61 @@ function buttonDelete() {
 		window.bringToFront();
 	}
 	else
-	ui.openWindow({
-		onClose: () => {
-			toggle = false
-			toggleDisabled = true
-			toggleFreeze = false
-			colourPickerDisabled = true
-			ui.tool?.cancel()
-		},
-		classification: sackStaffWindow,
-		title: "Sack staff",
-		width: 200,
-		height: 100,
-		x: ui.width/2-100,
-		y: ui.height/2-50,
-		colours: [26, 26],
-		widgets: [
-			<LabelWidget>{
-				type: "label",
-				x: 0,
-				y: 48,
-				width: 200,
-				height: widgetLineHeight,
-				textAlign: "centred",
-				text: `{WHITE}Are you sure you want to sack\n${idStaff.name}?`,
-				isDisabled: false
+		ui.openWindow({
+			onClose: () => {
+				toggle = false;
+				toggleDisabled = true;
+				toggleFreeze = false;
+				colourPickerDisabled = true;
+				ui.tool?.cancel();
 			},
-			<ButtonWidget>{
-				name: "yes",
-				type: "button",
-				border: true,
-				x: 10,
-				y: 80,
-				width: 85,
-				height: 14,
-				text: "Yes",
-				isPressed: false,
-				isDisabled: false,
-				onClick: () => yesSackStaff(),
-			},
-			<ButtonWidget>{
-				name: "cancel",
-				type: "button",
-				border: true,
-				x: 105,
-				y: 80,
-				width: 85,
-				height: 14,
-				text: "Cancel",
-				isPressed: false,
-				isDisabled: false,
-				onClick: () => ui.getWindow(sackStaffWindow).close()
-			},
-		]
-		
-	})
+			classification: sackStaffWindow,
+			title: "Sack staff",
+			width: 200,
+			height: 100,
+			x: ui.width / 2 - 100,
+			y: ui.height / 2 - 50,
+			colours: [26, 26],
+			widgets: [
+				<LabelWidget>{
+					type: "label",
+					x: 0,
+					y: 48,
+					width: 200,
+					height: widgetLineHeight,
+					textAlign: "centred",
+					text: `{WHITE}Are you sure you want to sack\n${idStaff.name}?`,
+					isDisabled: false
+				},
+				<ButtonWidget>{
+					name: "yes",
+					type: "button",
+					border: true,
+					x: 10,
+					y: 80,
+					width: 85,
+					height: 14,
+					text: "Yes",
+					isPressed: false,
+					isDisabled: false,
+					onClick: () => yesSackStaff(),
+				},
+				<ButtonWidget>{
+					name: "cancel",
+					type: "button",
+					border: true,
+					x: 105,
+					y: 80,
+					width: 85,
+					height: 14,
+					text: "Cancel",
+					isPressed: false,
+					isDisabled: false,
+					onClick: () => ui.getWindow(sackStaffWindow).close()
+				},
+			]
+
+		});
 }
 function yesSackStaff() {
 	const win = ui.getWindow(windowId);
@@ -1072,9 +1076,15 @@ function yesSackStaff() {
 	const label = window.findWidget<LabelWidget>(staffTypeLabel);
 	const costume = window.findWidget<LabelWidget>(costumeLabel);
 	const pluginViewport = window.findWidget<ViewportWidget>(viewport);
+	const xPosition = window.findWidget<LabelWidget>(xPositionLabel);
+	const yPosition = window.findWidget<LabelWidget>(yPositionLabel);
+	const zPosition = window.findWidget<LabelWidget>(zPositionLabel);
+	const xPositionS = window.findWidget<LabelWidget>(xPositionSpinner);
+	const yPositionS = window.findWidget<LabelWidget>(yPositionSpinner);
+	const zPositionS = window.findWidget<LabelWidget>(zPositionSpinner);
 	if (win) {
-		idStaff.remove()
-		toggle = false
+		idStaff.remove();
+		toggle = false;
 		toggleDisabled = true,
 			toggleFreeze = false,
 			colourPickerDisabled = true,
@@ -1086,7 +1096,16 @@ function yesSackStaff() {
 			buttonLocate.isDisabled = toggleDisabled,
 			buttonFreeze.isDisabled = toggleDisabled,
 			buttonFreeze.isPressed = toggleFreeze,
-			buttonDelete.isDisabled = toggleDisabled
+			buttonDelete.isDisabled = toggleDisabled,
+			xPosition.isDisabled = true,
+			yPosition.isDisabled = true,
+			zPosition.isDisabled = true,
+			xPositionS.isDisabled = true,
+			yPositionS.isDisabled = true,
+			zPositionS.isDisabled = true,
+			xPositionS.text = "0",
+			yPositionS.text = "0",
+			zPositionS.text = "0",
 		staffColourCurrent.isDisabled = colourPickerDisabled;
 		if (update !== null) {
 			update.dispose();
@@ -1095,25 +1114,26 @@ function yesSackStaff() {
 		pluginViewport.viewport?.moveTo(blackViewport);
 		ui.tool?.cancel();
 		ui.getWindow(sackStaffWindow).close();
-		setPeepName(`{RED} ${peepName}`)
+		setPeepName(`{RED} ${peepName}`);
 	}
 }
-function staffColourSet(colour: number){
-	idStaff.colour = colour
+function staffColourSet(colour: number) {
+	idStaff.colour = colour;
 }
 function gotoStaff() {
+	coords.x = staffMember.x;
+	coords.y = staffMember.y;
+	coords.z = staffMember.z;
+	ui.mainViewport.scrollTo(coords);
+}
+function getStaffCoords(staffCoordsXYZ: CoordsXYZ) {
 	const window = ui.getWindow(windowId);
-	const x = window.findWidget<SpinnerWidget>(xPositionSpinner);
-	const y = window.findWidget<SpinnerWidget>(yPositionSpinner);
-	const z = window.findWidget<SpinnerWidget>(zPositionSpinner);
-	x.text = coords.x.toString(10);
-	y.text = coords.y.toString(10);
-	z.text = coords.z.toString(10);
-	coords.x = staffMember.x
-	coords.y = staffMember.y
-	coords.z = staffMember.z
-	ui.mainViewport.scrollTo(coords)
-	
+	const xPosition = window.findWidget<SpinnerWidget>(xPositionSpinner);
+	const yPosition = window.findWidget<SpinnerWidget>(yPositionSpinner);
+	const zPosition = window.findWidget<SpinnerWidget>(zPositionSpinner);
+	update = context.subscribe("interval.tick", () => xPosition.text = staffCoordsXYZ.x.toString(10));
+	update = context.subscribe("interval.tick", () => yPosition.text = staffCoordsXYZ.y.toString(10));
+	update = context.subscribe("interval.tick", () => zPosition.text = staffCoordsXYZ.z.toString(10));
 }
 function selectPeep(peepType: EntityType) {
 	const window = ui.getWindow(windowId);
@@ -1127,43 +1147,58 @@ function selectPeep(peepType: EntityType) {
 	const dropdownCostume = window.findWidget<DropdownWidget>(costumeDropdown);
 	const label = window.findWidget<LabelWidget>(staffTypeLabel);
 	const costume = window.findWidget<LabelWidget>(costumeLabel);
+	const xPosition = window.findWidget<LabelWidget>(xPositionLabel);
+	const yPosition = window.findWidget<LabelWidget>(yPositionLabel);
+	const zPosition = window.findWidget<LabelWidget>(zPositionLabel);
+	const xPositionS = window.findWidget<LabelWidget>(xPositionSpinner);
+	const yPositionS = window.findWidget<LabelWidget>(yPositionSpinner);
+	const zPositionS = window.findWidget<LabelWidget>(zPositionSpinner);
 	if (!window) {
-		return
+		return;
 	}
 	else {
 		if (toggle !== false) {
-			toggle = false
-			buttonPicker.isPressed = toggle
+			toggle = false;
+			buttonPicker.isPressed = toggle;
 			ui.tool?.cancel();
 		}
 		else {
-			toggle = true
-			buttonPicker.isPressed = toggle
+			toggle = true;
+			buttonPicker.isPressed = toggle;
 			ui.activateTool({
 				id: toolSelectPeep,
 				cursor: "cross_hair",
 				filter: ["entity"],
 				onDown: e => {
 					if (e.entityId !== undefined) {
-						console.log(`Entity ID: ${e.entityId}`)
+						console.log(`Entity ID: ${e.entityId}`);
 						const entity = map.getEntity(e.entityId);
 						const staff = <Staff>entity;
 						idStaff = staff;
 						if (!entity || entity.type !== peepType) {
 							dropdownType.selectedIndex = -1;
-							toggle = false							
+							toggle = false;
 							toggleDisabled = true,
-							toggleFreeze = false,
-							colourPickerDisabled = true,
-							label.isDisabled = true,
-							costume.isDisabled = true,
-							dropdownType.isDisabled = true,
-							dropdownCostume.isDisabled = true,
-							buttonPicker.isPressed = toggle,
-							buttonLocate.isDisabled = toggleDisabled,
-							buttonFreeze.isDisabled = toggleDisabled,
-							buttonFreeze.isPressed = toggleFreeze,
-							buttonDelete.isDisabled = toggleDisabled
+								toggleFreeze = false,
+								colourPickerDisabled = true,
+								label.isDisabled = true,
+								costume.isDisabled = true,
+								dropdownType.isDisabled = true,
+								dropdownCostume.isDisabled = true,
+								buttonPicker.isPressed = toggle,
+								buttonLocate.isDisabled = toggleDisabled,
+								buttonFreeze.isDisabled = toggleDisabled,
+								buttonFreeze.isPressed = toggleFreeze,
+								buttonDelete.isDisabled = toggleDisabled,
+								xPosition.isDisabled = true,
+								yPosition.isDisabled = true,
+								zPosition.isDisabled = true,
+								xPositionS.isDisabled = true,
+								yPositionS.isDisabled = true,
+								zPositionS.isDisabled = true,
+								xPositionS.text = "0",
+								yPositionS.text = "0",
+								zPositionS.text = "0",
 							staffColourCurrent.isDisabled = colourPickerDisabled;
 							if (update !== null) {
 								update.dispose();
@@ -1171,15 +1206,15 @@ function selectPeep(peepType: EntityType) {
 							}
 							pluginViewport.viewport?.moveTo(blackViewport);
 							ui.tool?.cancel();
-							ui.showError(`You have to`, `select ${peepType}`)
-							setPeepName(`{RED}No ${peepType} selected`)
+							ui.showError(`You have to`, `select ${peepType}`);
+							setPeepName(`{RED}No ${peepType} selected`);
 						}
 						else {
 							if (staff.energy !== 0) {
-								buttonFreeze.isPressed = false
+								buttonFreeze.isPressed = false;
 							}
 							else {
-								buttonFreeze.isPressed = true
+								buttonFreeze.isPressed = true;
 							}
 							ui.tool?.cancel(),
 								toggle = false,
@@ -1191,22 +1226,32 @@ function selectPeep(peepType: EntityType) {
 								buttonPicker.isPressed = toggle,
 								buttonFreeze.isDisabled = toggleDisabled,
 								buttonDelete.isDisabled = toggleDisabled,
+								xPosition.isDisabled = false,
+								yPosition.isDisabled = false,
+								zPosition.isDisabled = false,
+								xPositionS.isDisabled = false,
+								yPositionS.isDisabled = false,
+								zPositionS.isDisabled = false,
 								getCostume(staff.costume);
-								getStaffType(staff.staffType);
-								setPeepName(staff.name);
-									const pluginViewport = window.findWidget<ViewportWidget>(viewport);
-									update = context.subscribe("interval.tick", () => pluginViewport.viewport?.moveTo({x: staff.x, y: staff.y, z: staff.z}));
+							getStaffType(staff.staffType);
+							setPeepName(staff.name);
+							getStaffCoords(staff);
+							const pluginViewport = window.findWidget<ViewportWidget>(viewport);
+							update = context.subscribe("interval.tick", () => pluginViewport.viewport?.moveTo({ x: staff.x, y: staff.y, z: staff.z }));
+							debug(`x is ${staff.x}`);
+							debug(`y is ${staff.y}`);
+							debug(`z is ${staff.z}`);
 						}
-						return energyStaff = staff.energy, staffMember = entity
+						return energyStaff = staff.energy, staffMember = entity;
 					}
-					return
+					return;
 				},
-			})
+			});
 		}
 	}
 }
 type GuestColoursOptions = "tshirtColour" | "trousersColour" | "balloonColour" | "umbrellaColour" | "hatColour";
-let guestColourOptions: { [Keys in GuestColoursOptions]: { id: string; colour: number | null } } = {
+const guestColourOptions: { [Keys in GuestColoursOptions]: { id: string; colour: number | null } } = {
 	tshirtColour: {
 		id: 'guest-editor-tshirts',
 		colour: windowColour,
@@ -1230,12 +1275,12 @@ let guestColourOptions: { [Keys in GuestColoursOptions]: { id: string; colour: n
 };
 
 function SetColour(colour: number, property: GuestColoursOptions) {
-    const guest = map.getAllEntities("guest");
-    guest.forEach(guest => {
-        guest[property] = colour;
-    });
-    guestColourOptions[property].colour = colour;
-};
+	const guest = map.getAllEntities("guest");
+	guest.forEach(guest => {
+		guest[property] = colour;
+	});
+	guestColourOptions[property].colour = colour;
+}
 
 function checkbox(flag: PeepFlags, name: string) {
 	const win = ui.getWindow(windowId);
@@ -1243,12 +1288,12 @@ function checkbox(flag: PeepFlags, name: string) {
 	const guest = map.getAllEntities("guest");
 	guest.forEach(guest => {
 		if (guest.getFlag(flag) === false) {
-			guest.setFlag(flag, true)
-			widget.isChecked = true
+			guest.setFlag(flag, true);
+			widget.isChecked = true;
 		}
 		else {
-			guest.setFlag(flag, false)
-			widget.isChecked = false
+			guest.setFlag(flag, false);
+			widget.isChecked = false;
 		}
 	});
-};
+}
