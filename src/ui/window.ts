@@ -153,7 +153,7 @@ export class PeepEditorWindow {
 								text: `Type:`,
 								isDisabled: true,
 							},
-							<DropdownWidget>{
+							<DropdownDesc>{
 								name: stafftypeDropdown,
 								type: "dropdown",
 								x: 75,
@@ -175,7 +175,7 @@ export class PeepEditorWindow {
 								text: `Costume:`,
 								isDisabled: true,
 							},
-							<DropdownWidget>{
+							<DropdownDesc>{
 								name: costumeDropdown,
 								type: "dropdown",
 								x: 75,
@@ -246,7 +246,7 @@ export class PeepEditorWindow {
 								text: `X position:`,
 								isDisabled: true,
 							},
-							<SpinnerWidget>{
+							<SpinnerDesc>{
 								name: xPositionSpinner,
 								type: "spinner",
 								x: 85,
@@ -268,7 +268,7 @@ export class PeepEditorWindow {
 								text: `Y position:`,
 								isDisabled: true,
 							},
-							<SpinnerWidget>{
+							<SpinnerDesc>{
 								name: yPositionSpinner,
 								type: "spinner",
 								x: 85,
@@ -290,7 +290,7 @@ export class PeepEditorWindow {
 								text: `Z position:`,
 								isDisabled: true,
 							},
-							<SpinnerWidget>{
+							<SpinnerDesc>{
 								name: zPositionSpinner,
 								type: "spinner",
 								x: 85,
@@ -302,7 +302,7 @@ export class PeepEditorWindow {
 								onDecrement: () => --idStaff.z,
 								onIncrement: () => ++idStaff.z,
 							},
-							<ButtonWidget>{
+							<ButtonDesc>{
 								name: buttonPipette,
 								type: "button",
 								border: true,
@@ -314,7 +314,7 @@ export class PeepEditorWindow {
 								isPressed: toggle,
 								onClick: () => selectPeep("staff")
 							},
-							<ButtonWidget>{
+							<ButtonDesc>{
 								name: buttonLocateStaff,
 								type: "button",
 								border: true,
@@ -327,7 +327,7 @@ export class PeepEditorWindow {
 								isDisabled: toggleDisabled,
 								onClick: () => gotoStaff()
 							},
-							<ButtonWidget>{
+							<ButtonDesc>{
 								name: freeze,
 								type: "button",
 								border: true,
@@ -340,7 +340,7 @@ export class PeepEditorWindow {
 								isDisabled: toggleDisabled,
 								onClick: () => buttonFreeze()
 							},
-							<ButtonWidget>{
+							<ButtonDesc>{
 								name: deleteStaff,
 								type: "button",
 								border: true,
@@ -353,7 +353,7 @@ export class PeepEditorWindow {
 								isDisabled: toggleDisabled,
 								onClick: () => buttonDelete()
 							},
-							<ColourPickerWidget>{
+							<ColourPickerDesc>{
 								type: "colourpicker",
 								x: 220,
 								y: 73,
@@ -422,7 +422,7 @@ export class PeepEditorWindow {
 								text: `Name: {RED}${guestName}`,
 								isDisabled: false
 							},
-							<ButtonWidget>{
+							<ButtonDesc>{
 								name: buttonPipette,
 								type: "button",
 								border: true,
@@ -434,7 +434,7 @@ export class PeepEditorWindow {
 								isPressed: toggle,
 								onClick: () => selectPeep("guest")
 							},
-							<ButtonWidget>{
+							<ButtonDesc>{
 								name: buttonLocateGuest,
 								type: "button",
 								border: true,
@@ -447,7 +447,7 @@ export class PeepEditorWindow {
 								isDisabled: false,
 								onClick: () => gotoPeep("guest")
 							},
-							<ButtonWidget>{
+							<ButtonDesc>{
 								name: freeze,
 								type: "button",
 								border: true,
@@ -460,7 +460,7 @@ export class PeepEditorWindow {
 								isDisabled: false,
 								onClick: () => buttonFreeze()
 							},
-							<ButtonWidget>{
+							<ButtonDesc>{
 								name: allGuests,
 								type: "button",
 								border: true,
@@ -509,7 +509,7 @@ export class PeepEditorWindow {
 								height: 170,
 								text: "Colours",
 							},
-							<ColourPickerWidget>{
+							<ColourPickerDesc>{
 								type: "colourpicker",
 								x: 20,
 								y: 80,
@@ -530,7 +530,7 @@ export class PeepEditorWindow {
 								text: "Shirts",
 								isDisabled: false
 							},
-							<ColourPickerWidget>{
+							<ColourPickerDesc>{
 								type: "colourpicker",
 								x: 20,
 								y: 100,
@@ -551,7 +551,7 @@ export class PeepEditorWindow {
 								text: "Trousers",
 								isDisabled: false
 							},
-							<ColourPickerWidget>{
+							<ColourPickerDesc>{
 								type: "colourpicker",
 								x: 20,
 								y: 120,
@@ -572,7 +572,7 @@ export class PeepEditorWindow {
 								text: "Balloons",
 								isDisabled: false
 							},
-							<ColourPickerWidget>{
+							<ColourPickerDesc>{
 								type: "colourpicker",
 								x: 20,
 								y: 140,
@@ -593,7 +593,7 @@ export class PeepEditorWindow {
 								text: "Hats",
 								isDisabled: false
 							},
-							<ColourPickerWidget>{
+							<ColourPickerDesc>{
 								type: "colourpicker",
 								x: 20,
 								y: 160,
@@ -642,7 +642,7 @@ export class PeepEditorWindow {
 								height: 170,
 								text: "Flags",
 							},
-							<CheckboxWidget>{
+							<CheckboxDesc>{
 								name: widgetFlags.litter.id,
 								type: "checkbox",
 								x: 20,
@@ -654,7 +654,7 @@ export class PeepEditorWindow {
 								isChecked: widgetFlags.litter.toggle,
 								onChange: () => checkbox("litter", widgetFlags.litter.id),
 							},
-							<CheckboxWidget>{
+							<CheckboxDesc>{
 								name: widgetFlags.explode.id,
 								type: "checkbox",
 								x: 20,
@@ -666,7 +666,7 @@ export class PeepEditorWindow {
 								isChecked: widgetFlags.explode.toggle,
 								onChange: () => checkbox("explode", widgetFlags.explode.id),
 							},
-							<CheckboxWidget>{
+							<CheckboxDesc>{
 								name: widgetFlags.leavingPark.id,
 								type: "checkbox",
 								x: 20,
@@ -678,7 +678,7 @@ export class PeepEditorWindow {
 								isChecked: widgetFlags.leavingPark.toggle,
 								onChange: () => checkbox("leavingPark", widgetFlags.leavingPark.id),
 							},
-							<CheckboxWidget>{
+							<CheckboxDesc>{
 								name: widgetFlags.slowWalk.id,
 								type: "checkbox",
 								x: 20,
@@ -690,7 +690,7 @@ export class PeepEditorWindow {
 								isChecked: widgetFlags.slowWalk.toggle,
 								onChange: () => checkbox("slowWalk", widgetFlags.slowWalk.id),
 							},
-							<CheckboxWidget>{
+							<CheckboxDesc>{
 								name: widgetFlags.tracking.id,
 								type: "checkbox",
 								x: 20,
@@ -702,7 +702,7 @@ export class PeepEditorWindow {
 								isChecked: widgetFlags.tracking.toggle,
 								onChange: () => checkbox("tracking", widgetFlags.tracking.id),
 							},
-							<CheckboxWidget>{
+							<CheckboxDesc>{
 								name: widgetFlags.waving.id,
 								type: "checkbox",
 								x: 20,
@@ -714,7 +714,7 @@ export class PeepEditorWindow {
 								isChecked: widgetFlags.waving.toggle,
 								onChange: () => checkbox("waving", widgetFlags.waving.id),
 							},
-							<CheckboxWidget>{
+							<CheckboxDesc>{
 								name: widgetFlags.photo.id,
 								type: "checkbox",
 								x: 20,
@@ -726,7 +726,7 @@ export class PeepEditorWindow {
 								isChecked: widgetFlags.photo.toggle,
 								onChange: () => checkbox("photo", widgetFlags.photo.id),
 							},
-							<CheckboxWidget>{
+							<CheckboxDesc>{
 								name: widgetFlags.painting.id,
 								type: "checkbox",
 								x: 150,
@@ -738,7 +738,7 @@ export class PeepEditorWindow {
 								isChecked: widgetFlags.painting.toggle,
 								onChange: () => checkbox("painting", widgetFlags.painting.id),
 							},
-							<CheckboxWidget>{
+							<CheckboxDesc>{
 								name: widgetFlags.wow.id,
 								type: "checkbox",
 								x: 150,
@@ -750,7 +750,7 @@ export class PeepEditorWindow {
 								isChecked: widgetFlags.wow.toggle,
 								onChange: () => checkbox("wow", widgetFlags.wow.id),
 							},
-							<CheckboxWidget>{
+							<CheckboxDesc>{
 								name: widgetFlags.hereWeAre.id,
 								type: "checkbox",
 								x: 150,
@@ -762,7 +762,7 @@ export class PeepEditorWindow {
 								isChecked: widgetFlags.hereWeAre.toggle,
 								onChange: () => checkbox("hereWeAre", widgetFlags.hereWeAre.id),
 							},
-							<CheckboxWidget>{
+							<CheckboxDesc>{
 								name: widgetFlags.iceCream.id,
 								type: "checkbox",
 								x: 150,
@@ -774,7 +774,7 @@ export class PeepEditorWindow {
 								isChecked: widgetFlags.iceCream.toggle,
 								onChange: () => checkbox("iceCream", widgetFlags.iceCream.id),
 							},
-							<CheckboxWidget>{
+							<CheckboxDesc>{
 								name: widgetFlags.pizza.id,
 								type: "checkbox",
 								x: 150,
@@ -786,7 +786,7 @@ export class PeepEditorWindow {
 								isChecked: widgetFlags.pizza.toggle,
 								onChange: () => checkbox("pizza", widgetFlags.pizza.id),
 							},
-							<CheckboxWidget>{
+							<CheckboxDesc>{
 								name: widgetFlags.joy.id,
 								type: "checkbox",
 								x: 150,
@@ -798,7 +798,7 @@ export class PeepEditorWindow {
 								isChecked: widgetFlags.joy.toggle,
 								onChange: () => checkbox("joy", widgetFlags.joy.id),
 							},
-							<CheckboxWidget>{
+							<CheckboxDesc>{
 								name: widgetFlags.angry.id,
 								type: "checkbox",
 								x: 150,
@@ -1033,7 +1033,7 @@ function buttonDelete() {
 					text: `{WHITE}Are you sure you want to sack\n${idStaff.name}?`,
 					isDisabled: false
 				},
-				<ButtonWidget>{
+				<ButtonDesc>{
 					name: "yes",
 					type: "button",
 					border: true,
@@ -1046,7 +1046,7 @@ function buttonDelete() {
 					isDisabled: false,
 					onClick: () => yesSackStaff(),
 				},
-				<ButtonWidget>{
+				<ButtonDesc>{
 					name: "cancel",
 					type: "button",
 					border: true,
