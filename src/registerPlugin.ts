@@ -10,6 +10,6 @@ registerPlugin({
 	authors: ["Manticore-007"],
 	type: "local",
 	licence: "MIT",
-	targetApiVersion: 37,
+	targetApiVersion: 64,
 	main,
 });

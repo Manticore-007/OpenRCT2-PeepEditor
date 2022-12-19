@@ -2,7 +2,7 @@ import { isDevelopment } from "./environment";
 
 
 /**
- * Logs a message is debug mode is enabled, or does nothing otherwise.
+ * Logs a message if debug mode is enabled, or does nothing otherwise.
  * @param message The error message to be logged.
  */
 export function debug(message: string): void
@@ -11,7 +11,7 @@ export function debug(message: string): void
 	{
 		console.log(message);
 	}
-}
+};
 
 
 /**
@@ -24,4 +24,4 @@ export function error(message: string, method?:string): void
 	console.log((method)
 		? `Error (${method}): ${message}`
 		: `Error: ${message}`);
-}
+};

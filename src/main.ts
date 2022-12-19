@@ -18,5 +18,5 @@ export function main(): void
 		return;
 	}
 
-	ui.registerMenuItem("Peep Editor", () => window.open());
+	ui.registerMenuItem("Peep Editor (alpha)", () => window.open());
 }
