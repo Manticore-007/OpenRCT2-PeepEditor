@@ -11,7 +11,6 @@ const removePeepWindow = "remove-peep-window";
 let peepPropertiesWindow = "peep-properties-window";
 const staffPropertiesWindow = "staff-properties-window";
 const guestPropertiesWindow = "guest-properties-window";
-const peepNameWindow = "peep-name-window";
 
 let peepId: Guest | Staff;
 
