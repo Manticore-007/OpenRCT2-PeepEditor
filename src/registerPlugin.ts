@@ -8,7 +8,7 @@ registerPlugin({
 	name: "Peep Editor",
 	version: pluginVersion,
 	authors: ["Manticore-007"],
-	type: "local",
+	type: "remote",
 	licence: "MIT",
 	targetApiVersion: 64,
 	main,
