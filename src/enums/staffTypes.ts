@@ -1,5 +1,3 @@
-//import { debug } from "./logger";
-
 export enum staffTypeLabel {
     "handyman" = "Handyman",
     "mechanic" = "Mechanic",

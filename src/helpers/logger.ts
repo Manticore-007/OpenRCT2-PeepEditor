@@ -1,5 +1,8 @@
-import { isDevelopment } from "./environment";
+/// <reference path="../../lib/ducktape.d.ts" />
 
+import * as Environment from "./environment";
+
+const isDuktapeAvailable = (typeof Duktape !== "undefined");
 
 /**
  * Logs a message if debug mode is enabled, or does nothing otherwise.
@@ -7,11 +10,11 @@ import { isDevelopment } from "./environment";
  */
 export function debug(message: string): void
 {
-	if (isDevelopment)
+	if (Environment.isDevelopment)
 	{
 		console.log(message);
 	}
-};
+}
 
 
 /**
@@ -24,4 +27,39 @@ export function error(message: string, method?:string): void
 	console.log((method)
 		? `Error (${method}): ${message}`
 		: `Error: ${message}`);
-};
+}
+
+function stacktrace(): string
+{
+	if (!isDuktapeAvailable)
+	{
+		return "  (stacktrace unavailable)\r\n";
+	}
+
+	const depth = -4; // skips act(), stacktrace() and the calling method.
+	let entry: DukStackEntry, result = "";
+
+	for (let i = depth; (entry = Duktape.act(i)); i--)
+	{
+		const functionName = entry.function.name;
+		const prettyName = functionName
+			? (functionName + "()")
+			: "<anonymous>";
+
+		result += `   -> ${prettyName}: line ${entry.lineNumber}\r\n`;
+	}
+	return result;
+}
+
+
+/**
+ * Enable stack-traces on errors in development mode.
+ */
+if (Environment.isDevelopment && isDuktapeAvailable)
+{
+	Duktape.errCreate = function onError(error): Error
+	{
+		error.message += ("\r\n" + stacktrace());
+		return error;
+	};
+}

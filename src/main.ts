@@ -1,10 +1,10 @@
 import { isUiAvailable } from "./helpers/environment";
 import { debug } from "./helpers/logger";
-import { PeepEditorWindow } from "./ui/window";
-
+import { PeepEditorWindow } from "./ui/mainWindow/mainWindow";
+import { initCustomSprites } from "./helpers/customImages";
+import { initActions } from "./gameActions/initActions";
 
 const window = new PeepEditorWindow();
-
 
 /**
  * Entry point of the plugin.
@@ -13,10 +13,13 @@ export function main(): void
 {
 	debug("Plugin started.");
 
-	if (!isUiAvailable || network.mode != "none")
+	if (!isUiAvailable)
 	{
 		return;
 	}
 
-	ui.registerMenuItem("Peep Editor (alpha)", () => window.open());
+	initActions();
+	initCustomSprites();
+
+	ui.registerMenuItem("Peep Editor", () => window.open());
 }
