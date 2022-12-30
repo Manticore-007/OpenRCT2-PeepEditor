@@ -3,7 +3,7 @@ export enum staffTypeLabel {
     "mechanic" = "Mechanic",
     "security" = "Security guard",
     "entertainer" = "Entertainer",
-};
+}
 
 export const staffType: StaffType[] = [
     "handyman",

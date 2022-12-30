@@ -1,4 +1,5 @@
-export function errorMessage(entityType: EntityType) {
+export function errorMessage(entityType: EntityType): void
+{
 	switch (entityType) {
 		case "balloon":
 			ui.showError("They all float down here,", "you'll float too...");
@@ -37,4 +38,4 @@ export function errorMessage(entityType: EntityType) {
 			ui.showError("That's", "hot");
 			break;
 	}
-};
+}

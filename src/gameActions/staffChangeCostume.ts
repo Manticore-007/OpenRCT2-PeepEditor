@@ -8,10 +8,8 @@ export function changeStaffCostumeQuery(args: object): GameActionResult
 
 export function changeStaffCostumeExecute(args: object): GameActionResult
 {
-    // @ts-ignore
     const entity = map.getEntity(args.staffId);
     const staff: Staff = <Staff>entity;
-    // @ts-ignore
     const costume = args.costume;
 
     return setStaffCostume(staff, costume);
@@ -19,10 +17,10 @@ export function changeStaffCostumeExecute(args: object): GameActionResult
 
 function setStaffCostume(staff: Staff, costume: number): GameActionResult {
 	if (costume > 43) {
-		costume += 208
-		staff.costume = costume
+		costume += 208;
+		staff.costume = costume;
 	}
-	else {staff.costume = costume}
+	else {staff.costume = costume;}
     return returnSuccess();
 }
 

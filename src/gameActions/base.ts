@@ -8,5 +8,5 @@ export function returnSuccess(): GameActionResult
             y: -1,
             z: 0
         }
-    }
+    };
 }

@@ -9,7 +9,6 @@ export function setPeepNameQuery(args: object): GameActionResult
 
 export function setPeepNameExecute(args: object): GameActionResult
 {
-    // @ts-ignore
     const entity = map.getEntity(args.peepId);
     const peep: Guest | Staff = <Guest|Staff>entity;
 
@@ -24,26 +23,26 @@ export function setPeepName(peep: Staff | Guest): GameActionResult
 		description: peepTypeDescription(peep),
 		initialValue: `${selectedPeep.name}`,
 		callback: text => {
-			selectedPeep.name = text
-			window.findWidget<LabelWidget>("label-peep-name").text = `{WHITE}${text}`
+			selectedPeep.name = text;
+			window.findWidget<LabelWidget>("label-peep-name").text = `{WHITE}${text}`;
 		},
-	})
+	});
     return returnSuccess();
 }
 
 function peepTypeTitle(peep: Staff | Guest): string
 {
-	if (peep.peepType === "staff") { return "Staff member name" }
-	else { return "Guest's name" }
+	if (peep.peepType === "staff") { return "Staff member name"; }
+	else return "Guest's name";
 }
 
 function peepTypeDescription(peep: Staff | Guest): string
 {
-	if (peep.peepType === "staff") { return "Enter new name for this member of staff:" }
-	else { return "Enter name for this guest:" }
+	if (peep.peepType === "staff") { return "Enter new name for this member of staff:"; }
+	else { return "Enter name for this guest:"; }
 }
 
-export function setPeepNameExecuteArgs(peep: Guest | Staff)
+export function setPeepNameExecuteArgs(peep: Guest | Staff): object
 {
     return {"peepId": peep.id};
 }

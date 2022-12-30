@@ -9,10 +9,8 @@ export function changeStaffTypeQuery(args: object): GameActionResult
 
 export function changeStaffTypeExecute(args: object): GameActionResult
 {
-    // @ts-ignore
     const entity = map.getEntity(args.staffId);
     const staff: Staff = <Staff>entity;
-    // @ts-ignore
     const staffType = args.staffType;
 
     return setStaffType(staff, staffType);

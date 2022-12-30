@@ -105,7 +105,7 @@ const buttonAllGuests: ButtonDesc = {
 	image: 5193, //group of guests
 	border: false,
 	isDisabled: false,
-	onClick: () => { selectAllGuests() }
+	onClick: () => { selectAllGuests(); }
 };
 
 const labelAuthor: LabelDesc = {
@@ -171,14 +171,14 @@ export class PeepEditorWindow
 				widgets: widgetsMain,
 				onClose: () => {
 					if (ui.getWindow(peepPropertiesWindow)) {
-						ui.getWindow(peepPropertiesWindow).close()
-					};
+						ui.getWindow(peepPropertiesWindow).close();
+					}
 					if (ui.getWindow(removePeepWindow)) {
-						ui.getWindow(removePeepWindow).close()
-					};
+						ui.getWindow(removePeepWindow).close();
+					}
 					if (ui.getWindow(aboutWindow)) {
-						ui.getWindow(aboutWindow).close()
-					};
+						ui.getWindow(aboutWindow).close();
+					}
 					ui.tool?.cancel();
 					disableUpdateViewport();
 					disableUpdateCoordinates();
@@ -186,15 +186,15 @@ export class PeepEditorWindow
 			});
 			resetViewport();
 		}
-	};
+	}
 }
 
 let updateCoordinates: (IDisposable | null) = null;
 export const staffPropertiesWindow = "staff-properties-window";
 export const guestPropertiesWindow = "guest-properties-window";
-export const aboutWindow = "about-window"
+export const aboutWindow = "about-window";
 
-export function peepProperties(peepType: EntityType, thisWindow: string, otherWindow: string)
+export function peepProperties(peepType: EntityType, thisWindow: string, otherWindow: string): void
 {
 	const thisPropertiesWindow = ui.getWindow(thisWindow);
 	const peepEditorWindow = ui.getWindow(windowId);
@@ -211,10 +211,10 @@ export function peepProperties(peepType: EntityType, thisWindow: string, otherWi
 	else {
 		if (otherPropertiesWindow) {
 			otherPropertiesWindow.close();
-		};
+		}
 		if (ui.getWindow(aboutWindow)) {
 			ui.getWindow(aboutWindow).close();
-		};
+		}
 		ui.openWindow({
 			classification: thisWindow,
 			title: `${peepType.charAt(0).toUpperCase() + peepType.slice(1)} properties`,
@@ -234,21 +234,21 @@ export function peepProperties(peepType: EntityType, thisWindow: string, otherWi
 				buttonPicker.isDisabled = false;
 				labelPeepName.text = `{RED} No peep selected`;
 			},
-		})
+		});
 	}
 }
 
 export function openAboutWindow(): void
 {
 	const window = ui.getWindow(aboutWindow);
-	const propertiesWindow = ui.getWindow(peepPropertiesWindow)
+	const propertiesWindow = ui.getWindow(peepPropertiesWindow);
 	const mainWindow = ui.getWindow(windowId);
 	if (window) {
 		debug("About window is already shown");
 		window.bringToFront();
 	}
 	else {
-		if (propertiesWindow) { propertiesWindow.close() };
+		if (propertiesWindow) { propertiesWindow.close(); }
 		ui.openWindow({
 			classification: aboutWindow,
 			title: "About",
@@ -293,7 +293,7 @@ export function openAboutWindow(): void
 					y: 95,
 					width: 128,
 					height: 128,
-					onDraw: function (g) {drawTest(g, customImageFor("manticore"))},
+					onDraw: function (g) {drawTest(g, customImageFor("manticore"));},
 				},
 				<LabelDesc> {
 					type: "label",
@@ -316,18 +316,18 @@ export function openAboutWindow(): void
 					textAlign: "centred",
 				},
 			],
-			onClose: () => { },
-		})
+			// onClose: () => {ui.getWindow(aboutWindow).close;},
+		});
 	}
 }
 
 function versionString(): string
 {
     if (isDevelopment) {
-        return `Version ${pluginVersion} [DEBUG]`
+        return `Version ${pluginVersion} [DEBUG]`;
     }
-    else {`Version ${pluginVersion}`}
-return "{RED} undefined"
+    else `Version ${pluginVersion}`;
+return "{RED} undefined";
 }
 
 function widgetsProperties(peepType: EntityType): WidgetBaseDesc[]
@@ -338,13 +338,13 @@ function widgetsProperties(peepType: EntityType): WidgetBaseDesc[]
 		return guestWidgets;
 }
 
-export function disableUpdateCoordinates()
+export function disableUpdateCoordinates(): void
 {
 	updateCoordinates?.dispose();
 	updateCoordinates = null;
 }
 
-export function peepCoordinates(peepCoordinates: CoordsXYZ)
+export function peepCoordinates(peepCoordinates: CoordsXYZ): void
 {
 	disableUpdateCoordinates();
 	const window = ui.getWindow(peepPropertiesWindow);
@@ -355,19 +355,19 @@ export function peepCoordinates(peepCoordinates: CoordsXYZ)
 	});
 }
 
-export function widgetEnable(name: Widget)
+export function widgetEnable(name: Widget): void
 {
 	const widget = ui.getWindow(windowId).findWidget<Widget>(name.name);
 		widget.isDisabled = false;
 }
 
-export function widgetDisable(name: Widget)
+export function widgetDisable(name: Widget): void
 {
 	const widget = ui.getWindow(windowId).findWidget<Widget>(name.name);
 		widget.isDisabled = true;
 }
 
-function peepSelect()
+function peepSelect(): void
 {
 	const window = ui.getWindow(windowId);
 	const buttonPicker = window.findWidget<ButtonWidget>("button-picker");
@@ -403,7 +403,7 @@ function peepSelect()
 				}
 				else {
 					if (peep.peepType === "guest") {
-						buttonFreeze.isPressed = false
+						buttonFreeze.isPressed = false;
 						buttonFreeze.isDisabled = true;
 						peepProperties("guest", guestPropertiesWindow, staffPropertiesWindow);
 						getColourGuest(<Guest>peep);
@@ -412,7 +412,7 @@ function peepSelect()
 						peepProperties("staff", staffPropertiesWindow, guestPropertiesWindow);
 						peepCoordinates(peep);
 						getEnergy(<Staff>peep);
-						getStaffType(<Staff>peep)
+						getStaffType(<Staff>peep);
 						getCostume(<Staff>peep);
 						getColourStaff(<Staff>peep);
 						buttonFreeze.isDisabled = false;
@@ -435,23 +435,23 @@ function getColourGuest(guest: Guest): void
 	window.findWidget<ColourPickerWidget>("colourpicker-trousers").colour = guest.trousersColour;
 	window.findWidget<ColourPickerWidget>("colourpicker-balloon").colour = guest.balloonColour;
 	window.findWidget<ColourPickerWidget>("colourpicker-hat").colour = guest.hatColour;
-	window.findWidget<ColourPickerWidget>("colourpicker-umbrella").colour = guest.umbrellaColour
+	window.findWidget<ColourPickerWidget>("colourpicker-umbrella").colour = guest.umbrellaColour;
 }
 
-function getStaffType(peep: Staff)
+function getStaffType(peep: Staff): void
 {
 	const dropdown = ui.getWindow(peepPropertiesWindow).findWidget<DropdownWidget>("dropdown-staff-type");
 	dropdown.text = staffTypeLabel[peep.staffType];
 	debug(`stafftype is ${peep.staffType}`);
 }
 
-function getCostume(peep: Staff)
+function getCostume(peep: Staff): void
 {
 	const dropdown = ui.getWindow(peepPropertiesWindow).findWidget<DropdownWidget>("dropdown-costume");
 	if (peep.costume > 251) {
-		dropdown.text = costume[peep.costume - 208]
+		dropdown.text = costume[peep.costume - 208];
 	}
-	else {dropdown.text = costume[peep.costume]}
+	else dropdown.text = costume[peep.costume];
 }
 
 function getColourStaff(peep: Staff): void
@@ -462,10 +462,10 @@ function getColourStaff(peep: Staff): void
 	widget.colour = staff.colour;
 }
 
-function selectAllGuests()
+function selectAllGuests(): void
 {
 	const window = ui.getWindow(windowId);
-	const PropertiesWindow = ui.getWindow(peepPropertiesWindow)
+	const PropertiesWindow = ui.getWindow(peepPropertiesWindow);
 	const buttonAllGuests = window.findWidget<ButtonWidget>("button-all-guests");
 	const buttonPicker = window.findWidget<ButtonWidget>("button-picker");
 	const buttonLocate = window.findWidget<ButtonWidget>("button-locate");
@@ -476,7 +476,7 @@ function selectAllGuests()
 	disableUpdateViewport();
 	resetViewport();
 	if (buttonAllGuests.isPressed === false){
-		peepProperties("guest", guestPropertiesWindow, staffPropertiesWindow)
+		peepProperties("guest", guestPropertiesWindow, staffPropertiesWindow);
 		buttonAllGuests.isPressed = true;
 		buttonPicker.isDisabled = true;
 		buttonLocate.isDisabled = true;

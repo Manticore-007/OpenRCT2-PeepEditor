@@ -12,22 +12,23 @@ export const windowWidth = 260;
 export const windowColour = colour.DarkYellow;
 export let selectedPeep: Guest | Staff;
 
-export function setMultiplier(number: number) {
+export function setMultiplier(number: number): void
+{
 	if (number === 0) {
-		multiplier = 1
+		multiplier = 1;
 	}
 	if (number === 1) {
-		multiplier = 10
+		multiplier = 10;
 	}
 	if (number === 2) {
-		multiplier = 100
+		multiplier = 100;
 	}
-	debug(`Multiplier set to ${multiplierList[number]}`)
+	debug(`Multiplier set to ${multiplierList[number]}`);
 }
 
 export function setSelectedPeep(peep: Guest | Staff): void
 {
-    selectedPeep = peep
+    selectedPeep = peep;
 }
 
 export const groupboxName: GroupBoxDesc = {
@@ -47,7 +48,7 @@ export function setPeepPropertiesWindow(window: string): void
     peepPropertiesWindow = window;
 }
 
-export function resetCoordinates()
+export function resetCoordinates(): void
 {
 	ui.getWindow(peepPropertiesWindow).findWidget<SpinnerWidget>("spinner-x-position").text = " ";
 	ui.getWindow(peepPropertiesWindow).findWidget<SpinnerWidget>("spinner-y-position").text = " ";

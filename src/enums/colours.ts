@@ -31,6 +31,6 @@ export enum colour {
     DarkPink,           //29
     BrightPink,         //30
     LightPink,          //31
-};
+}
 
 export const colourList = Object.keys(colour).filter((value) => isNaN(Number(value)));

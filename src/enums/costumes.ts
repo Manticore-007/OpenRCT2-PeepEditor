@@ -47,6 +47,6 @@ export enum costume {
     "Handyman",				//253
     "Mechanic",				//254
     "Security guard",       //255
-};
+}
 
 export const costumeList = Object.keys(costume).filter((value) => isNaN(Number(value)));

@@ -1,6 +1,6 @@
-import { margin, toolbarHeight, widgetLineHeight, windowColour, selectedPeep, groupboxName } from "../../helpers/windowProperties"
-import { costumeList } from "../../enums/costumes"
-import { staffTypeList } from "../../enums/staffTypes"
+import { margin, toolbarHeight, widgetLineHeight, windowColour, selectedPeep, groupboxName } from "../../helpers/windowProperties";
+import { costumeList } from "../../enums/costumes";
+import { staffTypeList } from "../../enums/staffTypes";
 import { multiplierList, setMultiplier } from "../../helpers/windowProperties";
 import { changeStaffCoordinatesExecuteArgs } from "../../gameActions/staffChangeCoordinates";
 import { changeStaffTypeExecuteArgs } from "../../gameActions/staffChangeType";
@@ -24,7 +24,7 @@ export const staffWidgets: WidgetBaseDesc[] = [
         height: widgetLineHeight,
         width: widgetLineHeight,
         colour: windowColour,
-        onChange: (number) => { const staff = <Staff>selectedPeep; staff.colour = number},
+        onChange: (number) => { const staff = <Staff>selectedPeep; staff.colour = number;},
     },
     <GroupBoxDesc>{
         type: "groupbox",

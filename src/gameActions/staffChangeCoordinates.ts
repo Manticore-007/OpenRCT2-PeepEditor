@@ -9,12 +9,9 @@ export function changeStaffCoordinatesQuery(args: object): GameActionResult
 
 export function changeStaffCoordinatesExecute(args: object): GameActionResult
 {
-    // @ts-ignore
     const entity = map.getEntity(args.staffId);
     const staff: Staff = <Staff>entity;
-    // @ts-ignore
     const axis: keyof CoordsXYZ = args.axis;
-    // @ts-ignore
     const operator: number = args.operator;    
 
     return changeSpinner(staff, axis, operator);

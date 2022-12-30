@@ -12,4 +12,4 @@ registerPlugin({
 	licence: "MIT",
 	targetApiVersion: 64,
 	main,
-})
+});

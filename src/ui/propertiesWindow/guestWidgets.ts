@@ -1,4 +1,4 @@
-import { margin, toolbarHeight, widgetLineHeight, windowWidth, windowColour, buttonSize, selectedPeep} from "../../helpers/windowProperties"
+import { margin, toolbarHeight, widgetLineHeight, windowWidth, windowColour, buttonSize, selectedPeep} from "../../helpers/windowProperties";
 import { setFlagExecuteArgs } from "../../gameActions/guestSetFlags";
 import { setGuestColourExecuteArgs } from "../../gameActions/guestSetColours";
 import { customImageFor } from "../../helpers/customImages";
@@ -21,7 +21,7 @@ export const guestWidgets: WidgetBaseDesc[] = [
         y: margin + toolbarHeight + widgetLineHeight * 2 / 2.5 + 3,
         width: 16,
         height: 16,
-        onDraw: function (g) {drawTest(g, 5081, "tshirtColour")},
+        onDraw: function (g) {drawTest(g, 5081, "tshirtColour");},
     },
     <ColourPickerDesc> {
         type: "colourpicker",
@@ -42,7 +42,7 @@ export const guestWidgets: WidgetBaseDesc[] = [
         y: margin + toolbarHeight + widgetLineHeight * 2 / 2.5 + 1,
         width: 16,
         height: 16,
-        onDraw: function (g) {drawTest(g, customImageFor("trousers"), "trousersColour")},
+        onDraw: function (g) {drawTest(g, customImageFor("trousers"), "trousersColour");},
     },
     <ColourPickerDesc> {
         type: "colourpicker",
@@ -63,7 +63,7 @@ export const guestWidgets: WidgetBaseDesc[] = [
         y: margin + toolbarHeight + widgetLineHeight * 2 / 2.5 + 3,
         width: 16,
         height: 16,
-        onDraw: function (g) {drawTest(g, 5079, "hatColour")},
+        onDraw: function (g) {drawTest(g, 5079, "hatColour");},
     },
     <ColourPickerDesc> {
         type: "colourpicker",
@@ -84,7 +84,7 @@ export const guestWidgets: WidgetBaseDesc[] = [
         y: margin + toolbarHeight + widgetLineHeight * 2 / 2.5 + 3,
         width: 16,
         height: 16,
-        onDraw: function (g) {drawTest(g, 5061, "balloonColour")},
+        onDraw: function (g) {drawTest(g, 5061, "balloonColour");},
     },
     <ColourPickerDesc> {
         type: "colourpicker",
@@ -105,7 +105,7 @@ export const guestWidgets: WidgetBaseDesc[] = [
         y: margin + toolbarHeight + widgetLineHeight * 2 / 2.5 + 3,
         width: 16,
         height: 16,
-        onDraw: function (g) {drawTest(g, 5065, "umbrellaColour")},
+        onDraw: function (g) {drawTest(g, 5065, "umbrellaColour");},
     },
     <ColourPickerDesc> {
         type: "colourpicker",
@@ -394,13 +394,13 @@ export const guestWidgets: WidgetBaseDesc[] = [
     },
 ];
 
-export function drawTest(g: GraphicsContext, image: number, property?: keyof Guest)
+export function drawTest(g: GraphicsContext, image: number, property?: keyof Guest): void
 {
     const img = g.getImage(image);
-    const guest = <Guest>selectedPeep
+    const guest = <Guest>selectedPeep;
     if (property === "tshirtColour" || property === "trousersColour" || property === "hatColour" || property === "umbrellaColour" || property === "balloonColour")
     {
-        const colour = guest[property]
+        const colour = guest[property];
         if (img) {
             g.paletteId = colour;
             g.image(img.id, 0, 0);

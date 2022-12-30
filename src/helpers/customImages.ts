@@ -1,7 +1,7 @@
 enum ImageMoniker {
     "trousers",
     "manticore",
-};
+}
 
 type ImageStringNames = keyof typeof ImageMoniker;
 

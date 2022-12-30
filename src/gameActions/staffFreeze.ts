@@ -9,7 +9,6 @@ export function freezeStaffQuery(args: object): GameActionResult
 
 export function freezeStaffExecute(args: object): GameActionResult
 {
-    // @ts-ignore
     const entity = map.getEntity(args.staffId);
     const staff: Staff = <Staff>entity;
 
@@ -33,7 +32,7 @@ export function freezeStaffExecuteArgs(staff: Staff): object
     return { "staffId": staff.id};
 }
 
-export function getEnergy(staff: Staff)
+export function getEnergy(staff: Staff): void
 {
 	const button = ui.getWindow(windowId).findWidget<ButtonWidget>("button-freeze");
 	if (staff.energy <= 1) {
