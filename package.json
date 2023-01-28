@@ -21,7 +21,7 @@
         "url": "https://github.com/Manticore-007/OpenRCT2-PeepEditor/issues"
     },
     "devDependencies": {
-        "@rollup/plugin-replace": "^3.0.0",
+        "@rollup/plugin-replace": "^5.0.2",
         "@rollup/plugin-typescript": "^8.2.5",
         "@typescript-eslint/eslint-plugin": "5.4",
         "@typescript-eslint/parser": "5.4",
