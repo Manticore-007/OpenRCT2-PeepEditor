@@ -11,7 +11,7 @@ const isDev = (build === "development");
 
 const output = (isDev)
 	? `${getPath("documents")}/OpenRCT2/plugin/PeepEditor_alpha.js`
-	: "./dist/PeepEditor_alpha.js";
+	: "./dist/PeepEditor.js";
 
 
 /**

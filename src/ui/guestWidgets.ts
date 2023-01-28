@@ -424,7 +424,7 @@ const chkBoxIceCream: CheckboxDesc = {
     onChange: function (isChecked) {
         context.executeAction("pe_setflag", setFlagExecuteArgs(<Guest>selectedPeep, "iceCream", isChecked));
     },
-}
+};
 
 export const guestWidgets: WidgetBaseDesc[] = [
     grpBoxAttColours,

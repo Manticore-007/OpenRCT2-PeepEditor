@@ -9,10 +9,8 @@ export function changeStaffEnergyQuery(args: object): GameActionResult
 
 export function changeStaffEnergyExecute(args: object): GameActionResult
 {
-    //@ts-ignore
     const entity = map.getEntity(args.staffId);
     const staff: Staff = <Staff>entity;
-    //@ts-ignore
     const operator: number = args.operator;    
 
     return changeSpinner(staff, operator);

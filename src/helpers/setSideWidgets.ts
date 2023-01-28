@@ -1,20 +1,20 @@
-import { aboutWidgets } from "../ui/aboutWidgets"
-import { AllGuestWidgets } from "../ui/allGuestWidgets"
-import { guestWidgets } from "../ui/guestWidgets"
-import { staffWidgets } from "../ui/staffWidgets"
+import { aboutWidgets } from "../ui/aboutWidgets";
+import { AllGuestWidgets } from "../ui/allGuestWidgets";
+import { guestWidgets } from "../ui/guestWidgets";
+import { staffWidgets } from "../ui/staffWidgets";
 
 export function setSideWidgets(type: string): WidgetDesc[] | undefined
 {
     switch (type)
     {
         case "About":
-            return aboutWidgets
+            return aboutWidgets;
         case "Guest properties":
-            return guestWidgets
+            return guestWidgets;
         case "Staff member properties":
-            return staffWidgets
+            return staffWidgets;
         case "All guests properties":
-            return AllGuestWidgets
+            return AllGuestWidgets;
     }
-    return undefined
+    return undefined;
 }

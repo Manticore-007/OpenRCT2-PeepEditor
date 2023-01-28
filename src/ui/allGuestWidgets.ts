@@ -372,7 +372,7 @@ const chkBoxIceCream: CheckboxDesc = {
     width: windowWidth - margin * 2,
     text: `Ice cream`,
     onChange: (value) => toggleFlag(value, "iceCream")
-}
+};
 
 export const AllGuestWidgets: WidgetBaseDesc[] = [
     grpBoxAttColours,
@@ -409,7 +409,6 @@ export const AllGuestWidgets: WidgetBaseDesc[] = [
     chkBoxJoy,
     chkBoxAngry,
     chkBoxIceCream,
-
 ];
 
 function drawImage(g: GraphicsContext, image: number, colour: number): void
@@ -426,19 +425,19 @@ function changeColour(colour: number, attribute: keyof Guest): void
     if (attribute === "tshirtColour" || attribute === "trousersColour" || attribute === "hatColour" || attribute === "balloonColour" || attribute === "umbrellaColour") {
         const allGuests = map.getAllEntities("guest");
         allGuests.forEach(guest => {
-            guest[attribute] = colour
+            guest[attribute] = colour;
             switch (attribute)
             {
                 case "tshirtColour":
-                    return tshirtColour = colour
+                    return tshirtColour = colour;
                 case "trousersColour":
-                    return trousersColour = colour
+                    return trousersColour = colour;
                 case "hatColour":
-                    return hatColour = colour
+                    return hatColour = colour;
                 case "balloonColour":
-                    return balloonColour = colour
+                    return balloonColour = colour;
                 case "umbrellaColour":
-                    return umbrellaColour = colour
+                    return umbrellaColour = colour;
             }
         });
     }

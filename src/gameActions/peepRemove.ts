@@ -86,7 +86,6 @@ export function removePeepQuery(args: object): GameActionResult
 
 export function removePeepExecute(args: object): GameActionResult
 {
-    //@ts-ignore
     const entity = map.getEntity(args.peepId);
     const peep: Guest | Staff = <Guest|Staff>entity;
 

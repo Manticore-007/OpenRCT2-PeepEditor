@@ -1,5 +1,5 @@
 import { returnSuccess } from "./base";
-import * as button from "../helpers/buttonControl"
+import * as button from "../helpers/buttonControl";
 import { getEnergy } from "../helpers/staffGetters";
 
 export function freezeStaffQuery(args: object): GameActionResult
@@ -10,7 +10,6 @@ export function freezeStaffQuery(args: object): GameActionResult
 
 export function freezeStaffExecute(args: object): GameActionResult
 {
-    //@ts-ignore
     const entity = map.getEntity(args.staffId);
     const staff: Staff = <Staff>entity;
 

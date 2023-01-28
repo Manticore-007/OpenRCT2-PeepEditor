@@ -8,12 +8,9 @@ export function setFlagQuery(args: object): GameActionResult
 
 export function setFlagExecute(args: object): GameActionResult
 {
-    //@ts-ignore
     const entity = map.getEntity(args.guestId);
     const guest: Guest = <Guest>entity;
-    //@ts-ignore
     const key: PeepFlags = args.key;
-    //@ts-ignore
     const value: boolean = args.value;
 
     return setFlag(guest, key, value);

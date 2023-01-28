@@ -64,4 +64,4 @@ const labelGitHub: LabelDesc = {
     textAlign: "centred",
 };
 
-export const aboutWidgets: WidgetDesc[] = [groupboxAbout, labelAbout, labelPeepEditor, customManticore, labelSpecialThanks, labelGitHub]
+export const aboutWidgets: WidgetDesc[] = [groupboxAbout, labelAbout, labelPeepEditor, customManticore, labelSpecialThanks, labelGitHub];

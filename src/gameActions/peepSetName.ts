@@ -10,7 +10,6 @@ export function setPeepNameQuery(args: object): GameActionResult
 
 export function setPeepNameExecute(args: object): GameActionResult
 {
-    //@ts-ignore
     const entity = map.getEntity(args.peepId);
     const peep: Guest | Staff = <Guest|Staff>entity;
 

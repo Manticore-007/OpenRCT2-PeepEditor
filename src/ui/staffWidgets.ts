@@ -145,7 +145,7 @@ const spnXPos: SpinnerDesc = {
             description: "Put in X coordinate to move staff member to",
             initialValue: selectedPeep.x.toString(),
             callback: text => {
-                selectedPeep.x = parseInt(text) || selectedPeep.x
+                selectedPeep.x = parseInt(text) || selectedPeep.x;
             }
         }),
         onIncrement: () => context.executeAction("pe_changestaffcoordinates", changeStaffCoordinatesExecuteArgs(<Staff>selectedPeep, "x", + 1)),
@@ -177,7 +177,7 @@ const spnYPos: SpinnerDesc = {
         description: "Put in Y coordinate to move staff member to",
         initialValue: selectedPeep.y.toString(),
         callback: text => {
-            selectedPeep.y = parseInt(text) || selectedPeep.y
+            selectedPeep.y = parseInt(text) || selectedPeep.y;
         }
     }),
     onIncrement: () => context.executeAction("pe_changestaffcoordinates", changeStaffCoordinatesExecuteArgs(<Staff>selectedPeep, "y", + 1)),
@@ -209,7 +209,7 @@ const spnZPos: SpinnerDesc = {
         description: "Put in Z coordinate to move staff member to",
         initialValue: selectedPeep.z.toString(),
         callback: text => {
-            selectedPeep.z = parseInt(text) || selectedPeep.z
+            selectedPeep.z = parseInt(text) || selectedPeep.z;
         }
     }),
     onIncrement: () => context.executeAction("pe_changestaffcoordinates", changeStaffCoordinatesExecuteArgs(<Staff>selectedPeep, "z", + 1)),
@@ -245,7 +245,7 @@ const spnEnergy: SpinnerDesc = {
                 callback: text => {
                     const number = parseInt(text);
                     if (number > 0 && number < 256) {
-                        selectedPeep.energy = number || selectedPeep.energy
+                        selectedPeep.energy = number || selectedPeep.energy;
                     }
                 }
             });
