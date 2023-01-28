@@ -2,45 +2,66 @@
 
 This plugin lets you modify the properties of your park guests and staff members.
 
-v1.2:
-![(Video example of using PeepEditor)](https://raw.githubusercontent.com/Manticore-007/OpenRCT2-PeepEditor/main/img/v1.2.gif)
+### The Main Window:
 
-v1.1:
-![(Video example of using PeepEditor)](https://raw.githubusercontent.com/Manticore-007/OpenRCT2-PeepEditor/main/img/v1.1.gif)
+![(The main window of Peep Editor)](https://raw.githubusercontent.com/Manticore-007/OpenRCT2-PeepEditor/main/img/main%20window.png)
 
-This is my first experience with any actual coding. I got interested by using the Ride Vehicle Editor from Basssiiie. I wanted to make something similar, but with peeps. I thought it would be a cool project to learn how to code.
+Here you can see the most basic information about the peep you've selected. The buttons do the following:
 
-There are a few different tabs:
+![(Select a peep)](https://raw.githubusercontent.com/Manticore-007/OpenRCT2-PeepEditor/main/img/pipette.png)
+Activates the tool to select a guest or staff member.
 
-Staff:
-Freeze/unfreeze staff members, so you can use the as scenery objects around your map
-Give each individual staff member their own colour
-Change their appearance or their stafftype.
+![(Select a peep)](https://raw.githubusercontent.com/Manticore-007/OpenRCT2-PeepEditor/main/img/freeze.png)
+Toggles wether a staff member is frozen in place or moving. Unfreezing sets the speed of the staff member automatically to 90.
 
-Colours
-    Give all the guests on the map the same colour for their shirts, trousers, balloons,
-    hats and umbrellas respectively.
+![(Select a peep)](https://raw.githubusercontent.com/Manticore-007/OpenRCT2-PeepEditor/main/img/rename.png)
+Opens a text box where you can put in a new (longer than normally) name for your guest or staff member.
 
-Flags
-    Here you can make your guests do different kind of stuff; like littering or exploding to name two.
+![(Select a peep)](https://raw.githubusercontent.com/Manticore-007/OpenRCT2-PeepEditor/main/img/locate.png)
+When you press this button, the screen will focus on the selected guest or staff member.
 
-Conditions
-    This is a planned feature, here I want the option to set your guests conditions, like happiness or thirst, this is already possible at the Cheats menu.
+![(Select a peep)](https://raw.githubusercontent.com/Manticore-007/OpenRCT2-PeepEditor/main/img/remove.png)
+Remove the selected guest or staff member.
 
-About
-    Just some info about me and the plug-in.
+![(Select a peep)](https://raw.githubusercontent.com/Manticore-007/OpenRCT2-PeepEditor/main/img/allguests.png)
+All the guests on the map will be selected, except the ones on rides.
 
-Thanks to Basssiiie for let me use his Proxy Pather and readme file as a template, and showing me the ways of writing plug-ins.
+### Staff member properties
 
+<img src= "https://raw.githubusercontent.com/Manticore-007/OpenRCT2-PeepEditor/main/img/staff.png" align="left" />
+<br>
+Type: let's you change what kind of staff member it is.<br>
+Costume: changes the how the staff member looks, you can even turn them into guests!<br>
+Colour: changes the colour of the selected staff member's outfit, if possible.<br>
+<br>
+X position: moves the selected staff member along the X axis on the map.<br>
+Y position: moves the selected staff member along the Y axis on the map.<br>
+Z position: moves the selected staff member along the Z axis on the map.<br>
+Speed: adjusts how fast a staff member is walking, adjustable from 1 to 255.<br>
+<br>
+The multiplier lets you set increments by 1, 10 or 100 respectively.<br>
+<br clear="left"/>
+
+### Guest properties
+
+<img src= "https://raw.githubusercontent.com/Manticore-007/OpenRCT2-PeepEditor/main/img/guest.png" align="left" />
+<br>
+Here you can change the colours of the attributes of the selected guest.<br>
+<br>
+By checking the flags you can -for instance- force a guest to leave the park, or let him explode or let him paint a picture. Be sure to play around with all of the possibilities.
+<br><br><br><br><br>
+<br clear="left"/>
+
+This window looks the same when the "all guests" button is pressed. The results are the same, but for ALL guests on the map, except for those on rides.
 
 ## Installation
 
-2. Download the latest version of the plugin from the [Releases page](https://github.com/Manticore-007/OpenRCT2-PeepEditor/releases/tag/v1.1).
-3. To install it, put the downloaded `*.js` file into your `/OpenRCT2/plugin` folder.
+1. Download the latest version of the plugin from the [Releases page](https://github.com/Manticore-007/OpenRCT2-PeepEditor/releases/tag/v23.1.0).
+2. To install it, put the downloaded `*.js` file into your `/OpenRCT2/plugin` folder.
     - Easiest way to find the OpenRCT2-folder is by launching the OpenRCT2 game, click and hold on the red toolbox in the main menu, and select "Open custom content folder".
     - Otherwise this folder is commonly found in `C:/Users/<YOUR NAME>/Documents/OpenRCT2/plugin` on Windows.
     - If you already had this plugin installed before, you can safely overwrite the old file.
-4. Once the file is there, it should show up ingame in the dropdown menu under the map icon.
+3. Once the file is there, it should show up ingame in the dropdown menu under the map icon.
 
 ---
 
