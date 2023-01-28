@@ -1,6 +1,6 @@
 import { isUiAvailable } from "./helpers/environment";
 import { debug } from "./helpers/logger";
-import { PeepEditorWindow } from "./ui/mainWindow/mainWindow";
+import { PeepEditorWindow } from "./ui/mainWindow";
 import { initCustomSprites } from "./helpers/customImages";
 import { initActions } from "./gameActions/initActions";
 

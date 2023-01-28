@@ -1,8 +1,11 @@
 import { colour } from "../enums/colours";
 import { debug } from "../helpers/logger";
-import { resetViewport } from "../helpers/resetViewport";
-import { peepPropertiesWindow, resetCoordinates, widgetLineHeight, windowId } from "../helpers/windowProperties";
+import { widgetLineHeight, windowId } from "../helpers/windowProperties";
 import { returnSuccess } from "./base";
+import { resetViewport } from "../helpers/resetViewport";
+import { setLabelPeepName } from "../helpers/peepSelection";
+import * as btn from "../helpers/buttonControl";
+import { sideWindow } from "../ui/sideWindow";
 
 export const removePeepWindow = "remove-peep-window";
 
@@ -24,7 +27,7 @@ export function removePeep(peep: Staff | Guest): void
 			height: 100,
 			x: ui.width / 2 - 100,
 			y: ui.height / 2 - 50,
-			colours: [colour.BordeauxRed, colour.BordeauxRed],
+			colours: [colour["Bordeaux red"], colour["Bordeaux red"]],
 			widgets: [
 				<LabelDesc>{
 					type: "label",
@@ -33,7 +36,7 @@ export function removePeep(peep: Staff | Guest): void
 					width: 200,
 					height: widgetLineHeight,
 					textAlign: "centred",
-					text: `{WHITE}Are you sure you want to remove\n${peep.name}?`,
+					text: textRemovePeep(peep),
 					isDisabled: false
 				},
 				<ButtonDesc>{
@@ -47,7 +50,16 @@ export function removePeep(peep: Staff | Guest): void
 					text: "Yes",
 					isPressed: false,
 					isDisabled: false,
-					onClick: () => context.executeAction("pe_removepeep", removePeepExecuteArgs(peep)),
+					onClick: () =>
+					{
+						const window = ui.getWindow(windowId);
+						const btnAllGuests = window.findWidget<ButtonWidget>("button-all-guests");
+						if (btnAllGuests.isPressed === true)
+						{
+							context.executeAction("pe_removeallguests", removeAllGuestsExecuteArgs());
+						}
+						else {context.executeAction("pe_removepeep", removePeepExecuteArgs(peep));}
+					}
 				},
 				<ButtonDesc>{
 					name: "cancel",
@@ -74,6 +86,7 @@ export function removePeepQuery(args: object): GameActionResult
 
 export function removePeepExecute(args: object): GameActionResult
 {
+    //@ts-ignore
     const entity = map.getEntity(args.peepId);
     const peep: Guest | Staff = <Guest|Staff>entity;
 
@@ -82,8 +95,15 @@ export function removePeepExecute(args: object): GameActionResult
 
 function confirmRemove(peep: Staff | Guest): GameActionResult
 {
-    ui.getWindow(removePeepWindow).close();
-    afterRemovePeepWindowClose(peep);
+	ui.getWindow(removePeepWindow).close();
+	ui.getWindow(sideWindow).close();
+	resetViewport();
+	setLabelPeepName();
+	ui.getWindow(windowId).findWidget<LabelWidget>("label-peep-name").text = `{RED} No peep selected`;
+	btn.disableAll();
+	btn.unpressAll();
+	peep.remove();
+	debug("Peep removed");
 	return returnSuccess();
 }
 
@@ -92,19 +112,43 @@ export function removePeepExecuteArgs(peep: Guest | Staff): object
     return { "peepId": peep.id };
 }
 
-export function afterRemovePeepWindowClose(peep: Guest | Staff): GameActionResult
+function textRemovePeep(peep: Guest | Staff): string
 {
-	if (peep.peepType === "staff"){
-		resetCoordinates();
+	if (ui.getWindow(windowId).findWidget<ButtonWidget>("button-all-guests").isPressed)
+	{
+		return `{WHITE}Are you sure you want to remove\n all guests?`;
 	}
-	const window = ui.getWindow(windowId);
-	const buttonFreeze = window.findWidget<ButtonWidget>("button-freeze");
-	const LabelName = window.findWidget<LabelWidget>("label-peep-name");
-	buttonFreeze.isDisabled = true;
-	buttonFreeze.isPressed = false;
-	LabelName.text = `{RED} No peep selected`;
-	ui.getWindow(peepPropertiesWindow).close();
-	resetViewport(); 
-	peep.remove();
+	else return `{WHITE}Are you sure you want to remove\n${peep.name}?`;
+}
+
+
+// remove all guests
+
+export function removeAllGuestsQuery(): GameActionResult
+{
     return returnSuccess();
+}
+
+export function removeAllGuestsExecute(): GameActionResult
+{
+    const allGuests = map.getAllEntities("guest");
+    return removeAllGuests(allGuests);
+}
+
+export function removeAllGuestsExecuteArgs(): object
+{
+    return {};
+}
+
+function removeAllGuests(allGuests: Guest[]): GameActionResult
+{
+	ui.getWindow(removePeepWindow).close();
+	resetViewport();
+	ui.getWindow(windowId).findWidget<LabelWidget>("label-peep-name").text = `{RED} No peep selected`;
+	btn.disableAll();
+	btn.unpressAll();
+	ui.showError("            Not available...            ", "Please use Cheats menu");
+	debug(allGuests.length.toString() + " guests would've been removed");
+	//allGuests.forEach(guest => {guest.remove();});
+	return returnSuccess();
 }

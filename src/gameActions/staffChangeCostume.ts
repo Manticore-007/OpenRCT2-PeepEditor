@@ -8,8 +8,10 @@ export function changeStaffCostumeQuery(args: object): GameActionResult
 
 export function changeStaffCostumeExecute(args: object): GameActionResult
 {
+    //@ts-ignore
     const entity = map.getEntity(args.staffId);
     const staff: Staff = <Staff>entity;
+    //@ts-ignore
     const costume = args.costume;
 
     return setStaffCostume(staff, costume);

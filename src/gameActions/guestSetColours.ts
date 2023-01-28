@@ -10,9 +10,12 @@ export function setGuestColourQuery(args: object): GameActionResult
 
 export function setGuestColourExecute(args: object): GameActionResult
 {
+    //@ts-ignore
     const entity = map.getEntity(args.guestId);
     const guest: Guest = <Guest>entity;
+    //@ts-ignore
     const property: GuestColoursOptions = args.property;
+    //@ts-ignore
     const colour: number = args.colour;
 
     return setGuestColour(guest, property, colour);

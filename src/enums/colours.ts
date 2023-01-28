@@ -1,36 +1,36 @@
 export enum colour {
-    Black,               //0
-    Grey,                //1
-    White,               //2
-    DarkPurple,         //3
-    LightPurple,        //4
-    BrightPurple,       //5
-    DarkBlue,           //6
-    LightBlue,          //7
-    IcyBlue,            //8
-    Teal,                //9
-    Aquamarine,          //10
-    SaturatedGreen,     //11
-    DarkGreen,          //12
-    MossGreen,          //13
-    BrightGreen,        //14
-    OliveGreen,         //15
-    DarkOliveGreen,    //16
-    BrightYellow,       //17
-    Yellow,              //18
-    DarkYellow,         //19
-    LightOrange,        //20
-    DarkOrange,         //21
-    LightBrown,         //22
-    SaturatedBrown,     //23
-    DarkBrown,          //24
-    SalmonPink,         //25
-    BordeauxRed,        //26
-    SaturatedRed,       //27
-    BrightRed,          //28
-    DarkPink,           //29
-    BrightPink,         //30
-    LightPink,          //31
+    "Black",
+    "Grey",
+    "White",
+    "Dark purple",
+    "Light purple",
+    "Bright purple",
+    "Dark blue",
+    "Light blue",
+    "Icy blue",
+    "Teal",
+    "Aquamarine",
+    "Saturated green",
+    "Dark green",
+    "Moss green",
+    "Bright green",
+    "Olive green",
+    "Dark olive green",
+    "Bright yellow",
+    "Yellow",
+    "Dark yellow",
+    "Light orange",
+    "Dark orange",
+    "Light brown",
+    "Saturated brown",
+    "Dark brown",
+    "Salmon pink",
+    "Bordeaux red",
+    "Saturated red",
+    "Bright red",
+    "Dark pink",
+    "Bright pink",
+    "Light pink",
 }
 
 export const colourList = Object.keys(colour).filter((value) => isNaN(Number(value)));
