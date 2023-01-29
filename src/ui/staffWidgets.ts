@@ -1,21 +1,13 @@
 import { costumeList } from "../enums/costumes";
 import { staffTypeList } from "../enums/staffTypes";
-import { changeStaffCoordinatesExecuteArgs } from "../gameActions/staffChangeCoordinates";
+import { changeStaffColourExecuteArgs } from "../gameActions/staffChangeColour";
+import { changeStaffCoordinatesExecuteArgs, setStaffCoordinatesExecuteArgs } from "../gameActions/staffChangeCoordinates";
 import { changeStaffCostumeExecuteArgs } from "../gameActions/staffChangeCostume";
 import { changeStaffEnergyExecuteArgs } from "../gameActions/staffChangeEnergy";
 import { changeStaffTypeExecuteArgs } from "../gameActions/staffChangeType";
+import { setStaffEnergyExecuteArgs } from "../gameActions/staffSetEnergy";
 import { selectedPeep } from "../helpers/selectedPeep";
 import { margin, multiplierList, setMultiplier, toolbarHeight, widgetLineHeight, windowColour } from "../helpers/windowProperties";
-
-/* const grpBoxStaffColour: GroupBoxDesc = {
-    type: "groupbox",
-    name: "groupbox-staff-colour",
-    text: "Colour",
-    x: margin,
-    y: toolbarHeight + widgetLineHeight /2,
-    height: widgetLineHeight * 2.5,
-    width: 200 - margin * 2,
-}; */
 
 const grpBoxAppearance: GroupBoxDesc = {
     type: "groupbox",
@@ -107,7 +99,7 @@ const clrPickerStaff: ColourPickerDesc = {
     width: widgetLineHeight,
     colour: windowColour,
     tooltip: "Change the colour of the selected staff member's outfit",
-    onChange: (number) => { const staff = <Staff>selectedPeep; staff.colour = number;},
+    onChange: (number) => context.executeAction("pe_changestaffcolour", changeStaffColourExecuteArgs(<Staff>selectedPeep, number)),
 };
 
 const grpBoxCoordinates: GroupBoxDesc = {
@@ -144,9 +136,7 @@ const spnXPos: SpinnerDesc = {
             title: "X coordinate",
             description: "Put in X coordinate to move staff member to",
             initialValue: selectedPeep.x.toString(),
-            callback: text => {
-                selectedPeep.x = parseInt(text) || selectedPeep.x;
-            }
+            callback: text => {context.executeAction("pe_setstaffcoordinates", setStaffCoordinatesExecuteArgs(<Staff>selectedPeep, "x", text));}
         }),
         onIncrement: () => context.executeAction("pe_changestaffcoordinates", changeStaffCoordinatesExecuteArgs(<Staff>selectedPeep, "x", + 1)),
         onDecrement: () => context.executeAction("pe_changestaffcoordinates", changeStaffCoordinatesExecuteArgs(<Staff>selectedPeep, "x", - 1)),
@@ -176,9 +166,7 @@ const spnYPos: SpinnerDesc = {
         title: "Y coordinate",
         description: "Put in Y coordinate to move staff member to",
         initialValue: selectedPeep.y.toString(),
-        callback: text => {
-            selectedPeep.y = parseInt(text) || selectedPeep.y;
-        }
+        callback: text => {context.executeAction("pe_setstaffcoordinates", setStaffCoordinatesExecuteArgs(<Staff>selectedPeep, "z", text));}
     }),
     onIncrement: () => context.executeAction("pe_changestaffcoordinates", changeStaffCoordinatesExecuteArgs(<Staff>selectedPeep, "y", + 1)),
     onDecrement: () => context.executeAction("pe_changestaffcoordinates", changeStaffCoordinatesExecuteArgs(<Staff>selectedPeep, "y", - 1)),
@@ -208,9 +196,7 @@ const spnZPos: SpinnerDesc = {
         title: "Z coordinate",
         description: "Put in Z coordinate to move staff member to",
         initialValue: selectedPeep.z.toString(),
-        callback: text => {
-            selectedPeep.z = parseInt(text) || selectedPeep.z;
-        }
+        callback: text => {context.executeAction("pe_setstaffcoordinates", setStaffCoordinatesExecuteArgs(<Staff>selectedPeep, "z", text));}
     }),
     onIncrement: () => context.executeAction("pe_changestaffcoordinates", changeStaffCoordinatesExecuteArgs(<Staff>selectedPeep, "z", + 1)),
     onDecrement: () => context.executeAction("pe_changestaffcoordinates", changeStaffCoordinatesExecuteArgs(<Staff>selectedPeep, "z", - 1)),
@@ -244,9 +230,7 @@ const spnEnergy: SpinnerDesc = {
                 initialValue: selectedPeep.energy.toString(),
                 callback: text => {
                     const number = parseInt(text);
-                    if (number > 0 && number < 256) {
-                        selectedPeep.energy = number || selectedPeep.energy;
-                    }
+                    context.executeAction("pe_setstaffenergy", setStaffEnergyExecuteArgs(<Staff>selectedPeep, number));
                 }
             });
         }

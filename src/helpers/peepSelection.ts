@@ -17,7 +17,7 @@ export function peepSelect(): void
             cursor: "cross_hair",
             onDown: e => {
                 const entityId = e.entityId;
-                if (entityId)
+                if (entityId !== undefined)
                 {
                     const entity = map.getEntity(entityId);
                     if (!entity || entity.type === "car")

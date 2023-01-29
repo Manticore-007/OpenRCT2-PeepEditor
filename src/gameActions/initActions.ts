@@ -1,23 +1,29 @@
-import { setPeepNameExecute, setPeepNameQuery } from "./peepSetName";
-import { freezeStaffExecute, freezeStaffQuery } from "./staffFreeze";
-import { removeAllGuestsExecute, removeAllGuestsQuery, removePeepExecute, removePeepQuery } from "./peepRemove";
-import { changeStaffCoordinatesExecute, changeStaffCoordinatesQuery } from "./staffChangeCoordinates";
-import { changeStaffTypeExecute, changeStaffTypeQuery } from "./staffChangeType";
-import { changeStaffCostumeExecute, changeStaffCostumeQuery } from "./staffChangeCostume";
-import { setFlagExecute, setFlagQuery } from "./guestSetFlags";
-import { setGuestColourExecute, setGuestColourQuery } from "./guestSetColours";
-import { changeStaffEnergyExecute, changeStaffEnergyQuery } from "./staffChangeEnergy";
+import { setPeepNameExecute } from "./peepSetName";
+import { freezeStaffExecute } from "./staffFreeze";
+import { removePeepExecute } from "./peepRemove";
+import { changeStaffCoordinatesExecute, setStaffCoordinatesExecute } from "./staffChangeCoordinates";
+import { changeStaffTypeExecute } from "./staffChangeType";
+import { changeStaffCostumeExecute } from "./staffChangeCostume";
+import { setFlagExecute } from "./guestSetFlags";
+import { setGuestColourExecute } from "./guestSetColours";
+import { changeStaffEnergyExecute } from "./staffChangeEnergy";
+import { GuestColours, PeepFlagsArgs, PeepId, PeepName, SetStaffCoordinates, SetStaffEnergy, StaffColour, StaffCoordinates, StaffCostumeSet, StaffEnergy, StaffTypeSet } from "../../lib/interfaces";
+import { changeStaffColourExecute } from "./staffChangeColour";
+import { setStaffEnergyExecute } from "./staffSetEnergy";
+import { queryPermissionCheck } from "./permissions";
 
 export function initActions(): void
 {
-	context.registerAction("pe_setflag", (args) => setFlagQuery(args), (args) => setFlagExecute(args));
-	context.registerAction("pe_setguestcolour", (args) => setGuestColourQuery(args), (args) => setGuestColourExecute(args));
-	context.registerAction("pe_peepname", (args) => setPeepNameQuery(args), (args) => setPeepNameExecute(args));
-	context.registerAction("pe_freezestaff", (args) => freezeStaffQuery(args), (args) => freezeStaffExecute(args));
-	context.registerAction("pe_removepeep", (args) => removePeepQuery(args), (args) => removePeepExecute(args));
-	context.registerAction("pe_removeallguests", () => removeAllGuestsQuery(), () => removeAllGuestsExecute());
-	context.registerAction("pe_changestaffcoordinates", (args) => changeStaffCoordinatesQuery(args), (args) => changeStaffCoordinatesExecute(args));
-	context.registerAction("pe_changestaffenergy", (args) => changeStaffEnergyQuery(args), (args) => changeStaffEnergyExecute(args));
-	context.registerAction("pe_changestafftype", (args) => changeStaffTypeQuery(args), (args) => changeStaffTypeExecute(args));
-	context.registerAction("pe_changestaffcostume", (args) => changeStaffCostumeQuery(args), (args) => changeStaffCostumeExecute(args));
+	context.registerAction<PeepFlagsArgs>("pe_setflag", (args) => queryPermissionCheck(args), (args) => setFlagExecute(args.args));
+	context.registerAction<GuestColours>("pe_setguestcolour", (args) => queryPermissionCheck(args), (args) => setGuestColourExecute(args.args));
+	context.registerAction<PeepName>("pe_peepname", (args) => queryPermissionCheck(args), (args) => setPeepNameExecute(args.args));
+	context.registerAction<PeepId>("pe_freezestaff", (args) => queryPermissionCheck(args), (args) => freezeStaffExecute(args.args));
+	context.registerAction<PeepId>("pe_removepeep", (args) => queryPermissionCheck(args), (args) => removePeepExecute(args.args));
+	context.registerAction<StaffCoordinates>("pe_changestaffcoordinates", (args) => queryPermissionCheck(args), (args) => changeStaffCoordinatesExecute(args.args));
+	context.registerAction<SetStaffCoordinates>("pe_setstaffcoordinates", (args) => queryPermissionCheck(args), (args) => setStaffCoordinatesExecute(args.args));
+	context.registerAction<StaffEnergy>("pe_changestaffenergy", (args) => queryPermissionCheck(args), (args) => changeStaffEnergyExecute(args.args));
+	context.registerAction<SetStaffEnergy>("pe_setstaffenergy", (args) => queryPermissionCheck(args), (args) => setStaffEnergyExecute(args.args));
+	context.registerAction<StaffColour>("pe_changestaffcolour", (args) => queryPermissionCheck(args), (args) => changeStaffColourExecute(args.args));
+	context.registerAction<StaffTypeSet>("pe_changestafftype", (args) => queryPermissionCheck(args), (args) => changeStaffTypeExecute(args.args));
+	context.registerAction<StaffCostumeSet>("pe_changestaffcostume", (args) => queryPermissionCheck(args), (args) => changeStaffCostumeExecute(args.args));
 }

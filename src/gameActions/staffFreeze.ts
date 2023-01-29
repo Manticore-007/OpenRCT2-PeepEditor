@@ -1,16 +1,15 @@
-import { returnSuccess } from "./base";
-import * as button from "../helpers/buttonControl";
-import { getEnergy } from "../helpers/staffGetters";
+import { PeepId } from "../../lib/interfaces";
 
-export function freezeStaffQuery(args: object): GameActionResult
+export function freezeStaffQuery(args: PeepId): GameActionResult
 {
     args;
-    return returnSuccess();
+    return {};
 }
 
-export function freezeStaffExecute(args: object): GameActionResult
+export function freezeStaffExecute(args: PeepId): GameActionResult
 {
-    const entity = map.getEntity(args.staffId);
+    if (args.peepId === null) {return {};}
+    const entity = map.getEntity(args.peepId);
     const staff: Staff = <Staff>entity;
 
     return freezeStaff(staff);
@@ -20,17 +19,14 @@ function freezeStaff(staff: Staff): GameActionResult
 {
 	if (staff.energy !== 0) {
 		staff.energy = 0;
-        button.pressed("button-freeze");
 	}
 	else {
 		staff.energy = 90;
-        button.unpressed("button-freeze");
 	}
-	getEnergy(staff);
-    return returnSuccess();
+    return {};
 }
 
-export function freezeStaffExecuteArgs(staff: Staff): object
+export function freezeStaffExecuteArgs(staff: Staff): PeepId
 {
-    return { "staffId": staff.id};
+    return { "peepId": staff.id};
 }

@@ -1,3 +1,5 @@
+import { setGuestColourExecuteArgs } from "../gameActions/guestSetColours";
+import { setFlagExecuteArgs } from "../gameActions/guestSetFlags";
 import { customImageFor } from "../helpers/customImages";
 import { btnSize, margin, toolbarHeight, widgetLineHeight, windowColour, windowWidth } from "../helpers/windowProperties";
 
@@ -35,7 +37,13 @@ const clrPickerTshirt: ColourPickerDesc = {
     height: widgetLineHeight,
     width: widgetLineHeight,
     colour: windowColour,
-    onChange: (number) => changeColour(number, "tshirtColour"),
+    onChange: (number) => {
+        tshirtColour = number;
+        const allGuests = map.getAllEntities("guest");
+        allGuests.forEach(guest =>
+            context.executeAction("pe_setguestcolour", setGuestColourExecuteArgs(guest, "tshirtColour", number)),
+        );
+    }
 };
 
 const customTrousers: CustomDesc = {
@@ -56,7 +64,13 @@ const clrPickerTrousers: ColourPickerDesc = {
     height: widgetLineHeight,
     width: widgetLineHeight,
     colour: windowColour,
-    onChange: (number) => changeColour(number, "trousersColour"),
+    onChange: (number) => {
+        trousersColour = number;
+        const allGuests = map.getAllEntities("guest");
+        allGuests.forEach(guest =>
+            context.executeAction("pe_setguestcolour", setGuestColourExecuteArgs(guest, "trousersColour", number)),
+        );
+    }
 };
 
 const customHat: CustomDesc = {
@@ -77,7 +91,13 @@ const clrPickerHat: ColourPickerDesc = {
     height: widgetLineHeight,
     width: widgetLineHeight,
     colour: windowColour,
-    onChange: (number) => changeColour(number, "hatColour"),
+    onChange: (number) => {
+        hatColour = number;
+        const allGuests = map.getAllEntities("guest");
+        allGuests.forEach(guest =>
+            context.executeAction("pe_setguestcolour", setGuestColourExecuteArgs(guest, "hatColour", number)),
+        );
+    }
 };
 
 const customBalloon: CustomDesc = {
@@ -98,7 +118,13 @@ const clrPickerBalloon: ColourPickerDesc = {
     height: widgetLineHeight,
     width: widgetLineHeight,
     colour: windowColour,
-    onChange: (number) => changeColour(number, "balloonColour"),
+    onChange: (number) => {
+        balloonColour = number;
+        const allGuests = map.getAllEntities("guest");
+        allGuests.forEach(guest =>
+            context.executeAction("pe_setguestcolour", setGuestColourExecuteArgs(guest, "balloonColour", number)),
+        );
+    }
 };
 
 const customUmbrella: CustomDesc = {
@@ -119,7 +145,13 @@ const clrPickerUmbrella: ColourPickerDesc = {
     height: widgetLineHeight,
     width: widgetLineHeight,
     colour: windowColour,
-    onChange: (number) => changeColour(number, "umbrellaColour"),
+    onChange: (number) => {
+        umbrellaColour = number;
+        const allGuests = map.getAllEntities("guest");
+        allGuests.forEach(guest =>
+            context.executeAction("pe_setguestcolour", setGuestColourExecuteArgs(guest, "umbrellaColour", number)),
+        );
+    }
 };
 
 const grpBoxFlags: GroupBoxDesc = {
@@ -140,7 +172,12 @@ const chkBoxLeavingPark: CheckboxDesc = {
     height: widgetLineHeight,
     width: windowWidth - margin * 2,
     text: `Leaving park`,
-    onChange: (value) => toggleFlag(value, "leavingPark")
+    onChange: (value) => {
+        const allGuests = map.getAllEntities("guest");
+        allGuests.forEach( guest => {
+            context.executeAction("pe_setflag", setFlagExecuteArgs(guest, "leavingPark", value));
+        });
+    }
 };
 
 const chkBoxSlowWalk: CheckboxDesc = {
@@ -151,7 +188,12 @@ const chkBoxSlowWalk: CheckboxDesc = {
     height: widgetLineHeight,
     width: windowWidth - margin * 2,
     text: `Slow walk`,
-    onChange: (value) => toggleFlag(value, "slowWalk")
+    onChange: (value) => {
+        const allGuests = map.getAllEntities("guest");
+        allGuests.forEach( guest => {
+            context.executeAction("pe_setflag", setFlagExecuteArgs(guest, "slowWalk", value));
+        });
+    }
 };
 
 const chkBoxTracking: CheckboxDesc = {
@@ -162,7 +204,12 @@ const chkBoxTracking: CheckboxDesc = {
     height: widgetLineHeight,
     width: windowWidth - margin * 2,
     text: `Tracking`,
-    onChange: (value) => toggleFlag(value, "tracking")
+    onChange: (value) => {
+        const allGuests = map.getAllEntities("guest");
+        allGuests.forEach( guest => {
+            context.executeAction("pe_setflag", setFlagExecuteArgs(guest, "tracking", value));
+        });
+    }
 };
 
 const chkBoxWaving: CheckboxDesc = {
@@ -173,7 +220,12 @@ const chkBoxWaving: CheckboxDesc = {
     height: widgetLineHeight,
     width: windowWidth - margin * 2,
     text: `Waving`,
-    onChange: (value) => toggleFlag(value, "waving")
+    onChange: (value) => {
+        const allGuests = map.getAllEntities("guest");
+        allGuests.forEach( guest => {
+            context.executeAction("pe_setflag", setFlagExecuteArgs(guest, "waving", value));
+        });
+    }
 };
 
 const chkBoxPainting: CheckboxDesc = {
@@ -184,7 +236,12 @@ const chkBoxPainting: CheckboxDesc = {
     height: widgetLineHeight,
     width: windowWidth - margin * 2,
     text: `Painting`,
-    onChange: (value) => toggleFlag(value, "painting")
+    onChange: (value) => {
+        const allGuests = map.getAllEntities("guest");
+        allGuests.forEach( guest => {
+            context.executeAction("pe_setflag", setFlagExecuteArgs(guest, "painting", value));
+        });
+    }
 };
 
 const chkBoxPhoto: CheckboxDesc = {
@@ -195,7 +252,12 @@ const chkBoxPhoto: CheckboxDesc = {
     height: widgetLineHeight,
     width: windowWidth - margin * 2,
     text: `Photo`,
-    onChange: (value) => toggleFlag(value, "photo")
+    onChange: (value) => {
+        const allGuests = map.getAllEntities("guest");
+        allGuests.forEach( guest => {
+            context.executeAction("pe_setflag", setFlagExecuteArgs(guest, "photo", value));
+        });
+    }
 };
 
 const chkBoxWow: CheckboxDesc = {
@@ -206,7 +268,12 @@ const chkBoxWow: CheckboxDesc = {
     height: widgetLineHeight,
     width: windowWidth - margin * 2,
     text: `Wow!`,
-    onChange: (value) => toggleFlag(value, "wow")
+    onChange: (value) => {
+        const allGuests = map.getAllEntities("guest");
+        allGuests.forEach( guest => {
+            context.executeAction("pe_setflag", setFlagExecuteArgs(guest, "wow", value));
+        });
+    }
 };
 
 const chkBoxLitter: CheckboxDesc = {
@@ -217,7 +284,12 @@ const chkBoxLitter: CheckboxDesc = {
     height: widgetLineHeight,
     width: windowWidth - margin * 2,
     text: `Litter`,
-    onChange: (value) => toggleFlag(value, "litter")
+    onChange: (value) => {
+        const allGuests = map.getAllEntities("guest");
+        allGuests.forEach( guest => {
+            context.executeAction("pe_setflag", setFlagExecuteArgs(guest, "litter", value));
+        });
+    }
 };
 
 const chkBoxLost: CheckboxDesc = {
@@ -228,7 +300,12 @@ const chkBoxLost: CheckboxDesc = {
     height: widgetLineHeight,
     width: windowWidth - margin * 2,
     text: `Lost`,
-    onChange: (value) => toggleFlag(value, "lost")
+    onChange: (value) => {
+        const allGuests = map.getAllEntities("guest");
+        allGuests.forEach( guest => {
+            context.executeAction("pe_setflag", setFlagExecuteArgs(guest, "lost", value));
+        });
+    }
 };
 
 const chkBoxHunger: CheckboxDesc = {
@@ -239,7 +316,12 @@ const chkBoxHunger: CheckboxDesc = {
     height: widgetLineHeight,
     width: windowWidth - margin * 2,
     text: `Hunger`,
-    onChange: (value) => toggleFlag(value, "hunger")
+    onChange: (value) => {
+        const allGuests = map.getAllEntities("guest");
+        allGuests.forEach( guest => {
+            context.executeAction("pe_setflag", setFlagExecuteArgs(guest, "hunger", value));
+        });
+    }
 };
 
 const chkBoxHereWeAre: CheckboxDesc = {
@@ -250,7 +332,12 @@ const chkBoxHereWeAre: CheckboxDesc = {
     height: widgetLineHeight,
     width: windowWidth - margin * 2,
     text: `Here we are`,
-    onChange: (value) => toggleFlag(value, "hereWeAre")
+    onChange: (value) => {
+        const allGuests = map.getAllEntities("guest");
+        allGuests.forEach( guest => {
+            context.executeAction("pe_setflag", setFlagExecuteArgs(guest, "hereWeAre", value));
+        });
+    }
 };
 
 const chkBoxToilet: CheckboxDesc = {
@@ -261,7 +348,12 @@ const chkBoxToilet: CheckboxDesc = {
     height: widgetLineHeight,
     width: windowWidth - margin * 2,
     text: `Toilet`,
-    onChange: (value) => toggleFlag(value, "toilet")
+    onChange: (value) => {
+        const allGuests = map.getAllEntities("guest");
+        allGuests.forEach( guest => {
+            context.executeAction("pe_setflag", setFlagExecuteArgs(guest, "toilet", value));
+        });
+    }
 };
 
 const chkBoxCrowded: CheckboxDesc = {
@@ -272,7 +364,12 @@ const chkBoxCrowded: CheckboxDesc = {
     height: widgetLineHeight,
     width: windowWidth - margin * 2,
     text: `Crowded`,
-    onChange: (value) => toggleFlag(value, "crowded")
+    onChange: (value) => {
+        const allGuests = map.getAllEntities("guest");
+        allGuests.forEach( guest => {
+            context.executeAction("pe_setflag", setFlagExecuteArgs(guest, "crowded", value));
+        });
+    }
 };
 
 const chkBoxHappiness: CheckboxDesc = {
@@ -283,7 +380,12 @@ const chkBoxHappiness: CheckboxDesc = {
     height: widgetLineHeight,
     width: windowWidth - margin * 2,
     text: `Happiness`,
-    onChange: (value) => toggleFlag(value, "happiness")
+    onChange: (value) => {
+        const allGuests = map.getAllEntities("guest");
+        allGuests.forEach( guest => {
+            context.executeAction("pe_setflag", setFlagExecuteArgs(guest, "happiness", value));
+        });
+    }
 };
 
 const chkBoxNausea: CheckboxDesc = {
@@ -294,7 +396,12 @@ const chkBoxNausea: CheckboxDesc = {
     height: widgetLineHeight,
     width: windowWidth - margin * 2,
     text: `Nausea`,
-    onChange: (value) => toggleFlag(value, "nausea")
+    onChange: (value) => {
+        const allGuests = map.getAllEntities("guest");
+        allGuests.forEach( guest => {
+            context.executeAction("pe_setflag", setFlagExecuteArgs(guest, "nausea", value));
+        });
+    }
 };
 
 const chkBoxPurple: CheckboxDesc = {
@@ -305,7 +412,12 @@ const chkBoxPurple: CheckboxDesc = {
     height: widgetLineHeight,
     width: windowWidth - margin * 2,
     text: `Purple`,
-    onChange: (value) => toggleFlag(value, "purple")
+    onChange: (value) => {
+        const allGuests = map.getAllEntities("guest");
+        allGuests.forEach( guest => {
+            context.executeAction("pe_setflag", setFlagExecuteArgs(guest, "purple", value));
+        });
+    }
 };
 
 const chkBoxPizza: CheckboxDesc = {
@@ -316,7 +428,12 @@ const chkBoxPizza: CheckboxDesc = {
     height: widgetLineHeight,
     width: windowWidth - margin * 2,
     text: `Pizza`,
-    onChange: (value) => toggleFlag(value, "pizza")
+    onChange: (value) => {
+        const allGuests = map.getAllEntities("guest");
+        allGuests.forEach( guest => {
+            context.executeAction("pe_setflag", setFlagExecuteArgs(guest, "pizza", value));
+        });
+    }
 };
 
 const chkBoxExplode: CheckboxDesc = {
@@ -327,7 +444,12 @@ const chkBoxExplode: CheckboxDesc = {
     height: widgetLineHeight,
     width: windowWidth - margin * 2,
     text: `Explode`,
-    onChange: (value) => toggleFlag(value, "explode")
+    onChange: (value) => {
+        const allGuests = map.getAllEntities("guest");
+        allGuests.forEach( guest => {
+            context.executeAction("pe_setflag", setFlagExecuteArgs(guest, "explode", value));
+        });
+    }
 };
 
 const chkBoxContagious: CheckboxDesc = {
@@ -338,7 +460,12 @@ const chkBoxContagious: CheckboxDesc = {
     height: widgetLineHeight,
     width: windowWidth - margin * 2,
     text: `Contagious`,
-    onChange: (value) => toggleFlag(value, "contagious")
+    onChange: (value) => {
+        const allGuests = map.getAllEntities("guest");
+        allGuests.forEach( guest => {
+            context.executeAction("pe_setflag", setFlagExecuteArgs(guest, "contagious", value));
+        });
+    }
 };
 
 const chkBoxJoy: CheckboxDesc = {
@@ -349,7 +476,12 @@ const chkBoxJoy: CheckboxDesc = {
     height: widgetLineHeight,
     width: windowWidth - margin * 2,
     text: `Joy`,
-    onChange: (value) => toggleFlag(value, "joy")
+    onChange: (value) => {
+        const allGuests = map.getAllEntities("guest");
+        allGuests.forEach( guest => {
+            context.executeAction("pe_setflag", setFlagExecuteArgs(guest, "joy", value));
+        });
+    }
 };
 
 const chkBoxAngry: CheckboxDesc = {
@@ -360,7 +492,12 @@ const chkBoxAngry: CheckboxDesc = {
     height: widgetLineHeight,
     width: windowWidth - margin * 2,
     text: `Angry`,
-    onChange: (value) => toggleFlag(value, "angry")
+    onChange: (value) => {
+        const allGuests = map.getAllEntities("guest");
+        allGuests.forEach( guest => {
+            context.executeAction("pe_setflag", setFlagExecuteArgs(guest, "angry", value));
+        });
+    }
 };
 
 const chkBoxIceCream: CheckboxDesc = {
@@ -371,7 +508,12 @@ const chkBoxIceCream: CheckboxDesc = {
     height: widgetLineHeight,
     width: windowWidth - margin * 2,
     text: `Ice cream`,
-    onChange: (value) => toggleFlag(value, "iceCream")
+    onChange: (value) => {
+        const allGuests = map.getAllEntities("guest");
+        allGuests.forEach( guest => {
+            context.executeAction("pe_setflag", setFlagExecuteArgs(guest, "iceCream", value));
+        });
+    }
 };
 
 export const AllGuestWidgets: WidgetBaseDesc[] = [
@@ -414,41 +556,10 @@ export const AllGuestWidgets: WidgetBaseDesc[] = [
 function drawImage(g: GraphicsContext, image: number, colour: number): void
 {
     const img = g.getImage(image);
-        if (img) {
-            g.paletteId = colour;
-            g.image(img.id, 0, 0);
-        }
+    if (img) {
+        g.paletteId = colour;
+        g.image(img.id, 0, 0);
     }
-
-function changeColour(colour: number, attribute: keyof Guest): void
-{
-    if (attribute === "tshirtColour" || attribute === "trousersColour" || attribute === "hatColour" || attribute === "balloonColour" || attribute === "umbrellaColour") {
-        const allGuests = map.getAllEntities("guest");
-        allGuests.forEach(guest => {
-            guest[attribute] = colour;
-            switch (attribute)
-            {
-                case "tshirtColour":
-                    return tshirtColour = colour;
-                case "trousersColour":
-                    return trousersColour = colour;
-                case "hatColour":
-                    return hatColour = colour;
-                case "balloonColour":
-                    return balloonColour = colour;
-                case "umbrellaColour":
-                    return umbrellaColour = colour;
-            }
-        });
-    }
-}
-
-function toggleFlag(value: boolean, flag: PeepFlags): void
-{
-    const allGuests = map.getAllEntities("guest");
-    allGuests.forEach( guest => {
-        guest.setFlag(flag, value);
-    });
 }
 
 export function resetColours(): void

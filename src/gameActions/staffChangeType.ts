@@ -1,14 +1,15 @@
+import { StaffTypeSet } from "../../lib/interfaces";
 import { staffType } from "../enums/staffTypes";
-import { returnSuccess } from "./base";
 
-export function changeStaffTypeQuery(args: object): GameActionResult
+export function changeStaffTypeQuery(args: StaffTypeSet): GameActionResult
 {
     args;
-    return returnSuccess();
+    return {};
 }
 
-export function changeStaffTypeExecute(args: object): GameActionResult
+export function changeStaffTypeExecute(args: StaffTypeSet): GameActionResult
 {
+    if (args.staffId === null) {return {};}
     const entity = map.getEntity(args.staffId);
     const staff: Staff = <Staff>entity;
     const staffType = args.staffType;
@@ -18,10 +19,10 @@ export function changeStaffTypeExecute(args: object): GameActionResult
 
 function setStaffType(staff: Staff, number: number): GameActionResult {
 	staff.staffType = staffType[number];
-    return returnSuccess();
+    return {};
 }
 
-export function changeStaffTypeExecuteArgs(staff: Staff, staffType: number): object
+export function changeStaffTypeExecuteArgs(staff: Staff, staffType: number): StaffTypeSet
 {
     return { "staffId": staff.id, "staffType": staffType};
 }

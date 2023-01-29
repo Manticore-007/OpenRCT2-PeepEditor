@@ -1,14 +1,15 @@
+import { StaffEnergy } from "../../lib/interfaces";
 import { multiplier } from "../helpers/windowProperties";
-import { returnSuccess } from "./base";
 
-export function changeStaffEnergyQuery(args: object): GameActionResult
+export function changeStaffEnergyQuery(args: StaffEnergy): GameActionResult
 {
     args;
-    return returnSuccess();
+    return {};
 }
 
-export function changeStaffEnergyExecute(args: object): GameActionResult
+export function changeStaffEnergyExecute(args: StaffEnergy): GameActionResult
 {
+    if (args.staffId === null) {return {};}
     const entity = map.getEntity(args.staffId);
     const staff: Staff = <Staff>entity;
     const operator: number = args.operator;    
@@ -18,15 +19,15 @@ export function changeStaffEnergyExecute(args: object): GameActionResult
 
 function changeSpinner(staff: Staff, operator: number): GameActionResult
 {
-    if (staff.energy ===0) {return returnSuccess();}
+    if (staff.energy ===0) {return {};}
     else if ((staff.energy >= 2 && operator === -1) || (staff.energy <= 254 && operator === +1) || staff.energy === 0)
     {
-    staff.energy += operator * multiplier;
+        staff.energy += operator * multiplier;
     }
-    return returnSuccess();
+    return {};
 }
 
-export function changeStaffEnergyExecuteArgs(staff: Staff, operator: number): object
+export function changeStaffEnergyExecuteArgs(staff: Staff, operator: number): StaffEnergy
 {
     return { "staffId": staff.id, "operator": operator };
 }

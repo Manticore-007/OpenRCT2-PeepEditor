@@ -8,6 +8,8 @@ import { disableUpdateViewport, resetViewport } from "../helpers/resetViewport";
 import { activateAllGuests } from "../helpers/allGuestsSelection";
 import { openSideWindow, sideWindow } from "./sideWindow";
 import { selectedPeep } from "../helpers/selectedPeep";
+import * as button from "../helpers/buttonControl";
+import { getEnergy } from "../helpers/staffGetters";
 
 const groupboxName: GroupBoxDesc = {
 	type: "groupbox",
@@ -62,7 +64,16 @@ const btnFreeze: ButtonDesc = {
 	border: false,
 	isDisabled: true,
 	tooltip: "(Un)freeze staff member",
-	onClick: () => context.executeAction("pe_freezestaff", freezeStaffExecuteArgs(<Staff>selectedPeep)),
+	onClick: () => {
+		if (selectedPeep.energy !== 0) {
+			button.pressed("button-freeze");
+		}
+		else {
+			button.unpressed("button-freeze");
+		}
+		getEnergy(<Staff>selectedPeep);
+		context.executeAction("pe_freezestaff", freezeStaffExecuteArgs(<Staff>selectedPeep));
+}
 };
 
 const btnName: ButtonDesc = {
@@ -76,7 +87,18 @@ const btnName: ButtonDesc = {
 	border: false,
 	isDisabled: true,
 	tooltip: "Rename peep with longer name",
-	onClick: () => context.executeAction("pe_peepname", setPeepNameExecuteArgs(selectedPeep)),
+	onClick: () => {
+		const window = ui.getWindow(windowId);
+		ui.showTextInput({
+			title: peepTypeTitle(selectedPeep),
+			description: peepTypeDescription(selectedPeep),
+			initialValue: `${selectedPeep.name}`,
+			callback: text => {
+				context.executeAction("pe_peepname", setPeepNameExecuteArgs(selectedPeep, text));
+					window.findWidget<LabelWidget>("label-peep-name").text = `{WHITE}${text}`;
+			}
+		});
+	}
 };
 
 const btnLocate: ButtonDesc = {
@@ -200,4 +222,16 @@ export class PeepEditorWindow {
 			resetViewport();
 		}
 	}
+}
+
+function peepTypeTitle(peep: Staff | Guest): string
+{
+	if (peep.peepType === "staff") { return "Staff member name"; }
+	else return "Guest's name";
+}
+
+function peepTypeDescription(peep: Staff | Guest): string
+{
+	if (peep.peepType === "staff") { return "Enter new name for this member of staff:"; }
+	else { return "Enter name for this guest:"; }
 }

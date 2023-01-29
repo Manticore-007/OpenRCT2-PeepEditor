@@ -1,15 +1,16 @@
-import { returnSuccess } from "./base";
+import { GuestColours } from "../../lib/interfaces";
 
 export type GuestColoursOptions = "tshirtColour" | "trousersColour" | "balloonColour" | "umbrellaColour" | "hatColour";
 
-export function setGuestColourQuery(args: object): GameActionResult
+export function setGuestColourQuery(args: GuestColours): GameActionResult
 {
     args;
-    return returnSuccess();
+    return {};
 }
 
-export function setGuestColourExecute(args: object): GameActionResult
+export function setGuestColourExecute(args: GuestColours): GameActionResult
 {
+    if (args.guestId === null) {return {};}
     const entity = map.getEntity(args.guestId);
     const guest: Guest = <Guest>entity;
     const property: GuestColoursOptions = args.property;
@@ -21,10 +22,10 @@ export function setGuestColourExecute(args: object): GameActionResult
 function setGuestColour(guest: Guest, property: GuestColoursOptions, colour: number): GameActionResult
 {
     guest[property] = colour;
-    return returnSuccess();
+    return {};
 }
 
-export function setGuestColourExecuteArgs(guest: Guest, property: keyof Guest, colour: number): object
+export function setGuestColourExecuteArgs(guest: Guest, property: "tshirtColour" | "trousersColour" | "hatColour" | "balloonColour" | "umbrellaColour", colour: number): GuestColours
 {
     return {"guestId": guest.id, "property": property, "colour": colour};
 }

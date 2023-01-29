@@ -1,13 +1,14 @@
-import { returnSuccess } from "./base";
+import { StaffCostumeSet } from "../../lib/interfaces";
 
-export function changeStaffCostumeQuery(args: object): GameActionResult
+export function changeStaffCostumeQuery(args: StaffCostumeSet): GameActionResult
 {
     args;
-    return returnSuccess();
+    return {};
 }
 
-export function changeStaffCostumeExecute(args: object): GameActionResult
+export function changeStaffCostumeExecute(args: StaffCostumeSet): GameActionResult
 {
+    if (args.staffId === null) {return {};}
     const entity = map.getEntity(args.staffId);
     const staff: Staff = <Staff>entity;
     const costume = args.costume;
@@ -21,10 +22,10 @@ function setStaffCostume(staff: Staff, costume: number): GameActionResult {
 		staff.costume = costume;
 	}
 	else {staff.costume = costume;}
-    return returnSuccess();
+    return {};
 }
 
-export function changeStaffCostumeExecuteArgs(staff: Staff, costume: number): object
+export function changeStaffCostumeExecuteArgs(staff: Staff, costume: number): StaffCostumeSet
 {
     return { "staffId": staff.id, "costume": costume};
 }
