@@ -59,7 +59,7 @@ This window looks the same when the "all guests" button is pressed. The results 
 
 ### Multiplayer
 
-From version 23.1.1 on, the plugin is supported in multiplayer (on develop version, release version is not supported yet). To use it in a mulitplayer server you follow the [installation topic](https://github.com/Manticore-007/OpenRCT2-PeepEditor/main/README.md#installation) below, but on the server side. When a client is connected to the server it will automatically download this plugin. The player needs permission to modify guests and staff, else the plugin will generate an error
+From version 23.1.1 on, the plugin is supported in multiplayer (on develop version, release version is not supported yet). To use it in a mulitplayer server you follow the [installation topic](https://github.com/Manticore-007/OpenRCT2-PeepEditor/blob/main/README.md#installation) below, but on the server side. When a client is connected to the server it will automatically download this plugin. The player needs permission to modify guests and staff, else the plugin will generate an error
 
 ![(Permissions)](https://raw.githubusercontent.com/Manticore-007/OpenRCT2-PeepEditor/main/img/permissions.png)  
 
