@@ -2,6 +2,7 @@
 
 This plugin lets you modify the properties of your park guests and staff members.
 
+
 ### The Main Window:
 
 ![(The main window of Peep Editor)](https://raw.githubusercontent.com/Manticore-007/OpenRCT2-PeepEditor/main/img/main%20window.png)
@@ -26,6 +27,7 @@ Remove the selected guest or staff member.
 ![(Select a peep)](https://raw.githubusercontent.com/Manticore-007/OpenRCT2-PeepEditor/main/img/allguests.png)
 All the guests on the map will be selected, except the ones on rides.
 
+
 ### Staff member properties
 
 <img src= "https://raw.githubusercontent.com/Manticore-007/OpenRCT2-PeepEditor/main/img/staff.png" align="left" />
@@ -42,6 +44,7 @@ Speed: adjusts how fast a staff member is walking, adjustable from 1 to 255.<br>
 The multiplier lets you set increments by 1, 10 or 100 respectively.<br>
 <br clear="left"/>
 
+
 ### Guest properties
 
 <img src= "https://raw.githubusercontent.com/Manticore-007/OpenRCT2-PeepEditor/main/img/guest.png" align="left" />
@@ -53,6 +56,16 @@ By checking the flags you can -for instance- force a guest to leave the park, or
 <br clear="left"/>
 
 This window looks the same when the "all guests" button is pressed. The results are the same, but for ALL guests on the map, except for those on rides.
+
+
+### Multiplayer
+
+From version 23.1.1 on, the plugin is supported in multiplayer (on develop version, release version is not supported yet). To use it in a mulitplayer server you follow the [installation topic](https://github.com/Manticore-007/OpenRCT2-PeepEditor/edit/main/README.md#installation) below, but on the server side. When a client is connected to the server it will automatically download this plugin. The player needs permission to modify guests and staff, else the plugin will generate an error
+
+![(Permissions)](https://raw.githubusercontent.com/Manticore-007/OpenRCT2-PeepEditor/main/img/permissions.png)  
+
+The error message:  
+![(error)](https://raw.githubusercontent.com/Manticore-007/OpenRCT2-PeepEditor/main/img/error.png)
 
 ## Installation
 
