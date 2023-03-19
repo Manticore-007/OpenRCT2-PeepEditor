@@ -166,7 +166,7 @@ const spnYPos: SpinnerDesc = {
         title: "Y coordinate",
         description: "Put in Y coordinate to move staff member to",
         initialValue: selectedPeep.y.toString(),
-        callback: text => {context.executeAction("pe_setstaffcoordinates", setStaffCoordinatesExecuteArgs(<Staff>selectedPeep, "z", text));}
+        callback: text => {context.executeAction("pe_setstaffcoordinates", setStaffCoordinatesExecuteArgs(<Staff>selectedPeep, "y", text));}
     }),
     onIncrement: () => context.executeAction("pe_changestaffcoordinates", changeStaffCoordinatesExecuteArgs(<Staff>selectedPeep, "y", + 1)),
     onDecrement: () => context.executeAction("pe_changestaffcoordinates", changeStaffCoordinatesExecuteArgs(<Staff>selectedPeep, "y", - 1)),
