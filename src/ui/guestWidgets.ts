@@ -478,7 +478,7 @@ function drawImage(g: GraphicsContext, image: number, property?: keyof Guest): v
     }
     else    
     if (img) {
-        g.paletteId = colour["Light orange"];
+        g.paletteId = colour["Pastel Orange"];
         g.image(img.id, 0, 0);
     }
 }

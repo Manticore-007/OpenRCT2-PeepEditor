@@ -31,7 +31,7 @@ export function peepSelect(): void
                         ui.showError("You must select a guest", "or staff member");
                         return;
                     }
-                    setSelectedPeep(<Guest | Staff>entity);
+                    setSelectedPeep(<Guest|Staff>entity);
                     getFreeze(<Staff>selectedPeep);
                     followPeep(selectedPeep);
                     setLabelPeepName();
