@@ -2,6 +2,7 @@ import { colourList } from "../enums/colours";
 import { costume } from "../enums/costumes";
 import { staffTypeLabel } from "../enums/staffTypes";
 import { sideWindow } from "../ui/sideWindow";
+import { selectedStaffCostume, selectedStaffType } from "./selectedPeep";
 import { disableUpdateCoordinates, disableUpdateEnergy, disableUpdateStaffColour, updateCoordinates, updateEnergy, updateStaffColour } from "./updates";
 import { windowId } from "./windowProperties";
 
@@ -26,6 +27,7 @@ export function getColourStaff(staff: Staff): void
 export function getCostume(staff: Staff): void
 {
 	const dropdown = ui.getWindow(sideWindow).findWidget<DropdownWidget>("dropdown-costume");
+	dropdown.selectedIndex = selectedStaffCostume;
 	if (staff.costume > 251) {
 		dropdown.text = costume[staff.costume - 208];
 	}
@@ -36,6 +38,7 @@ export function getStaffType(peep: Staff): void
 {
 	const dropdown = ui.getWindow(sideWindow).findWidget<DropdownWidget>("dropdown-staff-type");
 	dropdown.text = staffTypeLabel[peep.staffType];
+	dropdown.selectedIndex = selectedStaffType;
 }
 
 export function getCoordinates(staff: Staff): void
