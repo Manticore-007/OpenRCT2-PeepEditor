@@ -27,11 +27,22 @@ export function getColourStaff(staff: Staff): void
 export function getCostume(staff: Staff): void
 {
 	const dropdown = ui.getWindow(sideWindow).findWidget<DropdownWidget>("dropdown-costume");
-	dropdown.selectedIndex = selectedStaffCostume;
-	if (staff.costume > 251) {
-		dropdown.text = costume[staff.costume - 208];
+	if (staff.staffType === "entertainer") {
+		dropdown.selectedIndex = selectedStaffCostume;
+		if (staff.costume > 251) {
+			dropdown.text = costume[staff.costume - 208];
+		}
+		else dropdown.text = costume[staff.costume];
 	}
-	else dropdown.text = costume[staff.costume];
+	if (staff.staffType === "mechanic") {
+		dropdown.selectedIndex = costume.Mechanic;
+	}
+	if (staff.staffType === "handyman") {
+		dropdown.selectedIndex = costume.Handyman;
+	}
+	if (staff.staffType === "security") {
+		dropdown.selectedIndex = costume["Security guard"];
+	}
 }
 
 export function getStaffType(peep: Staff): void
