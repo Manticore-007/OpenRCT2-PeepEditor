@@ -14,19 +14,20 @@ export function changeStaffCoordinatesExecute(args: StaffCoordinates): GameActio
     const staff: Staff = <Staff>entity;
     const axis: keyof CoordsXYZ = args.axis;
     const operator: number = args.operator;    
+    const _multiplier: number = args.multiplier;
 
-    return changeSpinner(staff, axis, operator);
+    return changeSpinner(staff, axis, operator, _multiplier);
 }
 
-function changeSpinner(staff: Staff, axis: keyof CoordsXYZ, operator: number): GameActionResult
+function changeSpinner(staff: Staff, axis: keyof CoordsXYZ, operator: number, _multiplier: number): GameActionResult
 {
-	staff[axis] += operator * multiplier;
+	staff[axis] += operator * _multiplier;
     return {};
 }
 
 export function changeStaffCoordinatesExecuteArgs(staff: Staff, axis: keyof CoordsXYZ, operator: number): StaffCoordinates
 {
-    return { "staffId": staff.id, "axis": axis, "operator": operator };
+    return { "staffId": staff.id, "axis": axis, "operator": operator, "multiplier": multiplier };
 }
 
 

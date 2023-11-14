@@ -21,6 +21,7 @@ export interface StaffEnergy {
 
 export interface StaffCoordinates extends StaffEnergy{
     axis: keyof CoordsXYZ;
+    multiplier: number;
 }
 
 export interface SetStaffEnergy {
