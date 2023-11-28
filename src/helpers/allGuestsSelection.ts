@@ -6,7 +6,7 @@ import { windowId } from "./windowProperties";
 export function activateAllGuests(): void
 {
     const mainWindow = ui.getWindow(windowId);
-    const sideWin = ui.getWindow(sideWindow);
+    const sideWin = sideWindow;
 
     if (mainWindow.findWidget<ButtonWidget>("button-picker").isPressed)
     {

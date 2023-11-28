@@ -2,6 +2,7 @@ import { colourList } from "../enums/colours";
 import { costume } from "../enums/costumes";
 import { staffTypeLabel } from "../enums/staffTypes";
 import { sideWindow } from "../ui/sideWindow";
+import { debug } from "./logger";
 import { selectedStaffCostume, selectedStaffType } from "./selectedPeep";
 import { disableUpdateCoordinates, disableUpdateEnergy, disableUpdateStaffColour, updateCoordinates, updateEnergy, updateStaffColour } from "./updates";
 import { windowId } from "./windowProperties";
@@ -19,14 +20,15 @@ export function getFreeze(staff: Staff): void
 
 export function getColourStaff(staff: Staff): void
 {
-	const window = ui.getWindow(sideWindow);
+	const window = sideWindow;
+    debug(window.title);
 	const widget = window.findWidget<ColourPickerWidget>("colourpicker-staff");
 	widget.colour = staff.colour;
 }
 
 export function getCostume(staff: Staff): void
 {
-	const dropdown = ui.getWindow(sideWindow).findWidget<DropdownWidget>("dropdown-costume");
+	const dropdown = sideWindow.findWidget<DropdownWidget>("dropdown-costume");
 	if (staff.staffType === "entertainer") {
 		dropdown.selectedIndex = selectedStaffCostume;
 		if (staff.costume > 251) {
@@ -47,7 +49,7 @@ export function getCostume(staff: Staff): void
 
 export function getStaffType(peep: Staff): void
 {
-	const dropdown = ui.getWindow(sideWindow).findWidget<DropdownWidget>("dropdown-staff-type");
+	const dropdown = sideWindow.findWidget<DropdownWidget>("dropdown-staff-type");
 	dropdown.text = staffTypeLabel[peep.staffType];
 	dropdown.selectedIndex = selectedStaffType;
 }
@@ -55,7 +57,7 @@ export function getStaffType(peep: Staff): void
 export function getCoordinates(staff: Staff): void
 {
 	disableUpdateCoordinates();
-	const window = ui.getWindow(sideWindow);
+	const window = sideWindow;
 	updateCoordinates(context.subscribe("interval.tick", () => {
 		window.findWidget<SpinnerWidget>("spinner-x-position").text = staff.x.toString();
 		window.findWidget<SpinnerWidget>("spinner-y-position").text = staff.y.toString();
@@ -66,7 +68,7 @@ export function getCoordinates(staff: Staff): void
 export function getLblColourStaff(staff: Staff): void
 {
 	disableUpdateStaffColour();
-	const window = ui.getWindow(sideWindow);
+	const window = sideWindow;
 	const widget = window.findWidget<LabelWidget>("textbox-staff-colour");
 	updateStaffColour(context.subscribe("interval.tick", () => {
 		widget.text = `${colourList[staff.colour]}`;
@@ -76,7 +78,7 @@ export function getLblColourStaff(staff: Staff): void
 export function getEnergy(staff: Staff): void
 {
 	disableUpdateEnergy();
-	const window = ui.getWindow(sideWindow);
+	const window = sideWindow;
 	updateEnergy(context.subscribe("interval.tick", () => {
 		window.findWidget<SpinnerWidget>("spinner-energy").text = staff.energy.toString();
 	}));

@@ -1,4 +1,5 @@
 import { costumeList } from "../enums/costumes";
+import { staffAction, staffActionList } from "../enums/staffActions";
 import { staffTypeList } from "../enums/staffTypes";
 import { changeStaffColourExecuteArgs } from "../gameActions/staffChangeColour";
 import { changeStaffCoordinatesExecuteArgs, setStaffCoordinatesExecuteArgs } from "../gameActions/staffChangeCoordinates";
@@ -6,8 +7,10 @@ import { changeStaffCostumeExecuteArgs } from "../gameActions/staffChangeCostume
 import { changeStaffEnergyExecuteArgs } from "../gameActions/staffChangeEnergy";
 import { changeStaffTypeExecuteArgs } from "../gameActions/staffChangeType";
 import { setStaffEnergyExecuteArgs } from "../gameActions/staffSetEnergy";
-import { selectedPeep } from "../helpers/selectedPeep";
+import { selectedPeep, selectedStaff } from "../helpers/selectedPeep";
 import { margin, multiplierList, setMultiplier, toolbarHeight, widgetLineHeight, windowColour } from "../helpers/windowProperties";
+
+let selectedAction: number;
 
 const grpBoxAppearance: GroupBoxDesc = {
     type: "groupbox",
@@ -15,7 +18,7 @@ const grpBoxAppearance: GroupBoxDesc = {
     text: "Appearance",
     x: margin,
     y: toolbarHeight + widgetLineHeight /2,
-    height: widgetLineHeight * 5.25,
+    height: widgetLineHeight * 6,
     width: 200 - margin * 2,
 };
 
@@ -23,7 +26,7 @@ const lblStaffType: LabelDesc = {
     type: "label",
     name: "label-staff-type",
     x: margin + toolbarHeight,
-    y: grpBoxAppearance.y + widgetLineHeight + margin,
+    y: grpBoxAppearance.y + widgetLineHeight,
     height: widgetLineHeight,
     width: grpBoxAppearance.width - margin * 2,
     text: "Type: ",
@@ -102,13 +105,51 @@ const clrPickerStaff: ColourPickerDesc = {
     onChange: (number) => context.executeAction("pe_changestaffcolour", changeStaffColourExecuteArgs(<Staff>selectedPeep, number)),
 };
 
+const lblStaffAction: LabelDesc = {
+    type: "label",
+    name: "label-staff-action",
+    x: margin + toolbarHeight,
+    y: lblStaffColour.y + widgetLineHeight +1,
+    height: widgetLineHeight,
+    width: grpBoxAppearance.width - margin * 2,
+    text: "Action: ",
+    tooltip: "Select an action of the selected staff member",
+};
+
+const dropdownStaffAction: DropdownDesc = {
+    type: "dropdown",
+    name: "dropdown-staff-action",
+    x: margin + 75,
+    y: lblStaffAction.y,
+    height: widgetLineHeight,
+    width: 105,
+    items: staffActionList,
+    selectedIndex: -1,
+    tooltip: "Select an action of the selected staff member",
+    onChange: (number) => {selectedAction = number},
+};
+
+const btnActionStaff: ButtonDesc = {
+    type: "button",
+    name: "button-action-staff",
+    x: 205 - margin - widgetLineHeight *2,
+    y: dropdownStaffAction.y +1,
+    height: 12,
+    width: 12,
+    image: 4001,
+    tooltip: "Apply the selected action of the selected staff member",
+    isVisible: true,
+    border: true,
+    onClick: () => selectedStaff.action = staffAction[selectedAction],
+};
+
 const grpBoxCoordinates: GroupBoxDesc = {
         type: "groupbox",
         name: "groupbox-coordinates",
         text: "Kinematics",
         x: margin,
-        y: grpBoxAppearance.y + grpBoxAppearance.height + margin,
-        height: widgetLineHeight * 6.75,
+        y: grpBoxAppearance.y + grpBoxAppearance.height + widgetLineHeight/2 ,
+        height: widgetLineHeight * 6,
         width: 200 - margin * 2,
     };
 
@@ -116,7 +157,7 @@ const lblXPos: LabelDesc = {
         type: "label",
         name: "label-x-position",
         x: margin + toolbarHeight,
-        y: grpBoxCoordinates.y + widgetLineHeight + margin,
+        y: grpBoxCoordinates.y + widgetLineHeight,
         height: widgetLineHeight,
         width: grpBoxAppearance.width - margin * 2,
         text: "X position: ",
@@ -206,7 +247,7 @@ const lblEnergy: LabelDesc = {
     type: "label",
     name: "label-energy",
     x: margin + toolbarHeight,
-    y: lblZPos.y + widgetLineHeight + widgetLineHeight /2,
+    y: lblZPos.y + widgetLineHeight +1,
     height: widgetLineHeight,
     width: grpBoxAppearance.width - margin * 2,
     text: "Speed: ",
@@ -280,6 +321,9 @@ export const staffWidgets: WidgetBaseDesc[] = [
     dropdownStaffType,
     lblCostume,
     dropdownCostume,
+    lblStaffAction,
+    dropdownStaffAction,
+    btnActionStaff,
     grpBoxCoordinates,
     lblXPos,
     spnXPos,
