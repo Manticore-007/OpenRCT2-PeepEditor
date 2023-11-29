@@ -19,14 +19,13 @@ export function getFreeze(staff: Staff): void
 
 export function getColourStaff(staff: Staff): void
 {
-	const window = ui.getWindow(sideWindow);
-	const widget = window.findWidget<ColourPickerWidget>("colourpicker-staff");
+	const widget = sideWindow.findWidget<ColourPickerWidget>("colourpicker-staff");
 	widget.colour = staff.colour;
 }
 
 export function getCostume(staff: Staff): void
 {
-	const dropdown = ui.getWindow(sideWindow).findWidget<DropdownWidget>("dropdown-costume");
+	const dropdown = sideWindow.findWidget<DropdownWidget>("dropdown-costume");
 	if (staff.staffType === "entertainer") {
 		dropdown.selectedIndex = selectedStaffCostume;
 		if (staff.costume > 251) {
@@ -47,7 +46,7 @@ export function getCostume(staff: Staff): void
 
 export function getStaffType(peep: Staff): void
 {
-	const dropdown = ui.getWindow(sideWindow).findWidget<DropdownWidget>("dropdown-staff-type");
+	const dropdown = sideWindow.findWidget<DropdownWidget>("dropdown-staff-type");
 	dropdown.text = staffTypeLabel[peep.staffType];
 	dropdown.selectedIndex = selectedStaffType;
 }
@@ -55,19 +54,17 @@ export function getStaffType(peep: Staff): void
 export function getCoordinates(staff: Staff): void
 {
 	disableUpdateCoordinates();
-	const window = ui.getWindow(sideWindow);
 	updateCoordinates(context.subscribe("interval.tick", () => {
-		window.findWidget<SpinnerWidget>("spinner-x-position").text = staff.x.toString();
-		window.findWidget<SpinnerWidget>("spinner-y-position").text = staff.y.toString();
-		window.findWidget<SpinnerWidget>("spinner-z-position").text = staff.z.toString();
+		sideWindow.findWidget<SpinnerWidget>("spinner-x-position").text = staff.x.toString();
+		sideWindow.findWidget<SpinnerWidget>("spinner-y-position").text = staff.y.toString();
+		sideWindow.findWidget<SpinnerWidget>("spinner-z-position").text = staff.z.toString();
 	}));
 }
 
 export function getLblColourStaff(staff: Staff): void
 {
 	disableUpdateStaffColour();
-	const window = ui.getWindow(sideWindow);
-	const widget = window.findWidget<LabelWidget>("textbox-staff-colour");
+	const widget = sideWindow.findWidget<LabelWidget>("textbox-staff-colour");
 	updateStaffColour(context.subscribe("interval.tick", () => {
 		widget.text = `${colourList[staff.colour]}`;
 	}));
@@ -76,8 +73,7 @@ export function getLblColourStaff(staff: Staff): void
 export function getEnergy(staff: Staff): void
 {
 	disableUpdateEnergy();
-	const window = ui.getWindow(sideWindow);
 	updateEnergy(context.subscribe("interval.tick", () => {
-		window.findWidget<SpinnerWidget>("spinner-energy").text = staff.energy.toString();
+		sideWindow.findWidget<SpinnerWidget>("spinner-energy").text = staff.energy.toString();
 	}));
 }

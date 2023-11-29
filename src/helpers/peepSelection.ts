@@ -67,10 +67,9 @@ export function setLabelPeepName(): void
 
 function getColourGuest(guest: Guest): void
 {
-	const window = ui.getWindow(sideWindow);
-	window.findWidget<ColourPickerWidget>("colourpicker-tshirt").colour = guest.tshirtColour;
-	window.findWidget<ColourPickerWidget>("colourpicker-trousers").colour = guest.trousersColour;
-	window.findWidget<ColourPickerWidget>("colourpicker-balloon").colour = guest.balloonColour;
-	window.findWidget<ColourPickerWidget>("colourpicker-hat").colour = guest.hatColour;
-	window.findWidget<ColourPickerWidget>("colourpicker-umbrella").colour = guest.umbrellaColour;
+	sideWindow.findWidget<ColourPickerWidget>("colourpicker-tshirt").colour = guest.tshirtColour;
+	sideWindow.findWidget<ColourPickerWidget>("colourpicker-trousers").colour = guest.trousersColour;
+	sideWindow.findWidget<ColourPickerWidget>("colourpicker-balloon").colour = guest.balloonColour;
+	sideWindow.findWidget<ColourPickerWidget>("colourpicker-hat").colour = guest.hatColour;
+	sideWindow.findWidget<ColourPickerWidget>("colourpicker-umbrella").colour = guest.umbrellaColour;
 }

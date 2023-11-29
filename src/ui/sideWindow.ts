@@ -4,20 +4,19 @@ import { disableUpdateCoordinates, disableUpdateEnergy, disableUpdateSideWindowP
 import { windowColour, windowId } from "../helpers/windowProperties";
 import { resetColours } from "./allGuestWidgets";
 
-export const sideWindow = "side-window";
+export let sideWindow: Window;
 
 export function openSideWindow(title: string): void
 {
-	const window = ui.getWindow(sideWindow);
 	const mainWindow = ui.getWindow(windowId);
-	if (window && window.title === title) {
+	if (sideWindow && sideWindow.title === title) {
 		debug(`${title} window is already shown`);
-		window.bringToFront();
+		sideWindow.bringToFront();
 	}
 	else {
-		if (window) {window.close();}
-		ui.openWindow({
-			classification: sideWindow,
+		if (sideWindow) {sideWindow.close();}
+		sideWindow = ui.openWindow({
+			classification: "side-window",
 			title: title,
 			width: 200,
 			height: mainWindow.height,

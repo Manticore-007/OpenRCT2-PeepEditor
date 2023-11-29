@@ -205,17 +205,15 @@ export class PeepEditorWindow {
 						btnAbout
 					],
 				onClose: () => {
-					const _sideWindow = ui.getWindow(sideWindow);
-					if (_sideWindow) { _sideWindow.close(); }
+					if (sideWindow) { sideWindow.close(); }
 					disableUpdateViewport();
 					ui.tool?.cancel();
 				},
 				onUpdate: () => {
 					const window = ui.getWindow(windowId);
-					const _sidewindow = ui.getWindow(sideWindow);
-					if (_sidewindow) {
-							_sidewindow.x = window.x + window.width;
-							_sidewindow.y = window.y;
+					if (sideWindow) {
+						sideWindow.x = window.x + window.width;
+						sideWindow.y = window.y;
 					}
 				}
 			});

@@ -6,7 +6,6 @@ import { windowId } from "./windowProperties";
 export function activateAllGuests(): void
 {
     const mainWindow = ui.getWindow(windowId);
-    const sideWin = ui.getWindow(sideWindow);
 
     if (mainWindow.findWidget<ButtonWidget>("button-picker").isPressed)
     {
@@ -26,7 +25,7 @@ export function activateAllGuests(): void
     {
         btn.disable("button-delete");
         mainWindow.findWidget<LabelWidget>("label-peep-name").text = `{RED} No peep selected`;
-        sideWin.close();
+        sideWindow.close();
     }
     btn.toggle("button-all-guests");
 }

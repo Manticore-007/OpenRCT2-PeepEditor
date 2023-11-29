@@ -52,7 +52,7 @@ export function removePeep(peep: Staff | Guest): void
 					isDisabled: false,
 					onClick: () => {
 						ui.getWindow(removePeepWindow).close();
-						ui.getWindow(sideWindow).close();
+						sideWindow.close();
 						ui.getWindow(windowId).findWidget<LabelWidget>("label-peep-name").text = `{RED} No peep selected`;
 						resetViewport();
 						setLabelPeepName();
