@@ -1,10 +1,6 @@
 import { isUiAvailable } from "./helpers/environment";
 import { debug } from "./helpers/logger";
-import { PeepEditorWindow } from "./ui/mainWindow";
-import { initCustomSprites } from "./helpers/customImages";
-import { initActions } from "./gameActions/initActions";
-
-const window = new PeepEditorWindow();
+import { windowPeepEditor } from "./ui/mainWindow";
 
 /**
  * Entry point of the plugin.
@@ -17,9 +13,5 @@ export function main(): void
 	{
 		return;
 	}
-
-	initActions();
-	initCustomSprites();
-
-	ui.registerMenuItem("Peep Editor", () => window.open());
+	ui.registerMenuItem("Peep Editor FlexUI", () => windowPeepEditor.open());
 }

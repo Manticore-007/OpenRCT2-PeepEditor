@@ -2,8 +2,8 @@
     "name": "openrct2-peep-editor",
     "author": "Manticore-007",
     "license": "MIT",
-    "version": "23.11.29",
-    "description": "", 
+    "version": "24.14.28",
+    "description": "",
     "main": "app.js",
     "scripts": {
         "start": "npm run watch",
@@ -21,6 +21,7 @@
         "url": "https://github.com/Manticore-007/OpenRCT2-PeepEditor/issues"
     },
     "devDependencies": {
+        "@rollup/plugin-node-resolve": "^15.2.3",
         "@rollup/plugin-replace": "^5.0.2",
         "@rollup/plugin-typescript": "^8.2.5",
         "@typescript-eslint/eslint-plugin": "5.4",
@@ -36,5 +37,8 @@
     },
     "dependencies": {
         "openrct2-flexui": "^0.1.0-prerelease.8"
+    },
+    "overrides": {
+        "semver": "7.5.3"
     }
 }

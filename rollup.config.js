@@ -1,3 +1,4 @@
+import resolve from "@rollup/plugin-node-resolve";
 import replace from "@rollup/plugin-replace";
 import typescript from "@rollup/plugin-typescript";
 import getPath from "platform-folders";
@@ -24,6 +25,7 @@ const config = {
 		format: "iife",
 	},
 	plugins: [
+		resolve(),
 		replace({
 			include: "./src/helpers/environment.ts",
 			preventAssignment: true,
