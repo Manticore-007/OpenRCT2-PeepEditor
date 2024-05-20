@@ -1,235 +1,383 @@
-import { debug } from "../helpers/logger";
-import { windowId, widgetLineHeight, windowWidth, windowColour, margin, btnSize, toolbarHeight } from "../helpers/windowProperties";
-import { setPeepNameExecuteArgs } from "../gameActions/peepSetName";
-import { freezeStaffExecuteArgs } from "../gameActions/staffFreeze";
-import { removePeep } from "../gameActions/peepRemove";
-import { peepSelect } from "../helpers/peepSelection";
-import { disableUpdateViewport, resetViewport } from "../helpers/resetViewport";
-import { activateAllGuests } from "../helpers/allGuestsSelection";
-import { openSideWindow, sideWindow } from "./sideWindow";
-import { selectedPeep } from "../helpers/selectedPeep";
-import * as button from "../helpers/buttonControl";
-import { getEnergy } from "../helpers/staffGetters";
 
-const groupboxName: GroupBoxDesc = {
-	type: "groupbox",
-	name: "groupbox-name",
-	text: "Name",
-	x: margin,
-	y: toolbarHeight + widgetLineHeight / 2,
-	height: widgetLineHeight * 2.5,
-	width: windowWidth - margin * 2,
-};
-const labelPeepName: LabelDesc = {
-	type: "label",
-	name: "label-peep-name",
-	x: groupboxName.x + margin,
-	y: groupboxName.y + groupboxName.height / 2.5,
-	height: widgetLineHeight,
-	width: groupboxName.width - margin * 2 - widgetLineHeight,
-	text: `{RED} No peep selected`,
-	textAlign: "centred",
-};
+/// <reference path="../../lib/openrct2.d.ts" />
 
-const viewportPeep: ViewportDesc = {
-	type: "viewport",
-	name: "viewport-peep",
-	x: margin,
-	y: groupboxName.y + groupboxName.height + margin,
-	height: btnSize * 6,
-	width: windowWidth - btnSize - margin * 2,
-};
+import { button, horizontal, label, tab, tabwindow, vertical, viewport, toggle, twoway, compute, Colour, window, groupbox, spinner, dropdown } from "openrct2-flexui";
+import { togglePeepPicker } from "../services/peepPicker";
+import { peepViewModel } from "../viewmodel/peepViewModel";
+import { locate } from "../services/peepLocator";
 
-const btnPicker: ButtonDesc = {
-	type: "button",
-	name: "button-picker",
-	x: viewportPeep.x +viewportPeep.width,
-	y: viewportPeep.y,
-	height: btnSize,
-	width: btnSize,
-	image: context.getIcon("eyedropper"),
-	isPressed: false,
-	tooltip: "Select a peep to modify",
-	onClick: () => peepSelect(),
-};
+const model = new peepViewModel;
 
-const btnFreeze: ButtonDesc = {
-	type: "button",
-	name: "button-freeze",
-	x: btnPicker.x,
-	y: btnPicker.y + btnPicker.height,
-	height: btnSize,
-	width: btnSize,
-	image: 5182, //red-green flag
-	border: false,
-	isDisabled: true,
-	tooltip: "(Un)freeze staff member",
-	onClick: () => {
-		if (selectedPeep.energy !== 0) {
-			button.pressed("button-freeze");
+const pointingFingerIcon: ImageAnimation = { frameBase: 5318, frameCount: 8, frameDuration: 2, };
+const paperIcon: ImageAnimation = { frameBase: 5277, frameCount: 7, frameDuration: 4, };
+const infoIcon: ImageAnimation = { frameBase: 5367, frameCount: 8, frameDuration: 4, };
+const gearIcon: ImageAnimation = { frameBase: 5201, frameCount: 4, frameDuration: 4, };
+const paintIcon: ImageAnimation = { frameBase: 5221, frameCount: 8, frameDuration: 4, };
+const mapIcon: ImageAnimation = { frameBase: 5192, frameCount: 1, frameDuration: 4, offset: { x: 4, y: 1 }};
+const lensIcon: ImageAnimation = {frameBase: 29401, frameCount: 1, frameDuration: 4, offset: {x: 4, y: 1}};
+
+const deleteIcon: number = 5165;
+const locateIcon: number = 5167;
+const nameIcon: number = 5168;
+const flagsIcon: number = 5182;
+const allGuestsIcon: number = 5193;
+const itemsIcon: number = 5326;
+
+const staticControls = [
+	toggle({
+		width: 24,
+		height: 24,
+		image: "eyedropper",
+		isPressed: twoway(model._isPicking),
+		padding: {top: 1},
+		onChange: pressed => togglePeepPicker(pressed, p => {model._select(p); model._tabImage(p)}, () => model._isPicking.set(false))
+	}),
+	toggle({
+		height: 24,
+		width: 24,
+		image: flagsIcon,
+		disabled: model._isPeepSelected,
+		isPressed: model._isFrozen,
+		padding: {top: 1},
+		onChange: pressed => {
+			model._freeze(pressed);
 		}
-		else {
-			button.unpressed("button-freeze");
+	}),
+	button({
+		height: 24,
+		width: 24,
+		image: nameIcon,
+		disabled: model._isPeepSelected,
+		padding: {top: 1},
+		onClick: () => {
+			const peep = model._selectedPeep.get();
+			if (peep !== undefined)
+				ui.showTextInput({
+					title: textInputTitle(peep),
+					description: peepTypeQuery(),
+					initialValue: `${peep.name}`,
+					callback: text => {
+						{text}
+					},
+				})
 		}
-		getEnergy(<Staff>selectedPeep);
-		context.executeAction("pe_freezestaff", freezeStaffExecuteArgs(<Staff>selectedPeep));
-}
-};
+	}),
+	button({
+		height: 24,
+		width: 24,
+		image: locateIcon,
+		disabled: model._isPeepSelected,
+		padding: {top: 1},
+		onClick: () => {
+			const peep = model._selectedPeep.get();
+			if (peep) locate(peep);
+		}
+	}),
+	button({
+		height: 24,
+		width: 24,
+		image: deleteIcon,
+		disabled: model._isPeepSelected,
+		padding: {top: 1},
+		onClick: () => {
+			const peep = model._selectedPeep.get();
+			if (peep !== undefined)
+				openWindowRemovePeep(peep);
+		}
+	}),
+	button({
+		height: 24,
+		width: 24,
+		image: allGuestsIcon,
+		padding: {top: 1},
+	})
+]
 
-const btnName: ButtonDesc = {
-	type: "button",
-	name: "button-peep-name",
-	x: btnPicker.x,
-	y: btnFreeze.y + btnFreeze.height,
-	height: btnSize,
-	width: btnSize,
-	image: 5168, //name tag
-	border: false,
-	isDisabled: true,
-	tooltip: "Rename peep with longer name",
-	onClick: () => {
-		const window = ui.getWindow(windowId);
-		ui.showTextInput({
-			title: peepTypeTitle(selectedPeep),
-			description: peepTypeDescription(selectedPeep),
-			initialValue: `${selectedPeep.name}`,
-			callback: text => {
-				context.executeAction("pe_peepname", setPeepNameExecuteArgs(selectedPeep, text));
-					window.findWidget<LabelWidget>("label-peep-name").text = `{WHITE}${text}`;
-			}
-		});
+export const windowPeepEditor = tabwindow({
+	title: "Peep Editor FlexUI",
+	width: 260,
+	height: 230,
+	colours: [Colour.DarkYellow, Colour.DarkYellow, Colour.DarkYellow],
+	padding: 5,
+	onOpen: () => model._open(),
+	onClose: () => model._close(),
+	tabs: [
+		tab({ //main tab
+			image: lensIcon,
+			width: { value: 260, max: 10_000 },
+			height: { value: 230, max: 10_000 },
+			content: [
+				horizontal([
+					viewport({
+						padding: 0,
+						target: compute(model._selectedPeep, p => (p) ? p.id : null)
+					}),
+					vertical({
+						content: staticControls
+					})
+				]),
+				label({
+					text: "{BLACK}Manticore-007 © 2022-2024",
+					padding: [-5, 0, 10, 0],
+					alignment: "centred",
+					height: 0
+				})
+			]
+		}),
+		tab({ //location
+			image: mapIcon,
+			content: [
+				horizontal([
+					groupbox({
+						text: "{WHITE}Kinematics",
+						spacing: 2,
+						content: [
+							horizontal([
+								label({
+									text: "X position:",
+									width: "40%",
+									padding: {top: 10, bottom: 2, left: 10},
+								}),
+								spinner({
+									padding: {top: 10, right: 10,  bottom: 2},
+								})
+							]),
+							horizontal([
+								label({
+									text: "Y position:",
+									width: "40%",
+									padding: {top: 2, bottom: 2, left: 10},
+								}),
+								spinner({
+									padding: {top: 2, right: 10,  bottom: 2},
+								})
+							]),
+							horizontal([
+								label({
+									text: "Z position:",
+									width: "40%",
+									padding: {top: 2, bottom: 2, left: 10},
+								}),
+								spinner({
+									padding: {top: 2, right: 10,  bottom: 2},
+								})
+							]),
+							horizontal([
+								label({
+									text: "Speed:",
+									width: "40%",
+									padding: {top: 20, bottom: 10, left: 10},
+								}),
+								spinner({
+									padding: {top: 20, right: 10, bottom: 10},
+								})
+							]),
+						]
+					}),
+					vertical({
+						content: staticControls
+					})
+				]),
+				horizontal([
+					label({
+						text: "Mulitplier:",
+						width: "40%",
+						padding: ["1w", 10, 7, 10],
+					}),
+					dropdown({
+						padding: ["1w", 45, 7, 0],
+						items: ["1x", "10x", "100x"],
+					})
+				]),
+			]
+		}),
+		tab({ //appearance
+			image: paintIcon,
+			content: [
+				horizontal([
+					groupbox({
+					text: "{WHITE}Appearance",
+					spacing: 2,
+					content: [
+						horizontal([
+							label({
+								text: "Staff type:",
+								width: "40%",
+								padding: {top: 10, bottom: 2, left: 10},
+							}),
+							spinner({
+								padding: {top: 10, right: 10,  bottom: 2},
+							})
+						]),
+						horizontal([
+							label({
+								text: "Costume:",
+								width: "40%",
+								padding: {top: 2, bottom: 2, left: 10},
+							}),
+							spinner({
+								padding: {top: 2, right: 10,  bottom: 2},
+							})
+						]),
+						horizontal([
+							label({
+								text: "Z position:",
+								width: "40%",
+								padding: {top: 2, bottom: 2, left: 10},
+							}),
+							spinner({
+								padding: {top: 2, right: 10,  bottom: 2},
+							})
+						]),
+					]
+				}),
+				vertical({
+					content: staticControls
+				})
+			])
+			]
+		}),
+		tab({
+			image: pointingFingerIcon,
+			content: [
+				label({
+					text: "{WHITE}Options / Flags",
+					alignment: "centred",
+					padding: [3, 0]
+				})
+			]
+		}),
+		tab({
+			image: itemsIcon,
+			content: [
+				label({
+					text: "{WHITE}Items",
+					alignment: "centred",
+					padding: [3, 0]
+				})
+			]
+		}),
+		tab({
+			image: paperIcon,
+			content: [
+				label({
+					text: "{WHITE}Statistics",
+					alignment: "centred",
+					padding: [3, 0]
+				})
+			]
+		}),
+		tab({
+			image: gearIcon,
+			content: [
+				label({
+					text: "{WHITE}Debug Stuff",
+					alignment: "centred",
+					padding: [3, 0]
+				})
+			]
+		}),
+		tab({
+			image: infoIcon,
+			content: [
+				label({
+					text: "Peep Editor, a plugin for OpenRCT2",
+					alignment: "centred",
+					padding: [4, 0, 8, 0]
+				}),
+				horizontal([
+					label({
+						text: "Version:\n\nAuthor:\n\nUI:\n\nSpecial\nThanks:",
+						width: "25%"
+					}),
+					label({
+						text: `{WHITE}24.4.28\n\n{WHITE}Manticore-007\n\n{WHITE}FlexUI by Basssiiie\n\n{WHITE}Basssiiie, Gymnasiast, ItsSmitty\nSpacek531, AaronVanGeffen\nSadret and Enox`,
+					}),
+				]),
+				label({
+					text: "https://github.com/Manticore-007\n/OpenRCT2-PeepEditor",
+					padding: ["95%", 0, 0, 0],
+					alignment: "centred"
+				})
+			]
+		}),
+	]
+});
+
+function peepTypeQuery(): string {
+	const peep = model._selectedPeep.get();
+	if (peep !== undefined && peep.type === "guest") {
+		return "Enter name for this guest:"
 	}
-};
+	else if (peep !== undefined && peep.type === "staff") {
+		return "Enter name for this member of staff:"
+	}
+	else return "";
+}
 
-const btnLocate: ButtonDesc = {
-	type: "button",
-	name: "button-locate",
-	x: btnPicker.x,
-	y: btnName.y + btnName.height,
-	height: btnSize,
-	width: btnSize,
-	image: 5167, //locate
-	border: false,
-	isDisabled: true,
-	tooltip: "Go to selected peep",
-	onClick: () => ui.mainViewport.scrollTo(selectedPeep),
-};
-
-const btnDelete: ButtonDesc = {
-	type: "button",
-	name: "button-delete",
-	x: btnPicker.x,
-	y: btnLocate.y + btnLocate.height,
-	height: btnSize,
-	width: btnSize,
-	image: 5165, //trashcan
-	border: false,
-	isDisabled: true,
-	tooltip: "Remove selected peep(s)",
-	onClick: () => removePeep(selectedPeep),
-};
-
-const btnAllGuests: ButtonDesc = {
-	type: "button",
-	name: "button-all-guests",
-	x: btnPicker.x,
-	y: btnDelete.y + btnDelete.height,
-	height: btnSize,
-	width: btnSize,
-	image: 5193, //group of guests
-	border: false,
-	isDisabled: false,
-	tooltip: "Select all guests",
-	onClick: () => activateAllGuests()
-};
-
-const labelAuthor: LabelDesc = {
-	type: "label",
-	name: "label-author",
-	x: margin,
-	y: viewportPeep.height +viewportPeep.y + margin / 2,
-	height: widgetLineHeight,
-	width: windowWidth - margin * 2,
-	isDisabled: true,
-	text: "Manticore-007 © 2022-2023",
-	textAlign: "centred",
-};
-
-const btnAbout: ButtonDesc = {
-	type: "button",
-	name: "button-about",
-	x: margin + 1,
-	y: labelAuthor.y,
-	height: 10,
-	width: 10,
-	image: 5129, //small info
-	border: false,
-	isDisabled: false,
-	onClick: () => openSideWindow("About"),
-};
-
-export class PeepEditorWindow {
-
-	/**
-	 * Opens the window for the Peep Editor.
-	 */
-
-	open(): void {
-		const window = ui.getWindow(windowId);
-		const windowHeight = btnAbout.y + widgetLineHeight;
-		if (window) {
-			debug("The Peep Editor window is already shown.");
-			window.bringToFront();
-		}
-		else {
-			ui.openWindow({
-				classification: windowId,
-				title: "Peep Editor",
-				x: ui.width / 8 - windowWidth / 8,
-				y: ui.height / 8 - windowHeight / 8,
-				width: windowWidth,
-				height: windowHeight,
-				colours: [windowColour, windowColour],
-				widgets:
-					[
-						groupboxName,
-						labelPeepName,
-						viewportPeep,
-						btnPicker,
-						btnFreeze,
-						btnName,
-						btnLocate,
-						btnDelete,
-						btnAllGuests,
-						labelAuthor,
-						btnAbout
-					],
-				onClose: () => {
-					if (sideWindow) { sideWindow.close(); }
-					disableUpdateViewport();
-					ui.tool?.cancel();
-				},
-				onUpdate: () => {
-					const window = ui.getWindow(windowId);
-					if (sideWindow) {
-						sideWindow.x = window.x + window.width;
-						sideWindow.y = window.y;
+export function openWindowRemovePeep(peep: Staff | Guest): void {
+	const removePeepWindow = window({
+		onClose: () => {
+			ui.tool?.cancel();
+		},
+		title: "Remove peep",
+		width: 200,
+		height: 100,
+		position: { x: ui.width / 2 - 100, y: ui.height / 2 - 50 },
+		colours: [Colour.BordeauxRed, Colour.BordeauxRed],
+		content: [
+			label({
+				width: 200,
+				alignment: "centred",
+				text: textRemovePeep(peep),
+				padding: [25, 0, 17, 0]
+			}),
+			horizontal([
+				button({
+					border: true,
+					width: 85,
+					height: 14,
+					text: "Yes",
+					padding: [0, 4],
+					onClick: () => {
+						if (peep !== undefined)
+							{}
+						removePeepWindow.close();
+						model._selectedPeep.set(undefined);
 					}
-				}
-			});
-			resetViewport();
-		}
+				}),
+				button({
+					border: true,
+					width: 85,
+					height: 14,
+					text: "Cancel",
+					padding: [0, 4],
+					onClick: () => {
+						removePeepWindow.close();
+					}
+				}),
+			])
+		]
+	});
+	removePeepWindow.open();
+}
+
+function textRemovePeep(peep: Guest | Staff): string {
+	if (peep.type === "guest") {
+		return `{WHITE}Are you sure you want to remove\n${peep.name}?`;
 	}
+	else if (peep.type === "staff") {
+		return `{WHITE}Are you sure you want to sack\n${peep.name}?`;
+	}
+	else return "";
 }
 
-function peepTypeTitle(peep: Staff | Guest): string
-{
-	if (peep.peepType === "staff") { return "Staff member name"; }
-	else return "Guest's name";
-}
-
-function peepTypeDescription(peep: Staff | Guest): string
-{
-	if (peep.peepType === "staff") { return "Enter new name for this member of staff:"; }
-	else { return "Enter name for this guest:"; }
+function textInputTitle(peep: Guest | Staff): string {
+	if (peep.type === "guest") {
+		return `{WHITE}Guest's name`;
+	}
+	else if (peep.type === "staff") {
+		return `{WHITE}Staff member name`;
+	}
+	else return "";
 }
