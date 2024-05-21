@@ -1,3 +1,4 @@
+import { initActions } from "./actions/initActions";
 import { isUiAvailable } from "./helpers/environment";
 import { debug } from "./helpers/logger";
 import { windowPeepEditor } from "./ui/mainWindow";
@@ -13,5 +14,6 @@ export function main(): void
 	{
 		return;
 	}
+	initActions();
 	ui.registerMenuItem("Peep Editor FlexUI", () => windowPeepEditor.open());
 }
