@@ -1,6 +1,6 @@
 import { Colour, compute, store } from "openrct2-flexui";
 
-const windowTitle = "Peep Editor FlexUI";
+const windowTitle = "Peep Editor";
 
 export class peepViewModel
 {
@@ -40,7 +40,7 @@ export class peepViewModel
     readonly _hasItem = store<boolean>(false);
 
     readonly _staffType = store<StaffType | null>(null);
-    readonly _colour = store<number>(0);
+    readonly _colour = store<number>(-1);
     readonly _availableCostumes = store<StaffCostume[]>([]);
     readonly _availableAnimations = store<GuestAnimation[]|StaffAnimation[]>([]);
     readonly _costume = store<StaffCostume | null>(null);
@@ -48,6 +48,8 @@ export class peepViewModel
     readonly _patrolArea = store<PatrolArea | null>(null);
     readonly _animationFrame = store<number>(0);
 
+    readonly _isStaff = store<boolean>(false);
+    readonly _isGuest = store<boolean>(false);
     readonly _isPicking = store<boolean>(false);
     readonly _isFrozen = compute(this._selectedPeep, p => (p?.energy === 0) ? true : false);
     readonly _isPeepSelected = compute(this._selectedPeep, p => (p) ? false : true);
@@ -74,6 +76,12 @@ export class peepViewModel
         this._isFrozen.set(false);
         this._name.set(windowTitle);
         this._availableAnimations.set([]);
+        this._x.set(0);
+        this._y.set(0);
+        this._z.set(0);
+        this._energy.set(96);
+        this._isStaff.set(false);
+        this._isGuest.set(false);
     }
 
     _select(peep: Guest | Staff): void
@@ -121,50 +129,18 @@ export class peepViewModel
 
     _onGameTickExecuted(): void {
         const peep = this._selectedPeep.get();
+        const staff = <Staff>peep;
         if (peep !== undefined)
         {
             this._x.set(peep.x);
             this._y.set(peep.y);
             this._z.set(peep.z);
             this._energy.set(peep.energy);
+            this._colour.set(staff.colour);
+            peep.energy === 0 ? this._isFrozen.set(true) : this._isFrozen.set(false);
+            if (peep.peepType === "staff"){this._isStaff.set(true); this._isGuest.set(false)};
+            if (peep.peepType === "guest"){this._isGuest.set(true); this._isStaff.set(false)};
         }
-    }
-
-    _xCoordinate(adjustment: number): void
-    {
-        const peep = this._selectedPeep.get();
-        if (peep !== undefined)
-            {
-                peep.x += adjustment;
-                
-            }
-    }
-
-    _yCoordinate(adjustment: number): void
-    {
-        const peep = this._selectedPeep.get();
-        if (peep !== undefined)
-            {
-                peep.y += adjustment;
-            }
-    }
-
-    _zCoordinate(adjustment: number): void
-    {
-        const peep = this._selectedPeep.get();
-        if (peep !== undefined)
-            {
-                peep.z += adjustment;
-            }
-    }
-
-    _setEnergy(adjustment: number): void
-    {
-        const peep = this._selectedPeep.get();
-        if (peep !== undefined)
-            {
-                peep.energy += adjustment;
-            }
     }
 }
 

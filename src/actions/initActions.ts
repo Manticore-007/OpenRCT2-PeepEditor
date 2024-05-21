@@ -1,3 +1,4 @@
+import { PeepColourArgs, colourPeepExecute } from "./peepColour";
 import { PeepFreezeArgs, freezePeepExecute } from "./peepFreezer";
 import { PeepMoveArgs, movePeepExecute } from "./peepMover";
 import { PeepNameArgs, namePeepExecute } from "./peepNamer";
@@ -12,4 +13,5 @@ context.registerAction<PeepNameArgs>("pe-namepeep", (args) => queryPermissionChe
 context.registerAction<PeepRemoveArgs>("pe-removepeep", (args) => queryPermissionCheck(args), (args) => removePeepExecute(args.args));
 context.registerAction<PeepMoveArgs>("pe-movepeep", (args) => queryPermissionCheck(args), (args) => movePeepExecute(args.args));
 context.registerAction<PeepSpeedArgs>("pe-speedpeep", (args) => queryPermissionCheck(args), (args) => speedPeepExecute(args.args));
+context.registerAction<PeepColourArgs>("pe-colourpeep", (args) => queryPermissionCheck(args), (args) => colourPeepExecute(args.args));
 }
