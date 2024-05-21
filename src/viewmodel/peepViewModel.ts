@@ -1,9 +1,11 @@
 import { Colour, compute, store } from "openrct2-flexui";
 
+const windowTitle = "Peep Editor FlexUI";
+
 export class peepViewModel
 {
     readonly _selectedPeep = store<Guest | Staff | undefined>(undefined);
-    readonly _name = store<string>("");
+    readonly _name = store<string>(windowTitle);
     readonly _destination = store<CoordsXYZ | null>(null);
     readonly _energy = store<number>(96);
     readonly _energyTarget = store<number>(96);
@@ -40,9 +42,11 @@ export class peepViewModel
     readonly _staffType = store<StaffType | null>(null);
     readonly _colour = store<number>(0);
     readonly _availableCostumes = store<StaffCostume[]>([]);
+    readonly _availableAnimations = store<GuestAnimation[]|StaffAnimation[]>([]);
     readonly _costume = store<StaffCostume | null>(null);
     readonly _orders = store<number>(0);
     readonly _patrolArea = store<PatrolArea | null>(null);
+    readonly _animationFrame = store<number>(0);
 
     readonly _isPicking = store<boolean>(false);
     readonly _isFrozen = compute(this._selectedPeep, p => (p?.energy === 0) ? true : false);
@@ -68,6 +72,8 @@ export class peepViewModel
         this._onGameTick = undefined;
         this._selectedPeep.set(undefined);
         this._isFrozen.set(false);
+        this._name.set(windowTitle);
+        this._availableAnimations.set([]);
     }
 
     _select(peep: Guest | Staff): void
@@ -161,3 +167,5 @@ export class peepViewModel
             }
     }
 }
+
+export const model = new peepViewModel;

@@ -2,11 +2,16 @@
 /// <reference path="../../lib/openrct2.d.ts" />
 
 import { button, horizontal, label, tab, tabwindow, vertical, viewport, toggle, twoway, compute, Colour, window, groupbox, spinner, dropdown } from "openrct2-flexui";
-import { togglePeepPicker } from "../services/peepPicker";
-import { peepViewModel } from "../viewmodel/peepViewModel";
-import { locate } from "../services/peepLocator";
-
-const model = new peepViewModel;
+import { togglePeepPicker } from "../actions/peepPicker";
+import { locate } from "../actions/peepLocator";
+import { model } from "../viewmodel/peepViewModel";
+import { freezePeepExecuteArgs } from "../actions/peepFreezer";
+import { namePeepExecuteArgs } from "../actions/peepNamer";
+import { isDevelopment, pluginVersion } from "../helpers/environment";
+import { removePeepExecuteArgs } from "../actions/peepRemover";
+import { debug } from "../helpers/logger";
+import { movePeepExecuteArgs } from "../actions/peepMover";
+import { speedPeepExecuteArgs } from "../actions/peepSpeed";
 
 const pointingFingerIcon: ImageAnimation = { frameBase: 5318, frameCount: 8, frameDuration: 2, };
 const paperIcon: ImageAnimation = { frameBase: 5277, frameCount: 7, frameDuration: 4, };
@@ -23,6 +28,8 @@ const flagsIcon: number = 5182;
 const allGuestsIcon: number = 5193;
 const itemsIcon: number = 5326;
 
+let multiplier: number = 1;
+
 const staticControls = [
 	toggle({
 		width: 24,
@@ -30,17 +37,28 @@ const staticControls = [
 		image: "eyedropper",
 		isPressed: twoway(model._isPicking),
 		padding: {top: 1},
-		onChange: pressed => togglePeepPicker(pressed, p => {model._select(p); model._tabImage(p)}, () => model._isPicking.set(false))
+		onChange: pressed => togglePeepPicker(pressed, p => {
+			model._select(p); model._tabImage(p);
+			model._name.set(p.name); model._availableAnimations.set(p.availableAnimations);
+			debug(`Frames: ${p.animationLength}`);
+			if (p.type === "staff") {
+				const staff = <Staff>p;
+				model._availableCostumes.set(staff.availableCostumes)
+			}
+		},
+			() => model._isPicking.set(false))
 	}),
 	toggle({
 		height: 24,
 		width: 24,
 		image: flagsIcon,
 		disabled: model._isPeepSelected,
-		isPressed: model._isFrozen,
+		isPressed: twoway(model._isFrozen),
 		padding: {top: 1},
-		onChange: pressed => {
-			model._freeze(pressed);
+		onChange: () => {
+			const peep = model._selectedPeep.get();
+			if (peep !== undefined)
+			context.executeAction("pe-freezepeep", freezePeepExecuteArgs(peep.id));
 		}
 	}),
 	button({
@@ -57,7 +75,8 @@ const staticControls = [
 					description: peepTypeQuery(),
 					initialValue: `${peep.name}`,
 					callback: text => {
-						{text}
+						model._name.set(text);
+						context.executeAction("pe-namepeep", namePeepExecuteArgs(peep.id, text));
 					},
 				})
 		}
@@ -94,13 +113,17 @@ const staticControls = [
 ]
 
 export const windowPeepEditor = tabwindow({
-	title: "Peep Editor FlexUI",
+	title: model._name,
 	width: 260,
 	height: 230,
 	colours: [Colour.DarkYellow, Colour.DarkYellow, Colour.DarkYellow],
 	padding: 5,
+	onTabChange: () => ui.tool?.cancel(),
 	onOpen: () => model._open(),
-	onClose: () => model._close(),
+	onClose: () => {
+		model._close();
+		multiplier = 1;
+	},
 	tabs: [
 		tab({ //main tab
 			image: lensIcon,
@@ -126,67 +149,126 @@ export const windowPeepEditor = tabwindow({
 		}),
 		tab({ //location
 			image: mapIcon,
+			height: "auto",
 			content: [
 				horizontal([
 					groupbox({
-						text: "{WHITE}Kinematics",
+						text: "Kinematics",
 						spacing: 2,
 						content: [
 							horizontal([
 								label({
 									text: "X position:",
-									width: "40%",
-									padding: {top: 10, bottom: 2, left: 10},
+									height: 13,
+									padding: {top: 0, bottom: 0, left: 10},
+									disabled: model._isPeepSelected,
 								}),
 								spinner({
-									padding: {top: 10, right: 10,  bottom: 2},
+									minimum: 0,
+									value: model._x,
+									height: 13,
+									padding: {top: 0, right: 10,  bottom: 0},
+									disabled: model._isPeepSelected,
+									disabledMessage: "Not available",
+									step: 1,
+									onChange: (_, adjustment: number) => {
+										const peep = model._selectedPeep.get();
+										if (peep !== undefined)
+										context.executeAction("pe-movepeep", movePeepExecuteArgs(peep.id, "x", (adjustment*multiplier)));
+									}
 								})
 							]),
 							horizontal([
 								label({
 									text: "Y position:",
-									width: "40%",
-									padding: {top: 2, bottom: 2, left: 10},
+									height: 12,
+									padding: {top: 0, bottom: 0, left: 10},
+									disabled: model._isPeepSelected,
 								}),
 								spinner({
-									padding: {top: 2, right: 10,  bottom: 2},
+									minimum: 0,
+									value: model._y,
+									height: 13,
+									padding: {top: 0, right: 10,  bottom: 0},
+									disabled: model._isPeepSelected,
+									disabledMessage: "Not available",
+									step: 1,
+									onChange: (_, adjustment: number) => {
+										const peep = model._selectedPeep.get();
+										if (peep !== undefined)
+										context.executeAction("pe-movepeep", movePeepExecuteArgs(peep.id, "y", (adjustment*multiplier)));
+									}
 								})
 							]),
 							horizontal([
 								label({
 									text: "Z position:",
-									width: "40%",
-									padding: {top: 2, bottom: 2, left: 10},
+									height: 13,
+									padding: {top: 0, bottom: 0, left: 10},
+									disabled: model._isPeepSelected,
 								}),
 								spinner({
-									padding: {top: 2, right: 10,  bottom: 2},
+									minimum: 0,
+									value: model._z,
+									height: 13,
+									padding: {top: 0, right: 10,  bottom: 0},
+									disabled: model._isPeepSelected,
+									disabledMessage: "Not available",
+									step: 1,
+									onChange: (_, adjustment: number) => {
+										const peep = model._selectedPeep.get();
+										if (peep !== undefined)
+										context.executeAction("pe-movepeep", movePeepExecuteArgs(peep.id, "z", (adjustment*multiplier)));
+									}
 								})
 							]),
 							horizontal([
 								label({
 									text: "Speed:",
-									width: "40%",
-									padding: {top: 20, bottom: 10, left: 10},
+									height: 13,
+									padding: {top: 10, bottom: 5, left: 10},
+									disabled: model._isPeepSelected,
 								}),
 								spinner({
-									padding: {top: 20, right: 10, bottom: 10},
+									minimum: 0,
+									maximum: 255,
+									value: model._energy,
+									height: 13,
+									padding: {top: 10, right: 10, bottom: 5},
+									disabled: model._isPeepSelected,
+									disabledMessage: "Not available",									
+									onChange: (_, adjustment: number) => {
+										const peep = model._selectedPeep.get();
+										if (peep !== undefined)
+										context.executeAction("pe-speedpeep", speedPeepExecuteArgs(peep.id, (adjustment*multiplier)));
+									}
 								})
 							]),
 						]
 					}),
-					vertical({
-						content: staticControls
-					})
+					// vertical({
+					// 	content: staticControls
+					// })
 				]),
 				horizontal([
 					label({
 						text: "Mulitplier:",
-						width: "40%",
-						padding: ["1w", 10, 7, 10],
+						//width: "70%",
+						height: 13,
+						padding: [5, -20, 7, "1w"],
 					}),
 					dropdown({
-						padding: ["1w", 45, 7, 0],
-						items: ["1x", "10x", "100x"],
+						padding: [5, 15, 7, -20],
+						width: "20%",
+						height: 13,
+						items: ["1x", "10x", "100x", "1000x"],
+						onChange: (number: number) => {
+							if (number === 0) {multiplier = 1};
+							if (number === 1) { multiplier =10};
+							if (number === 2) { multiplier =100};
+							if (number === 3) { multiplier =1000};
+							debug(`Multiplier set to ${multiplier}`)
+						}
 					})
 				]),
 			]
@@ -205,8 +287,9 @@ export const windowPeepEditor = tabwindow({
 								width: "40%",
 								padding: {top: 10, bottom: 2, left: 10},
 							}),
-							spinner({
+							dropdown({
 								padding: {top: 10, right: 10,  bottom: 2},
+								items: []
 							})
 						]),
 						horizontal([
@@ -215,18 +298,58 @@ export const windowPeepEditor = tabwindow({
 								width: "40%",
 								padding: {top: 2, bottom: 2, left: 10},
 							}),
-							spinner({
+							dropdown({
 								padding: {top: 2, right: 10,  bottom: 2},
+								items: model._availableCostumes,
+								onChange: (index) => {
+									const peep = model._selectedPeep.get();
+									const staff = <Staff>peep;
+									const availableCostumes = model._availableCostumes.get()
+									availableCostumes[index]
+									if (staff !== undefined){
+									staff.costume = availableCostumes[index];
+									}
+								}
 							})
 						]),
 						horizontal([
 							label({
-								text: "Z position:",
+								text: "Animation:",
 								width: "40%",
 								padding: {top: 2, bottom: 2, left: 10},
 							}),
-							spinner({
+							dropdown({
 								padding: {top: 2, right: 10,  bottom: 2},
+								items: model._availableAnimations,
+								onChange: (index) => {
+									const peep = model._selectedPeep.get();
+									const availableAnimations = model._availableAnimations.get()
+									availableAnimations[index]
+									if (peep !== undefined){
+									peep.animation = availableAnimations[index];
+									}
+								}
+
+							})
+						]),
+						horizontal([
+							label({
+								text: "Animation frame:",
+								width: "40%",
+								padding: {top: 20, bottom: 10, left: 10},
+							}),
+							spinner({
+								padding: {top: 20, right: 10, bottom: 10},
+								value: model._animationFrame,
+								step: 1,
+								onChange: (_, adj) => {
+									const peep = model._selectedPeep.get();
+									if (peep !== undefined){
+										debug(`Frame: ${peep.animationOffset}`);
+										model._animationFrame.set(peep.animationOffset);
+										peep.animationOffset += adj;
+									}
+								}
 							})
 						]),
 					]
@@ -291,7 +414,7 @@ export const windowPeepEditor = tabwindow({
 						width: "25%"
 					}),
 					label({
-						text: `{WHITE}24.4.28\n\n{WHITE}Manticore-007\n\n{WHITE}FlexUI by Basssiiie\n\n{WHITE}Basssiiie, Gymnasiast, ItsSmitty\nSpacek531, AaronVanGeffen\nSadret and Enox`,
+						text: versionString()+`\n\n{WHITE}Manticore-007\n\n{WHITE}FlexUI by Basssiiie\n\n{WHITE}Basssiiie, Gymnasiast, ItsSmitty\nSpacek531, AaronVanGeffen\nSadret and Enox`,
 					}),
 				]),
 				label({
@@ -341,7 +464,7 @@ export function openWindowRemovePeep(peep: Staff | Guest): void {
 					padding: [0, 4],
 					onClick: () => {
 						if (peep !== undefined)
-							{}
+							context.executeAction("pe-removepeep", removePeepExecuteArgs(peep.id));
 						removePeepWindow.close();
 						model._selectedPeep.set(undefined);
 					}
@@ -381,3 +504,12 @@ function textInputTitle(peep: Guest | Staff): string {
 	}
 	else return "";
 }
+
+function versionString(): string
+{
+    if (isDevelopment) {
+        return `{WHITE}${pluginVersion} {BABYBLUE}[DEBUG]`;
+    }
+    else return `{WHITE}${pluginVersion}`;
+}
+
