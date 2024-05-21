@@ -11,7 +11,7 @@ export function speedPeepExecute(args: PeepSpeedArgs): GameActionResult
     const entity = map.getEntity(args.id);
     const peep = <Guest|Staff>entity;
     peep.energy += args.adjustment;
-    debug(`Peep spees set to "${peep.energy}`);
+    debug(`Peep speed set to "${peep.energy}`);
     return{}
 }
 

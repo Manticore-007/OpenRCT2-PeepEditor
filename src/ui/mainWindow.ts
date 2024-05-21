@@ -1,7 +1,7 @@
 
 /// <reference path="../../lib/openrct2.d.ts" />
 
-import { button, horizontal, label, tab, tabwindow, vertical, viewport, toggle, twoway, compute, Colour, window, groupbox, spinner, dropdown } from "openrct2-flexui";
+import { button, horizontal, label, tab, tabwindow, vertical, viewport, toggle, twoway, compute, Colour, window, groupbox, spinner, dropdown, textbox, colourPicker, graphics } from "openrct2-flexui";
 import { togglePeepPicker } from "../actions/peepPicker";
 import { locate } from "../actions/peepLocator";
 import { model } from "../viewmodel/peepViewModel";
@@ -12,6 +12,9 @@ import { removePeepExecuteArgs } from "../actions/peepRemover";
 import { debug } from "../helpers/logger";
 import { movePeepExecuteArgs } from "../actions/peepMover";
 import { speedPeepExecuteArgs } from "../actions/peepSpeed";
+import { colourPeepExecuteArgs } from "../actions/peepColour";
+import { colour, colourList } from "../helpers/colours";
+import { customImageFor } from "../helpers/customImages";
 
 const pointingFingerIcon: ImageAnimation = { frameBase: 5318, frameCount: 8, frameDuration: 2, };
 const paperIcon: ImageAnimation = { frameBase: 5277, frameCount: 7, frameDuration: 4, };
@@ -37,7 +40,8 @@ const staticControls = [
 		image: "eyedropper",
 		isPressed: twoway(model._isPicking),
 		padding: {top: 1},
-		onChange: pressed => togglePeepPicker(pressed, p => {
+		onChange: pressed => togglePeepPicker(pressed, p =>
+		{
 			model._select(p); model._tabImage(p);
 			model._name.set(p.name); model._availableAnimations.set(p.availableAnimations);
 			debug(`Frames: ${p.animationLength}`);
@@ -53,12 +57,12 @@ const staticControls = [
 		width: 24,
 		image: flagsIcon,
 		disabled: model._isPeepSelected,
-		isPressed: twoway(model._isFrozen),
+		isPressed: model._isFrozen,
 		padding: {top: 1},
-		onChange: () => {
+		onChange: (pressed) => {
 			const peep = model._selectedPeep.get();
 			if (peep !== undefined)
-			context.executeAction("pe-freezepeep", freezePeepExecuteArgs(peep.id));
+			context.executeAction("pe-freezepeep", freezePeepExecuteArgs(peep.id, pressed));
 		}
 	}),
 	button({
@@ -167,6 +171,7 @@ export const windowPeepEditor = tabwindow({
 									minimum: 0,
 									value: model._x,
 									height: 13,
+									width: "55%",
 									padding: {top: 0, right: 10,  bottom: 0},
 									disabled: model._isPeepSelected,
 									disabledMessage: "Not available",
@@ -189,6 +194,7 @@ export const windowPeepEditor = tabwindow({
 									minimum: 0,
 									value: model._y,
 									height: 13,
+									width: "55%",
 									padding: {top: 0, right: 10,  bottom: 0},
 									disabled: model._isPeepSelected,
 									disabledMessage: "Not available",
@@ -211,6 +217,7 @@ export const windowPeepEditor = tabwindow({
 									minimum: 0,
 									value: model._z,
 									height: 13,
+									width: "55%",
 									padding: {top: 0, right: 10,  bottom: 0},
 									disabled: model._isPeepSelected,
 									disabledMessage: "Not available",
@@ -232,11 +239,13 @@ export const windowPeepEditor = tabwindow({
 								spinner({
 									minimum: 0,
 									maximum: 255,
+									wrapMode: "clamp",
 									value: model._energy,
 									height: 13,
+									width: "55%",
 									padding: {top: 10, right: 10, bottom: 5},
 									disabled: model._isPeepSelected,
-									disabledMessage: "Not available",									
+									disabledMessage: "Not available",
 									onChange: (_, adjustment: number) => {
 										const peep = model._selectedPeep.get();
 										if (peep !== undefined)
@@ -246,14 +255,10 @@ export const windowPeepEditor = tabwindow({
 							]),
 						]
 					}),
-					// vertical({
-					// 	content: staticControls
-					// })
 				]),
 				horizontal([
 					label({
-						text: "Mulitplier:",
-						//width: "70%",
+						text: "Multiplier:",
 						height: 13,
 						padding: [5, -20, 7, "1w"],
 					}),
@@ -263,10 +268,10 @@ export const windowPeepEditor = tabwindow({
 						height: 13,
 						items: ["1x", "10x", "100x", "1000x"],
 						onChange: (number: number) => {
-							if (number === 0) {multiplier = 1};
-							if (number === 1) { multiplier =10};
-							if (number === 2) { multiplier =100};
-							if (number === 3) { multiplier =1000};
+							if (number === 0) { multiplier = 1};
+							if (number === 1) { multiplier = 10};
+							if (number === 2) { multiplier = 100};
+							if (number === 3) { multiplier = 1000};
 							debug(`Multiplier set to ${multiplier}`)
 						}
 					})
@@ -275,31 +280,46 @@ export const windowPeepEditor = tabwindow({
 		}),
 		tab({ //appearance
 			image: paintIcon,
+			height: "auto",
 			content: [
 				horizontal([
 					groupbox({
-					text: "{WHITE}Appearance",
+					text: "Appearance",
 					spacing: 2,
 					content: [
 						horizontal([
 							label({
 								text: "Staff type:",
-								width: "40%",
-								padding: {top: 10, bottom: 2, left: 10},
+								height: 13,
+								disabled: model._isPeepSelected,
+								padding: {top: 0, bottom: 0, left: 10},
+								visibility: compute(model._isStaff, v => (v) ? "visible" : "none"),
 							}),
 							dropdown({
-								padding: {top: 10, right: 10,  bottom: 2},
+								height: 13,
+								width: "55%",
+								disabled: model._isPeepSelected,
+								disabledMessage: "Not available",
+								padding: {top: 0, right: 10,  bottom: 0},
+								visibility: compute(model._isStaff, v => (v) ? "visible" : "none"),
 								items: []
 							})
 						]),
 						horizontal([
 							label({
 								text: "Costume:",
-								width: "40%",
-								padding: {top: 2, bottom: 2, left: 10},
+								height: 13,
+								disabled: model._isPeepSelected,
+								padding: {top: 0, bottom: 10, left: 10},
+								visibility: compute(model._isStaff, v => (v) ? "visible" : "none"),
 							}),
 							dropdown({
-								padding: {top: 2, right: 10,  bottom: 2},
+								height: 13,
+								width: "55%",
+								disabled: model._isPeepSelected,
+								disabledMessage: "Not available",
+								padding: {top: 0, right: 10,  bottom: 10},
+								visibility: compute(model._isStaff, v => (v) ? "visible" : "none"),
 								items: model._availableCostumes,
 								onChange: (index) => {
 									const peep = model._selectedPeep.get();
@@ -315,11 +335,16 @@ export const windowPeepEditor = tabwindow({
 						horizontal([
 							label({
 								text: "Animation:",
-								width: "40%",
-								padding: {top: 2, bottom: 2, left: 10},
+								height: 13,
+								disabled: model._isPeepSelected,
+								padding: {top: 0, bottom: 0, left: 10},
 							}),
 							dropdown({
-								padding: {top: 2, right: 10,  bottom: 2},
+								height: 13,
+								width: "55%",
+								disabled: model._isPeepSelected,
+								disabledMessage: "Not available",
+								padding: {top: 0, right: 10,  bottom: 0},
 								items: model._availableAnimations,
 								onChange: (index) => {
 									const peep = model._selectedPeep.get();
@@ -335,11 +360,16 @@ export const windowPeepEditor = tabwindow({
 						horizontal([
 							label({
 								text: "Animation frame:",
-								width: "40%",
-								padding: {top: 20, bottom: 10, left: 10},
+								height: 13,
+								disabled: model._isPeepSelected,
+								padding: {top: 0, bottom: 10, left: 10},
 							}),
 							spinner({
-								padding: {top: 20, right: 10, bottom: 10},
+								height: 13,
+								width: "55%",
+								disabled: model._isPeepSelected,
+								disabledMessage: "Not available",
+								padding: {top: 0, right: 10, bottom: 10},
 								value: model._animationFrame,
 								step: 1,
 								onChange: (_, adj) => {
@@ -352,10 +382,83 @@ export const windowPeepEditor = tabwindow({
 								}
 							})
 						]),
+						horizontal([
+							label({
+								text: "Staff colour:",
+								height: 13,
+								disabled: model._isPeepSelected,
+								padding: {top: 0, bottom: 5, left: 10},
+								visibility: compute(model._isStaff, v => (v) ? "visible" : "none"),
+							}),
+							textbox({
+								text: compute(model._colour, c => colourList[c]),
+								width: "51%",
+								height: 13,
+								disabled: true,
+								padding: {top: 0, right: 0,  bottom: 5},
+								visibility: compute(model._isStaff, v => (v) ? "visible" : "none"),
+							}),
+							colourPicker({
+								colour: model._colour,
+								disabled: model._isPeepSelected,
+								padding: {right: 10, bottom: 5},
+								visibility: compute(model._isStaff, v => (v) ? "visible" : "none"),
+								onChange: (colour) => {
+									const peep = model._selectedPeep.get();
+									if (peep !== undefined){
+									context.executeAction("pe-colourpeep", colourPeepExecuteArgs(peep.id, colour));
+									}
+								}
+							})
+						]),
+						horizontal([
+							graphics({
+								height: 16,
+								width: 16,
+								padding: {left: 10},
+								onDraw: function (g) {drawImage(g, 5081);},
+							}),
+							colourPicker({
+								colour: Colour.DarkYellow,								
+							}),
+							graphics({
+								height: 16,
+								width: 16,
+								padding: {top: -1, left: 10},
+								onDraw: function (g) {drawImage(g, customImageFor("trousers"));},
+							}),
+							colourPicker({
+								colour: Colour.DarkYellow,								
+							}),
+							graphics({
+								height: 16,
+								width: 16,
+								padding: {left: 10},
+								onDraw: function (g) {drawImage(g, 5079);},
+							}),
+							colourPicker({
+								colour: Colour.DarkYellow,								
+							}),
+							graphics({
+								height: 16,
+								width: 16,
+								padding: {left: 10},
+								onDraw: function (g) {drawImage(g, 5061);},
+							}),
+							colourPicker({
+								colour: Colour.DarkYellow,								
+							}),
+							graphics({
+								height: 16,
+								width: 16,
+								padding: {left: 10},
+								onDraw: function (g) {drawImage(g, 5065);},
+							}),
+							colourPicker({
+								colour: Colour.DarkYellow,								
+							})
+						])
 					]
-				}),
-				vertical({
-					content: staticControls
 				})
 			])
 			]
@@ -513,3 +616,21 @@ function versionString(): string
     else return `{WHITE}${pluginVersion}`;
 }
 
+function drawImage(g: GraphicsContext, image: number, property?: keyof Guest): void
+{
+    const img = g.getImage(image);
+    const guest = <Guest>model._selectedPeep.get();
+    if (property === "tshirtColour" || property === "trousersColour" || property === "hatColour" || property === "umbrellaColour" || property === "balloonColour")
+    {
+        const colour = guest[property];
+        if (img) {
+            g.paletteId = colour;
+            g.image(img.id, 0, 0);
+        }
+    }
+    else
+    if (img) {
+        g.paletteId = colour["Yellow"];
+        g.image(img.id, 0, 0);
+    }
+}
