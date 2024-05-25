@@ -12,10 +12,13 @@ export function freezePeepExecute(args: PeepFreezeArgs): GameActionResult
     const peep = <Guest|Staff>entity;
     if (args.pressed) {
         peep.energy = 0
+        peep.energyTarget = 0;
         debug(`${peep.name} is frozen`);
+        debug(peep.energyTarget);
     }
     else {
         peep.energy = 96;
+        peep.energyTarget = 32;
         debug(`${peep.name} is unfrozen`)
     }
     return{}

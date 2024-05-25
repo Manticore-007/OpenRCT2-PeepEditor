@@ -1,0 +1,43 @@
+const AnimationFriendlyNames = {
+        "walking": "Walking",
+        "watchRide": "Standing",
+        "wave": "Waving",
+        "hanging": "Hanging",
+        "staffMower": "Mowing",
+        "staffSweep": "Sweeping",
+        "drowning": "Drowning",
+        "staffAnswerCall": "Answering",
+        "staffAnswerCall2": "Answering",
+        "staffCheckBoard": "Inspecting",
+        "staffFix": "Fixing",
+        "staffFix2": "Fixing",
+        "staffFixGround": "Fixing",
+        "staffFix3": "Fixing",
+        "staffWatering": "Watering",
+        "joy": "Jumping",
+        "staffEmptyBin": "Emptying bin",
+        "wave2": "Waving",
+        "checkTime": "Checking time",
+        "eatFood": "Eating",
+        "shakeHead": "Shaking head",
+        "emptyPockets": "Checking pockets",
+        "holdMat": "Holding mat",
+        "sittingIdle": "Sitting",
+        "sittingEatFood": "Sitting eating",
+        "sittingLookAroundLeft": "Sitting looking left",
+        "sittingLookAroundRight": "Sitting looking right",
+        "wow": "Eyepopping",
+        "throwUp": "Throwing up",
+        "jump": "Jumping",
+        "readMap": "Reading map",
+        "takePhoto": "Taking photo",
+        "clap": "Clapping",
+        "disgust": "Stepping in vomit",
+        "drawPicture": "Painting",
+        "beingWatched": "Looking around",
+        "withdrawMoney": "Withdrawing money"
+}
+
+export function animationList(value: StaffAnimation | GuestAnimation): string{
+    return AnimationFriendlyNames[value];
+}
