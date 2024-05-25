@@ -4,6 +4,8 @@ const windowTitle = "Peep Editor";
 
 export class peepViewModel
 {
+    //general
+
     readonly _selectedPeep = store<Guest | Staff | undefined>(undefined);
     readonly _name = store<string>(windowTitle);
     readonly _destination = store<CoordsXYZ | null>(null);
@@ -13,13 +15,27 @@ export class peepViewModel
     readonly _x = store<number>(0);
     readonly _y = store<number>(0);
     readonly _z = store<number>(0);
-    readonly _image = store<number>(6430 | (Colour.SalmonPink) << 19 | (Colour.SalmonPink << 24) | (0b111 << 29))
+    readonly _availableAnimations = store<GuestAnimation[]|StaffAnimation[]>([]);
+    readonly _animationFrame = store<number>(0);
 
-    readonly _tshirtColour = store<number>(0);
-    readonly _trousersColour = store<number>(0);
-    readonly _balloonColour = store<number>(0);
-    readonly _hatColour = store<number>(0);
-    readonly _umbrellaColour = store<number>(0);
+
+    //staff
+    
+    readonly _staffType = store<StaffType | null>(null);
+    readonly _colour = store<number>(100);
+    readonly _availableCostumes = store<StaffCostume[]>([]);
+    readonly _costume = store<StaffCostume | null>(null);
+    readonly _orders = store<number>(0);
+    readonly _patrolArea = store<PatrolArea | null>(null);
+
+
+    //guest
+
+    readonly _tshirtColour = store<number>(19);
+    readonly _trousersColour = store<number>(19);
+    readonly _balloonColour = store<number>(19);
+    readonly _hatColour = store<number>(19);
+    readonly _umbrellaColour = store<number>(19);
     readonly _happiness = store<number>(0);
     readonly _happinessTarget = store<number>(0);
     readonly _nausea = store<number>(0);
@@ -38,22 +54,20 @@ export class peepViewModel
     readonly _thoughts = store<Thought[]>([]);
     readonly _items = store<GuestItem[]>([]);
     readonly _hasItem = store<boolean>(false);
+    readonly _hasHat = store<boolean>(false);
+    readonly _hasBalloon = store<boolean>(false);
+    readonly _hasUmbrella = store<boolean>(false);
 
-    readonly _staffType = store<StaffType | null>(null);
-    readonly _colour = store<number>(-1);
-    readonly _availableCostumes = store<StaffCostume[]>([]);
-    readonly _availableAnimations = store<GuestAnimation[]|StaffAnimation[]>([]);
-    readonly _costume = store<StaffCostume | null>(null);
-    readonly _orders = store<number>(0);
-    readonly _patrolArea = store<PatrolArea | null>(null);
-    readonly _animationFrame = store<number>(0);
 
-    readonly _isStaff = store<boolean>(false);
+    //custom
+
+    readonly _image = store<number>(6430 | (Colour.SalmonPink) << 19 | (Colour.SalmonPink << 24) | (0b111 << 29))
     readonly _isGuest = store<boolean>(false);
+    readonly _isStaff = store<boolean>(false);
+    readonly _isEntertainer = store<boolean>(false);
     readonly _isPicking = store<boolean>(false);
     readonly _isFrozen = compute(this._selectedPeep, p => (p?.energy === 0) ? true : false);
     readonly _isPeepSelected = compute(this._selectedPeep, p => (p) ? false : true);
-    readonly _formatPosition = (pos: number): string => (this._isPeepSelected.get() ? "Not available" : pos.toString());
 
     private _onGameTick?: IDisposable;
 
@@ -82,6 +96,7 @@ export class peepViewModel
         this._energy.set(96);
         this._isStaff.set(false);
         this._isGuest.set(false);
+        this._colour.set(100);
     }
 
     _select(peep: Guest | Staff): void
@@ -130,6 +145,7 @@ export class peepViewModel
     _onGameTickExecuted(): void {
         const peep = this._selectedPeep.get();
         const staff = <Staff>peep;
+        const guest = <Guest>peep;
         if (peep !== undefined)
         {
             this._x.set(peep.x);
@@ -138,8 +154,21 @@ export class peepViewModel
             this._energy.set(peep.energy);
             this._colour.set(staff.colour);
             peep.energy === 0 ? this._isFrozen.set(true) : this._isFrozen.set(false);
-            if (peep.peepType === "staff"){this._isStaff.set(true); this._isGuest.set(false)};
-            if (peep.peepType === "guest"){this._isGuest.set(true); this._isStaff.set(false)};
+            if (peep.peepType === "staff"){
+                this._isStaff.set(true); this._isGuest.set(false)
+                staff.staffType === "entertainer"? this._isEntertainer.set(true) : this._isEntertainer.set(false);
+            }
+            if (peep.peepType === "guest"){
+                this._isGuest.set(true); this._isStaff.set(false);
+                this._tshirtColour.set(guest.tshirtColour);
+                this._trousersColour.set(guest.trousersColour);
+                this._hatColour.set(guest.hatColour);
+                this._balloonColour.set(guest.balloonColour);
+                this._umbrellaColour.set(guest.umbrellaColour);
+                guest.hasItem({type: "hat"})? this._hasHat.set(true) : this._hasHat.set(false);
+                guest.hasItem({type: "balloon"})? this._hasBalloon.set(true) : this._hasBalloon.set(false);
+                guest.hasItem({type: "umbrella"})? this._hasUmbrella.set(true) : this._hasUmbrella.set(false);
+            }
         }
     }
 }

@@ -15,6 +15,9 @@ import { speedPeepExecuteArgs } from "../actions/peepSpeed";
 import { colourPeepExecuteArgs } from "../actions/peepColour";
 import { colour, colourList } from "../helpers/colours";
 import { customImageFor } from "../helpers/customImages";
+import { staffTypeList } from "../helpers/staffTypes";
+import { costumeList } from "../helpers/costumes";
+import { animationList } from "../helpers/animations";
 
 const pointingFingerIcon: ImageAnimation = { frameBase: 5318, frameCount: 8, frameDuration: 2, };
 const paperIcon: ImageAnimation = { frameBase: 5277, frameCount: 7, frameDuration: 4, };
@@ -56,7 +59,8 @@ const staticControls = [
 		height: 24,
 		width: 24,
 		image: flagsIcon,
-		disabled: model._isPeepSelected,
+		tooltip: "Freeze a peep in place",
+		//disabled: compute(model._isStaff, s => !s),
 		isPressed: model._isFrozen,
 		padding: {top: 1},
 		onChange: (pressed) => {
@@ -125,6 +129,7 @@ export const windowPeepEditor = tabwindow({
 	onTabChange: () => ui.tool?.cancel(),
 	onOpen: () => model._open(),
 	onClose: () => {
+		ui.tool?.cancel();
 		model._close();
 		multiplier = 1;
 	},
@@ -165,7 +170,7 @@ export const windowPeepEditor = tabwindow({
 									text: "X position:",
 									height: 13,
 									padding: {top: 0, bottom: 0, left: 10},
-									disabled: model._isPeepSelected,
+									//disabled: compute(model._isStaff, s => !s),
 								}),
 								spinner({
 									minimum: 0,
@@ -173,7 +178,7 @@ export const windowPeepEditor = tabwindow({
 									height: 13,
 									width: "55%",
 									padding: {top: 0, right: 10,  bottom: 0},
-									disabled: model._isPeepSelected,
+									//disabled: compute(model._isStaff, s => !s),
 									disabledMessage: "Not available",
 									step: 1,
 									onChange: (_, adjustment: number) => {
@@ -188,7 +193,7 @@ export const windowPeepEditor = tabwindow({
 									text: "Y position:",
 									height: 12,
 									padding: {top: 0, bottom: 0, left: 10},
-									disabled: model._isPeepSelected,
+									//disabled: compute(model._isStaff, s => !s),
 								}),
 								spinner({
 									minimum: 0,
@@ -196,7 +201,7 @@ export const windowPeepEditor = tabwindow({
 									height: 13,
 									width: "55%",
 									padding: {top: 0, right: 10,  bottom: 0},
-									disabled: model._isPeepSelected,
+									//disabled: compute(model._isStaff, s => !s),
 									disabledMessage: "Not available",
 									step: 1,
 									onChange: (_, adjustment: number) => {
@@ -211,7 +216,7 @@ export const windowPeepEditor = tabwindow({
 									text: "Z position:",
 									height: 13,
 									padding: {top: 0, bottom: 0, left: 10},
-									disabled: model._isPeepSelected,
+									//disabled: compute(model._isStaff, s => !s),
 								}),
 								spinner({
 									minimum: 0,
@@ -219,7 +224,7 @@ export const windowPeepEditor = tabwindow({
 									height: 13,
 									width: "55%",
 									padding: {top: 0, right: 10,  bottom: 0},
-									disabled: model._isPeepSelected,
+									//disabled: compute(model._isStaff, s => !s),
 									disabledMessage: "Not available",
 									step: 1,
 									onChange: (_, adjustment: number) => {
@@ -234,7 +239,7 @@ export const windowPeepEditor = tabwindow({
 									text: "Speed:",
 									height: 13,
 									padding: {top: 10, bottom: 5, left: 10},
-									disabled: model._isPeepSelected,
+									//disabled: compute(model._isStaff, s => !s),
 								}),
 								spinner({
 									minimum: 0,
@@ -244,7 +249,7 @@ export const windowPeepEditor = tabwindow({
 									height: 13,
 									width: "55%",
 									padding: {top: 10, right: 10, bottom: 5},
-									disabled: model._isPeepSelected,
+									//disabled: compute(model._isStaff, s => !s),
 									disabledMessage: "Not available",
 									onChange: (_, adjustment: number) => {
 										const peep = model._selectedPeep.get();
@@ -282,79 +287,197 @@ export const windowPeepEditor = tabwindow({
 			image: paintIcon,
 			height: "auto",
 			content: [
-				horizontal([
-					groupbox({
-					text: "Appearance",
+				groupbox({
+					text: "Staff member appearance",
 					spacing: 2,
+					visibility: compute(model._isStaff, g => (g) ? "visible" : "none"),
 					content: [
 						horizontal([
 							label({
 								text: "Staff type:",
 								height: 13,
+								visibility: compute(model._isStaff, g => (g) ? "visible" : "none"),
 								disabled: model._isPeepSelected,
-								padding: {top: 0, bottom: 0, left: 10},
-								visibility: compute(model._isStaff, v => (v) ? "visible" : "none"),
+								padding: { top: 5, bottom: 0, left: 10 },
 							}),
 							dropdown({
 								height: 13,
 								width: "55%",
+								visibility: compute(model._isStaff, g => (g) ? "visible" : "none"),
 								disabled: model._isPeepSelected,
 								disabledMessage: "Not available",
-								padding: {top: 0, right: 10,  bottom: 0},
-								visibility: compute(model._isStaff, v => (v) ? "visible" : "none"),
-								items: []
+								padding: { top: 5, right: 10, bottom: 0 },
+								items: staffTypeList,
 							})
 						]),
 						horizontal([
 							label({
 								text: "Costume:",
 								height: 13,
+								visibility: compute(model._isEntertainer, e => (e) ? "visible" : "none"),
 								disabled: model._isPeepSelected,
-								padding: {top: 0, bottom: 10, left: 10},
-								visibility: compute(model._isStaff, v => (v) ? "visible" : "none"),
+								padding: { top: 0, bottom: 10, left: 10 },
 							}),
 							dropdown({
 								height: 13,
 								width: "55%",
+								visibility: compute(model._isEntertainer, e => (e) ? "visible" : "none"),
 								disabled: model._isPeepSelected,
 								disabledMessage: "Not available",
-								padding: {top: 0, right: 10,  bottom: 10},
-								visibility: compute(model._isStaff, v => (v) ? "visible" : "none"),
-								items: model._availableCostumes,
-								onChange: (index) => {
+								padding: { top: 0, right: 10, bottom: 10 },
+								items: compute(model._availableCostumes, c => (c.map(costumeList)))
+							})
+						]),
+						horizontal([
+							label({
+								text: "Uniform colour:",
+								height: 13,
+								visibility: compute(model._isEntertainer, e => (!e) ? "visible" : "none"),
+								disabled: model._isPeepSelected,
+								padding: { top: 0, bottom: 10, left: 10 },
+							}),
+							textbox({
+								text: compute(model._colour, c => colourList[c] || ""),
+								width: "51%",
+								height: 13,
+								visibility: compute(model._isEntertainer, e => (!e) ? "visible" : "none"),
+								disabled: true,
+								padding: { top: 0, right: 0, bottom: 10 },
+							}),
+							colourPicker({
+								colour: compute(model._colour, c => (c) || 0),
+								visibility: compute(model._isEntertainer, e => (!e) ? "visible" : "none"),
+								disabled: model._isPeepSelected,
+								padding: { right: 10, bottom: 10 },
+								onChange: (colour) => {
 									const peep = model._selectedPeep.get();
-									const staff = <Staff>peep;
-									const availableCostumes = model._availableCostumes.get()
-									availableCostumes[index]
-									if (staff !== undefined){
-									staff.costume = availableCostumes[index];
+									if (peep !== undefined) {
+										context.executeAction("pe-colourpeep", colourPeepExecuteArgs(peep.id, colour));
 									}
 								}
 							})
 						]),
+					]
+				}),
+				groupbox({
+					text: "Guest appearance",
+					spacing: 2,
+					visibility: compute(model._isGuest, g => (g) ? "visible" : "none"),
+					content: [
+						horizontal([
+							graphics({
+								height: 16,
+								width: 16,
+								padding: { left: 10 },
+								visibility: compute(model._isGuest, g => (g) ? "visible" : "none"),
+								onDraw: function (g) { drawImage(g, 5081, "tshirtColour"); },
+							}),
+							colourPicker({
+								colour: model._tshirtColour,
+								visibility: compute(model._isGuest, g => (g) ? "visible" : "none"),
+								onChange: (colour) => {
+									const peep = model._selectedPeep.get();
+									if (peep !== undefined) {
+										context.executeAction("pe-colourpeep", colourPeepExecuteArgs(peep.id, colour, "tshirtColour"));
+									}
+								}
+							}),
+							graphics({
+								height: 16,
+								width: 16,
+								padding: { top: -1, left: 10 },
+								visibility: compute(model._isGuest, g => (g) ? "visible" : "none"),
+								onDraw: function (g) { drawImage(g, customImageFor("trousers"), "trousersColour"); },
+							}),
+							colourPicker({
+								colour: model._trousersColour,
+								visibility: compute(model._isGuest, g => (g) ? "visible" : "none"),
+								onChange: (colour) => {
+									const peep = model._selectedPeep.get();
+									if (peep !== undefined) {
+										context.executeAction("pe-colourpeep", colourPeepExecuteArgs(peep.id, colour, "trousersColour"));
+									}
+								}
+							}),
+							graphics({
+								height: 16,
+								width: 16,
+								padding: { left: 10 },
+								disabled: compute(model._hasHat, h => !h),
+								visibility: compute(model._isGuest, g => (g) ? "visible" : "none"),
+								onDraw: function (g) { drawImage(g, 5079, "hatColour"); },
+							}),
+							colourPicker({
+								colour: model._hatColour,
+								disabled: compute(model._hasHat, h => !h),
+								visibility: compute(model._isGuest, g => (g) ? "visible" : "none"),
+								onChange: (colour) => {
+									const peep = model._selectedPeep.get();
+									if (peep !== undefined) {
+										context.executeAction("pe-colourpeep", colourPeepExecuteArgs(peep.id, colour, "hatColour"));
+									}
+								}
+							}),
+							graphics({
+								height: 16,
+								width: 16,
+								padding: { left: 10 },
+								disabled: compute(model._hasBalloon, b => !b),
+								visibility: compute(model._isGuest, g => (g) ? "visible" : "none"),
+								onDraw: function (g) { drawImage(g, 5061, "balloonColour"); },
+							}),
+							colourPicker({
+								colour: model._balloonColour,
+								disabled: compute(model._hasBalloon, b => !b),
+								visibility: compute(model._isGuest, g => (g) ? "visible" : "none"),
+								onChange: (colour) => {
+									const peep = model._selectedPeep.get();
+									if (peep !== undefined) {
+										context.executeAction("pe-colourpeep", colourPeepExecuteArgs(peep.id, colour, "balloonColour"));
+									}
+								}
+							}),
+							graphics({
+								height: 16,
+								width: 16,
+								padding: { left: 10 },
+								disabled: compute(model._hasUmbrella, u => !u),
+								visibility: compute(model._isGuest, g => (g) ? "visible" : "none"),
+								onDraw: function (g) { drawImage(g, 5065, "umbrellaColour"); },
+							}),
+							colourPicker({
+								colour: model._umbrellaColour,
+								disabled: compute(model._hasUmbrella, u => !u),
+								visibility: compute(model._isGuest, g => (g) ? "visible" : "none"),
+								padding: { right: 12 },
+								onChange: (colour) => {
+									const peep = model._selectedPeep.get();
+									if (peep !== undefined) {
+										context.executeAction("pe-colourpeep", colourPeepExecuteArgs(peep.id, colour, "umbrellaColour"));
+									}
+								}
+							})
+						]),
+					]
+				}),
+				groupbox({
+					text: "Animation",
+					spacing: 2,
+					content: [
 						horizontal([
 							label({
 								text: "Animation:",
 								height: 13,
 								disabled: model._isPeepSelected,
-								padding: {top: 0, bottom: 0, left: 10},
+								padding: { top: 5, bottom: 0, left: 10 },
 							}),
 							dropdown({
 								height: 13,
 								width: "55%",
 								disabled: model._isPeepSelected,
 								disabledMessage: "Not available",
-								padding: {top: 0, right: 10,  bottom: 0},
-								items: model._availableAnimations,
-								onChange: (index) => {
-									const peep = model._selectedPeep.get();
-									const availableAnimations = model._availableAnimations.get()
-									availableAnimations[index]
-									if (peep !== undefined){
-									peep.animation = availableAnimations[index];
-									}
-								}
-
+								padding: { top: 5, right: 10, bottom: 0 },
+								items: compute(model._availableAnimations, a => a.map(animationList)),
 							})
 						]),
 						horizontal([
@@ -362,105 +485,20 @@ export const windowPeepEditor = tabwindow({
 								text: "Animation frame:",
 								height: 13,
 								disabled: model._isPeepSelected,
-								padding: {top: 0, bottom: 10, left: 10},
+								padding: { top: 0, bottom: 10, left: 10 },
 							}),
 							spinner({
 								height: 13,
 								width: "55%",
 								disabled: model._isPeepSelected,
 								disabledMessage: "Not available",
-								padding: {top: 0, right: 10, bottom: 10},
+								padding: { top: 0, right: 10, bottom: 10 },
 								value: model._animationFrame,
 								step: 1,
-								onChange: (_, adj) => {
-									const peep = model._selectedPeep.get();
-									if (peep !== undefined){
-										debug(`Frame: ${peep.animationOffset}`);
-										model._animationFrame.set(peep.animationOffset);
-										peep.animationOffset += adj;
-									}
-								}
 							})
 						]),
-						horizontal([
-							label({
-								text: "Staff colour:",
-								height: 13,
-								disabled: model._isPeepSelected,
-								padding: {top: 0, bottom: 5, left: 10},
-								visibility: compute(model._isStaff, v => (v) ? "visible" : "none"),
-							}),
-							textbox({
-								text: compute(model._colour, c => colourList[c]),
-								width: "51%",
-								height: 13,
-								disabled: true,
-								padding: {top: 0, right: 0,  bottom: 5},
-								visibility: compute(model._isStaff, v => (v) ? "visible" : "none"),
-							}),
-							colourPicker({
-								colour: model._colour,
-								disabled: model._isPeepSelected,
-								padding: {right: 10, bottom: 5},
-								visibility: compute(model._isStaff, v => (v) ? "visible" : "none"),
-								onChange: (colour) => {
-									const peep = model._selectedPeep.get();
-									if (peep !== undefined){
-									context.executeAction("pe-colourpeep", colourPeepExecuteArgs(peep.id, colour));
-									}
-								}
-							})
-						]),
-						horizontal([
-							graphics({
-								height: 16,
-								width: 16,
-								padding: {left: 10},
-								onDraw: function (g) {drawImage(g, 5081);},
-							}),
-							colourPicker({
-								colour: Colour.DarkYellow,								
-							}),
-							graphics({
-								height: 16,
-								width: 16,
-								padding: {top: -1, left: 10},
-								onDraw: function (g) {drawImage(g, customImageFor("trousers"));},
-							}),
-							colourPicker({
-								colour: Colour.DarkYellow,								
-							}),
-							graphics({
-								height: 16,
-								width: 16,
-								padding: {left: 10},
-								onDraw: function (g) {drawImage(g, 5079);},
-							}),
-							colourPicker({
-								colour: Colour.DarkYellow,								
-							}),
-							graphics({
-								height: 16,
-								width: 16,
-								padding: {left: 10},
-								onDraw: function (g) {drawImage(g, 5061);},
-							}),
-							colourPicker({
-								colour: Colour.DarkYellow,								
-							}),
-							graphics({
-								height: 16,
-								width: 16,
-								padding: {left: 10},
-								onDraw: function (g) {drawImage(g, 5065);},
-							}),
-							colourPicker({
-								colour: Colour.DarkYellow,								
-							})
-						])
 					]
-				})
-			])
+				}),
 			]
 		}),
 		tab({
@@ -616,11 +654,11 @@ function versionString(): string
     else return `{WHITE}${pluginVersion}`;
 }
 
-function drawImage(g: GraphicsContext, image: number, property?: keyof Guest): void
+function drawImage(g: GraphicsContext, image: number, property: keyof Guest): void
 {
     const img = g.getImage(image);
     const guest = <Guest>model._selectedPeep.get();
-    if (property === "tshirtColour" || property === "trousersColour" || property === "hatColour" || property === "umbrellaColour" || property === "balloonColour")
+    if (property === "tshirtColour" || property === "trousersColour" || (property === "hatColour" && guest.hasItem({type: "hat"})) || (property === "umbrellaColour" && guest.hasItem({type: "umbrella"})) || (property === "balloonColour" && guest.hasItem({type: "balloon"})))
     {
         const colour = guest[property];
         if (img) {
@@ -630,7 +668,7 @@ function drawImage(g: GraphicsContext, image: number, property?: keyof Guest): v
     }
     else
     if (img) {
-        g.paletteId = colour["Yellow"];
+        g.paletteId = colour["Void"];
         g.image(img.id, 0, 0);
     }
 }
