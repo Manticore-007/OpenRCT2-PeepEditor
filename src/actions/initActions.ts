@@ -1,3 +1,5 @@
+import { PeepAnimationArgs, animationPeepExecute } from "./peepAnimation";
+import { PeepAnimationFrameArgs, animationFramePeepExecute } from "./peepAnimationFrame";
 import { PeepColourArgs, colourPeepExecute } from "./peepColour";
 import { PeepFreezeArgs, freezePeepExecute } from "./peepFreezer";
 import { PeepMoveArgs, movePeepExecute } from "./peepMover";
@@ -5,6 +7,8 @@ import { PeepNameArgs, namePeepExecute } from "./peepNamer";
 import { PeepRemoveArgs, removePeepExecute } from "./peepRemover";
 import { PeepSpeedArgs, speedPeepExecute } from "./peepSpeed";
 import { queryPermissionCheck } from "./permissions";
+import { StaffCostumeArgs, staffCostumeExecute } from "./staffSetCostume";
+import { StaffTypeArgs, staffTypeExecute } from "./staffSetType";
 
 export function initActions(): void
 {
@@ -14,4 +18,8 @@ context.registerAction<PeepRemoveArgs>("pe-removepeep", (args) => queryPermissio
 context.registerAction<PeepMoveArgs>("pe-movepeep", (args) => queryPermissionCheck(args), (args) => movePeepExecute(args.args));
 context.registerAction<PeepSpeedArgs>("pe-speedpeep", (args) => queryPermissionCheck(args), (args) => speedPeepExecute(args.args));
 context.registerAction<PeepColourArgs>("pe-colourpeep", (args) => queryPermissionCheck(args), (args) => colourPeepExecute(args.args));
+context.registerAction<StaffTypeArgs>("pe-stafftype", (args) => queryPermissionCheck(args), (args) => staffTypeExecute(args.args));
+context.registerAction<StaffCostumeArgs>("pe-staffcostume", (args) => queryPermissionCheck(args), (args) => staffCostumeExecute(args.args));
+context.registerAction<PeepAnimationArgs>("pe-animationpeep", (args) => queryPermissionCheck(args), (args) => animationPeepExecute(args.args));
+context.registerAction<PeepAnimationFrameArgs>("pe-animationframepeep", (args) => queryPermissionCheck(args), (args) => animationFramePeepExecute(args.args));
 }

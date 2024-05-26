@@ -15,9 +15,13 @@ import { speedPeepExecuteArgs } from "../actions/peepSpeed";
 import { colourPeepExecuteArgs } from "../actions/peepColour";
 import { colour, colourList } from "../helpers/colours";
 import { customImageFor } from "../helpers/customImages";
-import { staffTypeList } from "../helpers/staffTypes";
+import { staffType, staffTypeList } from "../helpers/staffTypes";
 import { costumeList } from "../helpers/costumes";
 import { animationList } from "../helpers/animations";
+import { staffTypeExecuteArgs } from "../actions/staffSetType";
+import { staffCostumeExecuteArgs } from "../actions/staffSetCostume";
+import { animationPeepExecuteArgs } from "../actions/peepAnimation";
+import { animationFramePeepExecuteArgs } from "../actions/peepAnimationFrame";
 
 const pointingFingerIcon: ImageAnimation = { frameBase: 5318, frameCount: 8, frameDuration: 2, };
 const paperIcon: ImageAnimation = { frameBase: 5277, frameCount: 7, frameDuration: 4, };
@@ -47,7 +51,6 @@ const staticControls = [
 		{
 			model._select(p); model._tabImage(p);
 			model._name.set(p.name); model._availableAnimations.set(p.availableAnimations);
-			debug(`Frames: ${p.animationLength}`);
 			if (p.type === "staff") {
 				const staff = <Staff>p;
 				model._availableCostumes.set(staff.availableCostumes)
@@ -60,7 +63,7 @@ const staticControls = [
 		width: 24,
 		image: flagsIcon,
 		tooltip: "Freeze a peep in place",
-		//disabled: compute(model._isStaff, s => !s),
+		disabled: compute(model._isStaff, s => !s),
 		isPressed: model._isFrozen,
 		padding: {top: 1},
 		onChange: (pressed) => {
@@ -170,7 +173,7 @@ export const windowPeepEditor = tabwindow({
 									text: "X position:",
 									height: 13,
 									padding: {top: 0, bottom: 0, left: 10},
-									//disabled: compute(model._isStaff, s => !s),
+									disabled: compute(model._isFrozen, f => !f),
 								}),
 								spinner({
 									minimum: 0,
@@ -178,7 +181,7 @@ export const windowPeepEditor = tabwindow({
 									height: 13,
 									width: "55%",
 									padding: {top: 0, right: 10,  bottom: 0},
-									//disabled: compute(model._isStaff, s => !s),
+									disabled: compute(model._isFrozen, f => !f),
 									disabledMessage: "Not available",
 									step: 1,
 									onChange: (_, adjustment: number) => {
@@ -193,7 +196,7 @@ export const windowPeepEditor = tabwindow({
 									text: "Y position:",
 									height: 12,
 									padding: {top: 0, bottom: 0, left: 10},
-									//disabled: compute(model._isStaff, s => !s),
+									disabled: compute(model._isFrozen, f => !f),
 								}),
 								spinner({
 									minimum: 0,
@@ -201,7 +204,7 @@ export const windowPeepEditor = tabwindow({
 									height: 13,
 									width: "55%",
 									padding: {top: 0, right: 10,  bottom: 0},
-									//disabled: compute(model._isStaff, s => !s),
+									disabled: compute(model._isFrozen, f => !f),
 									disabledMessage: "Not available",
 									step: 1,
 									onChange: (_, adjustment: number) => {
@@ -216,7 +219,7 @@ export const windowPeepEditor = tabwindow({
 									text: "Z position:",
 									height: 13,
 									padding: {top: 0, bottom: 0, left: 10},
-									//disabled: compute(model._isStaff, s => !s),
+									disabled: compute(model._isFrozen, f => !f),
 								}),
 								spinner({
 									minimum: 0,
@@ -224,7 +227,7 @@ export const windowPeepEditor = tabwindow({
 									height: 13,
 									width: "55%",
 									padding: {top: 0, right: 10,  bottom: 0},
-									//disabled: compute(model._isStaff, s => !s),
+									disabled: compute(model._isFrozen, f => !f),
 									disabledMessage: "Not available",
 									step: 1,
 									onChange: (_, adjustment: number) => {
@@ -239,7 +242,7 @@ export const windowPeepEditor = tabwindow({
 									text: "Speed:",
 									height: 13,
 									padding: {top: 10, bottom: 5, left: 10},
-									//disabled: compute(model._isStaff, s => !s),
+									disabled: compute(model._isStaff, s => !s),
 								}),
 								spinner({
 									minimum: 0,
@@ -249,7 +252,7 @@ export const windowPeepEditor = tabwindow({
 									height: 13,
 									width: "55%",
 									padding: {top: 10, right: 10, bottom: 5},
-									//disabled: compute(model._isStaff, s => !s),
+									disabled: compute(model._isStaff, s => !s),
 									disabledMessage: "Not available",
 									onChange: (_, adjustment: number) => {
 										const peep = model._selectedPeep.get();
@@ -290,6 +293,7 @@ export const windowPeepEditor = tabwindow({
 				groupbox({
 					text: "Staff member appearance",
 					spacing: 2,
+					gap: {top: 16, bottom: 16},
 					visibility: compute(model._isStaff, g => (g) ? "visible" : "none"),
 					content: [
 						horizontal([
@@ -298,7 +302,7 @@ export const windowPeepEditor = tabwindow({
 								height: 13,
 								visibility: compute(model._isStaff, g => (g) ? "visible" : "none"),
 								disabled: model._isPeepSelected,
-								padding: { top: 5, bottom: 0, left: 10 },
+								padding: { left: 10 },
 							}),
 							dropdown({
 								height: 13,
@@ -306,8 +310,15 @@ export const windowPeepEditor = tabwindow({
 								visibility: compute(model._isStaff, g => (g) ? "visible" : "none"),
 								disabled: model._isPeepSelected,
 								disabledMessage: "Not available",
-								padding: { top: 5, right: 10, bottom: 0 },
+								padding: { right: 10 },
 								items: staffTypeList,
+								selectedIndex: compute(model._staffType, t => staffType.indexOf(t)),
+								onChange: (index) => {
+									const staff = <Staff>model._selectedPeep.get();
+									if (staff !== undefined){
+										context.executeAction("pe-stafftype", staffTypeExecuteArgs(staff.id, staffType[index]));
+									}
+								}
 							})
 						]),
 						horizontal([
@@ -316,7 +327,7 @@ export const windowPeepEditor = tabwindow({
 								height: 13,
 								visibility: compute(model._isEntertainer, e => (e) ? "visible" : "none"),
 								disabled: model._isPeepSelected,
-								padding: { top: 0, bottom: 10, left: 10 },
+								padding: { left: 10 },
 							}),
 							dropdown({
 								height: 13,
@@ -324,31 +335,37 @@ export const windowPeepEditor = tabwindow({
 								visibility: compute(model._isEntertainer, e => (e) ? "visible" : "none"),
 								disabled: model._isPeepSelected,
 								disabledMessage: "Not available",
-								padding: { top: 0, right: 10, bottom: 10 },
-								items: compute(model._availableCostumes, c => (c.map(costumeList)))
+								padding: { right: 10 },
+								items: costumeList,
+								selectedIndex: compute(model._costume, c => model._availableCostumes.get().indexOf(c)),
+								onChange: (index) => {
+									const staff = <Staff>model._selectedPeep.get();
+									if (staff !== undefined){
+										context.executeAction("pe-staffcostume", staffCostumeExecuteArgs(staff.id, model._availableCostumes.get()[index]));
+									}
+								}
 							})
 						]),
 						horizontal([
 							label({
 								text: "Uniform colour:",
 								height: 13,
-								visibility: compute(model._isEntertainer, e => (!e) ? "visible" : "none"),
+								visibility: compute(model._costume, model._isGuest, (c, g) => ((c === "none" || c === "handyman" || c === "mechanic" || c === "security1" || c === "security2") && !g) ? "visible" : "none"),
 								disabled: model._isPeepSelected,
-								padding: { top: 0, bottom: 10, left: 10 },
+								padding: { left: 10 },
 							}),
 							textbox({
 								text: compute(model._colour, c => colourList[c] || ""),
 								width: "51%",
 								height: 13,
-								visibility: compute(model._isEntertainer, e => (!e) ? "visible" : "none"),
+								visibility: compute(model._costume, model._isGuest, (c, g) => ((c === "none" || c === "handyman" || c === "mechanic" || c === "security1" || c === "security2") && !g) ? "visible" : "none"),
 								disabled: true,
-								padding: { top: 0, right: 0, bottom: 10 },
 							}),
 							colourPicker({
 								colour: compute(model._colour, c => (c) || 0),
-								visibility: compute(model._isEntertainer, e => (!e) ? "visible" : "none"),
+								visibility: compute(model._costume, model._isGuest, (c, g) => ((c === "none" || c === "handyman" || c === "mechanic" || c === "security1" || c === "security2") && !g) ? "visible" : "none"),
 								disabled: model._isPeepSelected,
-								padding: { right: 10, bottom: 10 },
+								padding: { right: 10 },
 								onChange: (colour) => {
 									const peep = model._selectedPeep.get();
 									if (peep !== undefined) {
@@ -463,38 +480,70 @@ export const windowPeepEditor = tabwindow({
 				groupbox({
 					text: "Animation",
 					spacing: 2,
+					gap: {top: 16, bottom: 16},
 					content: [
 						horizontal([
 							label({
 								text: "Animation:",
 								height: 13,
 								disabled: model._isPeepSelected,
-								padding: { top: 5, bottom: 0, left: 10 },
+								padding: { left: 10 },
 							}),
-							dropdown({
+							dropdown({	//No selection and Guest
 								height: 13,
 								width: "55%",
 								disabled: model._isPeepSelected,
 								disabledMessage: "Not available",
-								padding: { top: 5, right: 10, bottom: 0 },
+								padding: { right: 10, },
+								visibility: compute(model._isPeepSelected, model._isGuest, (p, g) => (p || g)? "visible" : "none"),
 								items: compute(model._availableAnimations, a => a.map(animationList)),
+								selectedIndex: compute(model._animation, a => model._availableGuestAnimations.get().indexOf(<GuestAnimation>a)),
+								onChange: (index) => {
+									const peep = model._selectedPeep.get();
+									if (peep !== undefined){
+										context.executeAction("pe-animationpeep", animationPeepExecuteArgs(peep.id, model._availableAnimations.get()[index]));
+									}
+								}
+							}),
+							dropdown({ 	//Staff
+								height: 13,
+								width: "55%",
+								disabled: model._isPeepSelected,
+								disabledMessage: "Not available",
+								padding: { right: 10, },
+								visibility: compute(model._isStaff, s => (s)? "visible" : "none"),
+								items: compute(model._availableAnimations, a => a.map(animationList)),
+								selectedIndex: compute(model._animation, a => model._availableStaffAnimations.get().indexOf(<StaffAnimation>a)),
+								onChange: (index) => {
+									const peep = model._selectedPeep.get();
+									if (peep !== undefined){
+										context.executeAction("pe-animationpeep", animationPeepExecuteArgs(peep.id, model._availableAnimations.get()[index]));
+									}
+								}
 							})
 						]),
 						horizontal([
 							label({
-								text: "Animation frame:",
+								text: compute(model._animationLength, l => `Frame: (max: ${l-1})` || "Frame:"),
 								height: 13,
-								disabled: model._isPeepSelected,
-								padding: { top: 0, bottom: 10, left: 10 },
+								disabled: compute(model._isPeepSelected, model._isFrozen, (p,f) => p || !f),
+								padding: { left: 10 },
 							}),
 							spinner({
 								height: 13,
 								width: "55%",
-								disabled: model._isPeepSelected,
+								disabled: compute(model._isPeepSelected, model._isFrozen, (p,f) => p || !f),
 								disabledMessage: "Not available",
-								padding: { top: 0, right: 10, bottom: 10 },
+								padding: { right: 10 },
 								value: model._animationFrame,
-								step: 1,
+								minimum: 0,
+								maximum: compute(model._animationLength, l => l-1),
+								onChange: (value, adjustment) => {
+									const peep = model._selectedPeep.get();
+									if (peep !== undefined){
+										context.executeAction("pe-animationframepeep", animationFramePeepExecuteArgs(peep.id, value, adjustment));
+									}
+								}
 							})
 						]),
 					]

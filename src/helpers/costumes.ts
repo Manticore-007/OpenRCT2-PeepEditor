@@ -1,3 +1,5 @@
+import { compute } from "openrct2-flexui";
+import { model } from "../viewmodel/peepViewModel";
 
 
 const costumeFriendlyNames = {
@@ -19,6 +21,9 @@ const costumeFriendlyNames = {
     "pirate": "{INLINE_SPRITE}{8}{20}{0}{0} Pirate"
 }
 
-export function costumeList(value: StaffCostume): string{
+function convertToFriendlyName(value: StaffCostume | null): string{
+    if (value === null) return "";
     return costumeFriendlyNames[value]
 }
+
+export const costumeList = compute(model._availableCostumes, c => (c.map(convertToFriendlyName)));

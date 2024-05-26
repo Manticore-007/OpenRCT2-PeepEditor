@@ -15,18 +15,21 @@ export class peepViewModel
     readonly _x = store<number>(0);
     readonly _y = store<number>(0);
     readonly _z = store<number>(0);
-    readonly _availableAnimations = store<GuestAnimation[]|StaffAnimation[]>([]);
+    readonly _availableAnimations = store<GuestAnimation[] | StaffAnimation[]>([]);
     readonly _animationFrame = store<number>(0);
+    readonly _animationLength = store<number>(1);
+    readonly _animation = store<GuestAnimation | StaffAnimation>("walking");
 
 
     //staff
     
-    readonly _staffType = store<StaffType | null>(null);
+    readonly _staffType = store<StaffType>("handyman");
     readonly _colour = store<number>(100);
     readonly _availableCostumes = store<StaffCostume[]>([]);
-    readonly _costume = store<StaffCostume | null>(null);
+    readonly _costume = store<StaffCostume>("none");
     readonly _orders = store<number>(0);
     readonly _patrolArea = store<PatrolArea | null>(null);
+    readonly _availableStaffAnimations = store<StaffAnimation[]>([]);
 
 
     //guest
@@ -57,6 +60,7 @@ export class peepViewModel
     readonly _hasHat = store<boolean>(false);
     readonly _hasBalloon = store<boolean>(false);
     readonly _hasUmbrella = store<boolean>(false);
+    readonly _availableGuestAnimations = store<GuestAnimation[]>([]);
 
 
     //custom
@@ -97,25 +101,12 @@ export class peepViewModel
         this._isStaff.set(false);
         this._isGuest.set(false);
         this._colour.set(100);
+        this._animationLength.set(1);
     }
 
     _select(peep: Guest | Staff): void
     {
         this._selectedPeep.set(peep)
-    }
-
-    _freeze(frozen: boolean): void {
-        const peep = this._selectedPeep.get();
-        if (peep !== undefined) {
-            if (frozen) {
-                peep.energy = 0;
-                this._isFrozen.set(true);
-            }
-            else {
-                peep.energy = 96;
-                this._isFrozen.set(false);
-            }
-        }
     }
 
     _tabImage(peep: Guest | Staff): void {
@@ -151,12 +142,21 @@ export class peepViewModel
             this._x.set(peep.x);
             this._y.set(peep.y);
             this._z.set(peep.z);
+            this._name.set(peep.name);
             this._energy.set(peep.energy);
-            this._colour.set(staff.colour);
+            this._availableAnimations.set(peep.availableAnimations);
+            this._animation.set(peep.animation);
+            this._animationFrame.set(peep.animationOffset);
+            this._animationLength.set(peep.animationLength);
             peep.energy === 0 ? this._isFrozen.set(true) : this._isFrozen.set(false);
             if (peep.peepType === "staff"){
                 this._isStaff.set(true); this._isGuest.set(false)
+                this._colour.set(staff.colour);
+                this._staffType.set(staff.staffType);
                 staff.staffType === "entertainer"? this._isEntertainer.set(true) : this._isEntertainer.set(false);
+                this._availableCostumes.set(staff.availableCostumes);
+                this._costume.set(<StaffCostume>staff.costume);
+                this._availableStaffAnimations.set(staff.availableAnimations);
             }
             if (peep.peepType === "guest"){
                 this._isGuest.set(true); this._isStaff.set(false);
@@ -165,6 +165,7 @@ export class peepViewModel
                 this._hatColour.set(guest.hatColour);
                 this._balloonColour.set(guest.balloonColour);
                 this._umbrellaColour.set(guest.umbrellaColour);
+                this._availableGuestAnimations.set(guest.availableAnimations);
                 guest.hasItem({type: "hat"})? this._hasHat.set(true) : this._hasHat.set(false);
                 guest.hasItem({type: "balloon"})? this._hasBalloon.set(true) : this._hasBalloon.set(false);
                 guest.hasItem({type: "umbrella"})? this._hasUmbrella.set(true) : this._hasUmbrella.set(false);
