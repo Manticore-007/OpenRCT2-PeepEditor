@@ -45,6 +45,7 @@ const staticControls = [
 		width: 24,
 		height: 24,
 		image: "eyedropper",
+		tooltip: "Select a peep a the map",
 		isPressed: twoway(model._isPicking),
 		padding: {top: 1},
 		onChange: pressed => togglePeepPicker(pressed, p =>
@@ -62,7 +63,7 @@ const staticControls = [
 		height: 24,
 		width: 24,
 		image: flagsIcon,
-		tooltip: "Freeze a peep in place",
+		tooltip: "Freeze the selected peep in place",
 		disabled: compute(model._isStaff, s => !s),
 		isPressed: model._isFrozen,
 		padding: {top: 1},
@@ -76,6 +77,7 @@ const staticControls = [
 		height: 24,
 		width: 24,
 		image: nameIcon,
+		tooltip: "Give the selected peep a new name, even a longer name than usual",
 		disabled: model._isPeepSelected,
 		padding: {top: 1},
 		onClick: () => {
@@ -96,6 +98,7 @@ const staticControls = [
 		height: 24,
 		width: 24,
 		image: locateIcon,
+		tooltip: "Focus the main viewport on the selected peep",
 		disabled: model._isPeepSelected,
 		padding: {top: 1},
 		onClick: () => {
@@ -107,6 +110,7 @@ const staticControls = [
 		height: 24,
 		width: 24,
 		image: deleteIcon,
+		tooltip: "Remove the selected peep from existence",
 		disabled: model._isPeepSelected,
 		padding: {top: 1},
 		onClick: () => {
@@ -119,6 +123,7 @@ const staticControls = [
 		height: 24,
 		width: 24,
 		image: allGuestsIcon,
+		tooltip: "Select all guests on the map",
 		padding: {top: 1},
 	})
 ]
