@@ -1,7 +1,7 @@
 
 /// <reference path="../../lib/openrct2.d.ts" />
 
-import { button, horizontal, label, tab, tabwindow, vertical, viewport, toggle, twoway, compute, Colour, window, groupbox, spinner, dropdown, textbox, colourPicker, graphics } from "openrct2-flexui";
+import { button, horizontal, label, tab, tabwindow, vertical, viewport, toggle, twoway, compute, Colour, window, groupbox, spinner, dropdown, textbox, colourPicker, graphics, checkbox, store } from "openrct2-flexui";
 import { togglePeepPicker } from "../actions/peepPicker";
 import { locate } from "../actions/peepLocator";
 import { model } from "../viewmodel/peepViewModel";
@@ -22,6 +22,10 @@ import { staffTypeExecuteArgs } from "../actions/staffSetType";
 import { staffCostumeExecuteArgs } from "../actions/staffSetCostume";
 import { animationPeepExecuteArgs } from "../actions/peepAnimation";
 import { animationFramePeepExecuteArgs } from "../actions/peepAnimationFrame";
+import { staffOrdersExecuteArgs } from "../actions/staffSetOrders";
+
+const securityOrders = store<boolean>(true);
+const entertainerOrders = store<boolean>(true);
 
 const pointingFingerIcon: ImageAnimation = { frameBase: 5318, frameCount: 8, frameDuration: 2, };
 const paperIcon: ImageAnimation = { frameBase: 5277, frameCount: 7, frameDuration: 4, };
@@ -305,14 +309,14 @@ export const windowPeepEditor = tabwindow({
 							label({
 								text: "Staff type:",
 								height: 13,
-								visibility: compute(model._isStaff, g => (g) ? "visible" : "none"),
+								visibility: compute(model._isPeepSelected, model._isStaff, (p, s) => (!p &&s) ? "visible" : "none"),
 								disabled: model._isPeepSelected,
 								padding: { left: 10 },
 							}),
 							dropdown({
 								height: 13,
 								width: "55%",
-								visibility: compute(model._isStaff, g => (g) ? "visible" : "none"),
+								visibility: compute(model._isPeepSelected, model._isStaff, (p, s) => (!p &&s) ? "visible" : "none"),
 								disabled: model._isPeepSelected,
 								disabledMessage: "Not available",
 								padding: { right: 10 },
@@ -330,14 +334,14 @@ export const windowPeepEditor = tabwindow({
 							label({
 								text: "Costume:",
 								height: 13,
-								visibility: compute(model._isEntertainer, e => (e) ? "visible" : "none"),
+								visibility: compute(model._isPeepSelected, model._isEntertainer, (p, e) => (!p &&e) ? "visible" : "none"),
 								disabled: model._isPeepSelected,
 								padding: { left: 10 },
 							}),
 							dropdown({
 								height: 13,
 								width: "55%",
-								visibility: compute(model._isEntertainer, e => (e) ? "visible" : "none"),
+								visibility: compute(model._isPeepSelected, model._isEntertainer, (p, e) => (!p &&e) ? "visible" : "none"),
 								disabled: model._isPeepSelected,
 								disabledMessage: "Not available",
 								padding: { right: 10 },
@@ -355,7 +359,7 @@ export const windowPeepEditor = tabwindow({
 							label({
 								text: "Uniform colour:",
 								height: 13,
-								visibility: compute(model._costume, model._isGuest, (c, g) => ((c === "none" || c === "handyman" || c === "mechanic" || c === "security1" || c === "security2") && !g) ? "visible" : "none"),
+								visibility: compute(model._isPeepSelected, model._costume, model._isGuest, (p, c, g) => (!p && (c === "none" || c === "handyman" || c === "mechanic" || c === "security1" || c === "security2") && !g) ? "visible" : "none"),
 								disabled: model._isPeepSelected,
 								padding: { left: 10 },
 							}),
@@ -363,12 +367,12 @@ export const windowPeepEditor = tabwindow({
 								text: compute(model._colour, c => colourList[c] || ""),
 								width: "51%",
 								height: 13,
-								visibility: compute(model._costume, model._isGuest, (c, g) => ((c === "none" || c === "handyman" || c === "mechanic" || c === "security1" || c === "security2") && !g) ? "visible" : "none"),
+								visibility: compute(model._isPeepSelected, model._costume, model._isGuest, (p, c, g) => (!p && (c === "none" || c === "handyman" || c === "mechanic" || c === "security1" || c === "security2") && !g) ? "visible" : "none"),
 								disabled: true,
 							}),
 							colourPicker({
 								colour: compute(model._colour, c => (c) || 0),
-								visibility: compute(model._costume, model._isGuest, (c, g) => ((c === "none" || c === "handyman" || c === "mechanic" || c === "security1" || c === "security2") && !g) ? "visible" : "none"),
+								visibility: compute(model._isPeepSelected, model._costume, model._isGuest, (p, c, g) => (!p && (c === "none" || c === "handyman" || c === "mechanic" || c === "security1" || c === "security2") && !g) ? "visible" : "none"),
 								disabled: model._isPeepSelected,
 								padding: { right: 10 },
 								onChange: (colour) => {
@@ -557,11 +561,119 @@ export const windowPeepEditor = tabwindow({
 		}),
 		tab({
 			image: pointingFingerIcon,
+			height: "auto",
 			content: [
-				label({
-					text: "{WHITE}Options / Flags",
-					alignment: "centred",
-					padding: [3, 0]
+				groupbox({
+					text: "Options",
+					visibility: compute(model._isPeepSelected, p => p ? "visible" : "none"),
+					content: [
+						label({
+							text: "Here you can set staff orders or guest flags",
+							alignment: "centred",
+							visibility: compute(model._isPeepSelected, p => p ? "visible" : "none"),
+						})
+					]
+				}),
+				groupbox ({
+					text: "Staff orders",
+					spacing: 2,
+					gap: {top: 16, bottom: 16},
+					visibility: compute(model._isStaff, s => s ? "visible" : "none"),
+					content: [
+						checkbox({
+							text: "{INLINE_SPRITE}{247}{19}{0}{0} Sweep foothpaths",
+							visibility: compute(model._isHandyman, h => h ? "visible" : "none"),
+							isChecked: compute(model._orders, o => (o & (1 << 0)) !== 0),
+							onChange: (checked) => {
+								const peep = model._selectedPeep.get();
+								if (peep !== undefined) {
+									context.executeAction("pe-stafforders", staffOrdersExecuteArgs(peep.id, checked, (1 << 0)));
+								}
+							}
+						}),
+						checkbox({
+							text: "{INLINE_SPRITE}{248}{19}{0}{0} Water gardens",
+							visibility: compute(model._isHandyman, h => h ? "visible" : "none"),
+							isChecked: compute(model._orders, o => (o & (1 << 1)) !== 0),
+							onChange: (checked) => {
+								const peep = model._selectedPeep.get();
+								if (peep !== undefined) {
+									context.executeAction("pe-stafforders", staffOrdersExecuteArgs(peep.id, checked, (1 << 1)));
+								}
+							}
+						}),
+						checkbox({
+							text: "{INLINE_SPRITE}{249}{19}{0}{0} Empty litter bins",
+							visibility: compute(model._isHandyman, h => h ? "visible" : "none"),
+							isChecked: compute(model._orders, o => (o & (1 << 2)) !== 0),
+							onChange: (checked) => {
+								const peep = model._selectedPeep.get();
+								if (peep !== undefined) {
+									context.executeAction("pe-stafforders", staffOrdersExecuteArgs(peep.id, checked, (1 << 2)));
+								}
+							}
+						}),
+						checkbox({
+							text: "{INLINE_SPRITE}{250}{19}{0}{0} Mow grass",
+							visibility: compute(model._isHandyman, h => h ? "visible" : "none"),
+							isChecked: compute(model._orders, o => (o & (1 << 3)) !== 0),
+							onChange: (checked) => {
+								const peep = model._selectedPeep.get();
+								if (peep !== undefined) {
+									context.executeAction("pe-stafforders", staffOrdersExecuteArgs(peep.id, checked, (1 << 3)));
+								}
+							}
+						}),
+						checkbox({
+							text: "{INLINE_SPRITE}{251}{19}{0}{0} Inspect rides",
+							visibility: compute(model._isMechanic, m => m ? "visible" : "none"),
+							isChecked: compute(model._orders, o => (o & (1 << 0)) !== 0),
+							onChange: (checked) => {
+								const peep = model._selectedPeep.get();
+								if (peep !== undefined) {
+									context.executeAction("pe-stafforders", staffOrdersExecuteArgs(peep.id, checked, (1 << 0)));
+								}
+							}
+						}),
+						checkbox({
+							text: "{INLINE_SPRITE}{252}{19}{0}{0} Fix Rides",
+							visibility: compute(model._isMechanic, m => m ? "visible" : "none"),
+							isChecked: compute(model._orders, o => (o & (1 << 1)) !== 0),
+							onChange: (checked) => {
+								const peep = model._selectedPeep.get();
+								if (peep !== undefined) {
+									context.executeAction("pe-stafforders", staffOrdersExecuteArgs(peep.id, checked, (1 << 1)));
+								}
+							}
+						}),
+						checkbox({
+							text: "{INLINE_SPRITE}{253}{19}{0}{0} Surveilling park",
+							visibility: compute(model._isSecurity, s => s ? "visible" : "none"),
+							isChecked: twoway(securityOrders),
+							onChange: (checked) => {
+								if (!checked){
+									securityOrders.set(true);
+									ui.showError("Can't be turned off", "Security guards never take breaks");
+								}
+							}
+						}),
+						checkbox({
+							text: "{INLINE_SPRITE}{116}{21}{0}{0} Keep guests happy",
+							visibility: compute(model._isEntertainer, e => e ? "visible" : "none"),
+							isChecked: twoway(entertainerOrders),
+							onChange: (checked) => {
+								if (!checked){
+									entertainerOrders.set(true);
+									ui.showError("Can't be turned off", "Rule 7: have fun");
+								}
+							}
+						}),
+					]
+				}),
+				groupbox({
+					text: "Guest flags",
+					visibility: compute(model._isGuest, g => g ? "visible" : "none"),
+					content: [],
 				})
 			]
 		}),
