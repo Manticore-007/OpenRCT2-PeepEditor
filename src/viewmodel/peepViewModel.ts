@@ -68,6 +68,9 @@ export class peepViewModel
     readonly _image = store<number>(6430 | (Colour.SalmonPink) << 19 | (Colour.SalmonPink << 24) | (0b111 << 29))
     readonly _isGuest = store<boolean>(false);
     readonly _isStaff = store<boolean>(false);
+    readonly _isHandyman = store<boolean>(false);
+    readonly _isMechanic = store<boolean>(false);
+    readonly _isSecurity = store<boolean>(false);
     readonly _isEntertainer = store<boolean>(false);
     readonly _isPicking = store<boolean>(false);
     readonly _isFrozen = compute(this._selectedPeep, p => (p?.energy === 0) ? true : false);
@@ -102,6 +105,11 @@ export class peepViewModel
         this._isGuest.set(false);
         this._colour.set(100);
         this._animationLength.set(1);
+        this._isHandyman.set(false);
+        this._isMechanic.set(false);
+        this._isSecurity.set(false);
+        this._isEntertainer.set(false);
+        this._orders.set(0);
     }
 
     _select(peep: Guest | Staff): void
@@ -153,10 +161,14 @@ export class peepViewModel
                 this._isStaff.set(true); this._isGuest.set(false)
                 this._colour.set(staff.colour);
                 this._staffType.set(staff.staffType);
+                staff.staffType === "handyman"? this._isHandyman.set(true) : this._isHandyman.set(false);
+                staff.staffType === "mechanic"? this._isMechanic.set(true) : this._isMechanic.set(false);
+                staff.staffType === "security"? this._isSecurity.set(true) : this._isSecurity.set(false);
                 staff.staffType === "entertainer"? this._isEntertainer.set(true) : this._isEntertainer.set(false);
                 this._availableCostumes.set(staff.availableCostumes);
                 this._costume.set(<StaffCostume>staff.costume);
                 this._availableStaffAnimations.set(staff.availableAnimations);
+                this._orders.set(staff.orders);
             }
             if (peep.peepType === "guest"){
                 this._isGuest.set(true); this._isStaff.set(false);
