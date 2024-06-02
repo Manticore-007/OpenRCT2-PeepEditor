@@ -1,5 +1,4 @@
 import { Colour, compute, store } from "openrct2-flexui";
-
 const windowTitle = "Peep Editor";
 
 export class peepViewModel
@@ -11,14 +10,13 @@ export class peepViewModel
     readonly _destination = store<CoordsXYZ | null>(null);
     readonly _energy = store<number>(96);
     readonly _energyTarget = store<number>(96);
-    readonly _flag = store<boolean>(false);
     readonly _x = store<number>(0);
     readonly _y = store<number>(0);
     readonly _z = store<number>(0);
     readonly _availableAnimations = store<GuestAnimation[] | StaffAnimation[]>([]);
     readonly _animationFrame = store<number>(0);
     readonly _animationLength = store<number>(1);
-    readonly _animation = store<GuestAnimation | StaffAnimation>("walking");
+    readonly _animation = store<GuestAnimation | StaffAnimation>();
 
 
     //staff
@@ -61,6 +59,7 @@ export class peepViewModel
     readonly _hasBalloon = store<boolean>(false);
     readonly _hasUmbrella = store<boolean>(false);
     readonly _availableGuestAnimations = store<GuestAnimation[]>([]);
+    readonly _flags = store<number>(0);
 
 
     //custom
@@ -86,13 +85,8 @@ export class peepViewModel
         this._onGameTick = context.subscribe("interval.tick", () => this._onGameTickExecuted())
     }
 
-    _close(): void
+    _reset(): void
     {
-        if (this._onGameTick)
-        {
-            this._onGameTick.dispose();
-        }
-        this._onGameTick = undefined;
         this._selectedPeep.set(undefined);
         this._isFrozen.set(false);
         this._name.set(windowTitle);
@@ -104,12 +98,22 @@ export class peepViewModel
         this._isStaff.set(false);
         this._isGuest.set(false);
         this._colour.set(100);
+        this._animation.set("walking");
         this._animationLength.set(1);
         this._isHandyman.set(false);
         this._isMechanic.set(false);
         this._isSecurity.set(false);
         this._isEntertainer.set(false);
         this._orders.set(0);
+    }
+
+    _dispose(): void
+    {
+        if (this._onGameTick)
+        {
+            this._onGameTick.dispose();
+        }
+        this._onGameTick = undefined;
     }
 
     _select(peep: Guest | Staff): void
@@ -153,10 +157,10 @@ export class peepViewModel
             this._name.set(peep.name);
             this._energy.set(peep.energy);
             this._availableAnimations.set(peep.availableAnimations);
-            this._animation.set(peep.animation);
-            this._animationFrame.set(peep.animationOffset);
-            this._animationLength.set(peep.animationLength);
-            peep.energy === 0 ? this._isFrozen.set(true) : this._isFrozen.set(false);
+            // this._animation.set(peep.animation);
+            // this._animationFrame.set(peep.animationOffset);
+            // this._animationLength.set(peep.animationLength);
+            // peep.energy === 0 ? this._isFrozen.set(true) : this._isFrozen.set(false);
             if (peep.peepType === "staff"){
                 this._isStaff.set(true); this._isGuest.set(false)
                 this._colour.set(staff.colour);

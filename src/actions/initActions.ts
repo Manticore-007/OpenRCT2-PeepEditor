@@ -1,3 +1,4 @@
+import { GuestFlagsArgs, guestFlagsExecute } from "./guestFlags";
 import { PeepAnimationArgs, animationPeepExecute } from "./peepAnimation";
 import { PeepAnimationFrameArgs, animationFramePeepExecute } from "./peepAnimationFrame";
 import { PeepColourArgs, colourPeepExecute } from "./peepColour";
@@ -24,4 +25,5 @@ context.registerAction<StaffOrdersArgs>("pe-stafforders", (args) => queryPermiss
 context.registerAction<StaffCostumeArgs>("pe-staffcostume", (args) => queryPermissionCheck(args), (args) => staffCostumeExecute(args.args));
 context.registerAction<PeepAnimationArgs>("pe-animationpeep", (args) => queryPermissionCheck(args), (args) => animationPeepExecute(args.args));
 context.registerAction<PeepAnimationFrameArgs>("pe-animationframepeep", (args) => queryPermissionCheck(args), (args) => animationFramePeepExecute(args.args));
+context.registerAction<GuestFlagsArgs>("pe-guestflags", (args) => queryPermissionCheck(args), (args) => guestFlagsExecute(args.args));
 }
