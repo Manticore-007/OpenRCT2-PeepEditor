@@ -23,6 +23,7 @@ import { staffCostumeExecuteArgs } from "../actions/staffSetCostume";
 import { animationPeepExecuteArgs } from "../actions/peepAnimation";
 import { animationFramePeepExecuteArgs } from "../actions/peepAnimationFrame";
 import { staffOrdersExecuteArgs } from "../actions/staffSetOrders";
+import { guestFlagsExecuteArgs } from "../actions/guestFlags";
 
 const securityOrders = store<boolean>(true);
 const entertainerOrders = store<boolean>(true);
@@ -139,10 +140,22 @@ export const windowPeepEditor = tabwindow({
 	colours: [Colour.DarkYellow, Colour.DarkYellow, Colour.DarkYellow],
 	padding: 5,
 	onTabChange: () => ui.tool?.cancel(),
+	onUpdate: () => {
+		const peep = model._selectedPeep.get();
+		if (peep !== undefined) {
+			if (peep.peepType !== "guest" && peep.peepType !== "staff") {
+				model._reset();
+			}
+			else{
+				model._animation.set(peep.animation);				
+			}
+		}
+	},
 	onOpen: () => model._open(),
 	onClose: () => {
 		ui.tool?.cancel();
-		model._close();
+		model._reset();
+		model._dispose();
 		multiplier = 1;
 	},
 	tabs: [
@@ -673,7 +686,278 @@ export const windowPeepEditor = tabwindow({
 				groupbox({
 					text: "Guest flags",
 					visibility: compute(model._isGuest, g => g ? "visible" : "none"),
-					content: [],
+					content: [
+						horizontal([
+							vertical([
+								checkbox({
+									text: "Leave park",
+									visibility: compute(model._isGuest, g => g ? "visible" : "none"),
+									padding: -2,
+									isChecked: compute(model._flags, f => (f & (1 << 0)) !== 0),
+									onChange: (checked) => {
+										const peep = model._selectedPeep.get();
+										if (peep !== undefined) {
+											context.executeAction("pe-guestflags", guestFlagsExecuteArgs(peep.id, checked, "leavingPark"));
+										}
+									}
+								}),
+								checkbox({
+									text: "Slow walk",
+									visibility: compute(model._isGuest, g => g ? "visible" : "none"),
+									padding: -2,
+									isChecked: compute(model._flags, f => (f & (1 << 0)) !== 0),
+									onChange: (checked) => {
+										const peep = model._selectedPeep.get();
+										if (peep !== undefined) {
+											context.executeAction("pe-guestflags", guestFlagsExecuteArgs(peep.id, checked, "slowWalk"));
+										}
+									}
+								}),
+								checkbox({
+									text: "Tracking",
+									visibility: compute(model._isGuest, g => g ? "visible" : "none"),
+									padding: -2,
+									isChecked: compute(model._flags, f => (f & (1 << 0)) !== 0),
+									onChange: (checked) => {
+										const peep = model._selectedPeep.get();
+										if (peep !== undefined) {
+											context.executeAction("pe-guestflags", guestFlagsExecuteArgs(peep.id, checked, "tracking"));
+										}
+									}
+								}),
+								checkbox({
+									text: "Waving",
+									visibility: compute(model._isGuest, g => g ? "visible" : "none"),
+									padding: -2,
+									isChecked: compute(model._flags, f => (f & (1 << 0)) !== 0),
+									onChange: (checked) => {
+										const peep = model._selectedPeep.get();
+										if (peep !== undefined) {
+											context.executeAction("pe-guestflags", guestFlagsExecuteArgs(peep.id, checked, "waving"));
+										}
+									}
+								}),
+								checkbox({
+									text: "Photo",
+									visibility: compute(model._isGuest, g => g ? "visible" : "none"),
+									padding: -2,
+									isChecked: compute(model._flags, f => (f & (1 << 0)) !== 0),
+									onChange: (checked) => {
+										const peep = model._selectedPeep.get();
+										if (peep !== undefined) {
+											context.executeAction("pe-guestflags", guestFlagsExecuteArgs(peep.id, checked, "photo"));
+										}
+									}
+								}),
+								checkbox({
+									text: "Painting",
+									visibility: compute(model._isGuest, g => g ? "visible" : "none"),
+									padding: -2,
+									isChecked: compute(model._flags, f => (f & (1 << 0)) !== 0),
+									onChange: (checked) => {
+										const peep = model._selectedPeep.get();
+										if (peep !== undefined) {
+											context.executeAction("pe-guestflags", guestFlagsExecuteArgs(peep.id, checked, "painting"));
+										}
+									}
+								}),
+								checkbox({
+									text: "Wow",
+									visibility: compute(model._isGuest, g => g ? "visible" : "none"),
+									padding: -2,
+									isChecked: compute(model._flags, f => (f & (1 << 0)) !== 0),
+									onChange: (checked) => {
+										const peep = model._selectedPeep.get();
+										if (peep !== undefined) {
+											context.executeAction("pe-guestflags", guestFlagsExecuteArgs(peep.id, checked, "wow"));
+										}
+									}
+								}),
+								checkbox({
+									text: "Litter",
+									visibility: compute(model._isGuest, g => g ? "visible" : "none"),
+									padding: -2,
+									isChecked: compute(model._flags, f => (f & (1 << 0)) !== 0),
+									onChange: (checked) => {
+										const peep = model._selectedPeep.get();
+										if (peep !== undefined) {
+											context.executeAction("pe-guestflags", guestFlagsExecuteArgs(peep.id, checked, "litter"));
+										}
+									}
+								}),
+								checkbox({
+									text: "Lost",
+									visibility: compute(model._isGuest, g => g ? "visible" : "none"),
+									padding: -2,
+									isChecked: compute(model._flags, f => (f & (1 << 0)) !== 0),
+									onChange: (checked) => {
+										const peep = model._selectedPeep.get();
+										if (peep !== undefined) {
+											context.executeAction("pe-guestflags", guestFlagsExecuteArgs(peep.id, checked, "lost"));
+										}
+									}
+								}),
+								checkbox({
+									text: "Hunger",
+									visibility: compute(model._isGuest, g => g ? "visible" : "none"),
+									padding: -2,
+									isChecked: compute(model._flags, f => (f & (1 << 0)) !== 0),
+									onChange: (checked) => {
+										const peep = model._selectedPeep.get();
+										if (peep !== undefined) {
+											context.executeAction("pe-guestflags", guestFlagsExecuteArgs(peep.id, checked, "hunger"));
+										}
+									}
+								}),
+								checkbox({
+									text: "Toilet",
+									visibility: compute(model._isGuest, g => g ? "visible" : "none"),
+									padding: -2,
+									isChecked: compute(model._flags, f => (f & (1 << 0)) !== 0),
+									onChange: (checked) => {
+										const peep = model._selectedPeep.get();
+										if (peep !== undefined) {
+											context.executeAction("pe-guestflags", guestFlagsExecuteArgs(peep.id, checked, "toilet"));
+										}
+									}
+								}),
+							]),
+							vertical([
+								checkbox({
+									text: "Crowded",
+									visibility: compute(model._isGuest, g => g ? "visible" : "none"),
+									padding: -2,
+									isChecked: compute(model._flags, f => (f & (1 << 0)) !== 0),
+									onChange: (checked) => {
+										const peep = model._selectedPeep.get();
+										if (peep !== undefined) {
+											context.executeAction("pe-guestflags", guestFlagsExecuteArgs(peep.id, checked, "crowded"));
+										}
+									}
+								}),
+								checkbox({
+									text: "Happiness",
+									visibility: compute(model._isGuest, g => g ? "visible" : "none"),
+									padding: -2,
+									isChecked: compute(model._flags, f => (f & (1 << 0)) !== 0),
+									onChange: (checked) => {
+										const peep = model._selectedPeep.get();
+										if (peep !== undefined) {
+											context.executeAction("pe-guestflags", guestFlagsExecuteArgs(peep.id, checked, "happiness"));
+										}
+									}
+								}),
+								checkbox({
+									text: "Nausea",
+									visibility: compute(model._isGuest, g => g ? "visible" : "none"),
+									padding: -2,
+									isChecked: compute(model._flags, f => (f & (1 << 0)) !== 0),
+									onChange: (checked) => {
+										const peep = model._selectedPeep.get();
+										if (peep !== undefined) {
+											context.executeAction("pe-guestflags", guestFlagsExecuteArgs(peep.id, checked, "nausea"));
+										}
+									}
+								}),
+								checkbox({
+									text: "Purple",
+									visibility: compute(model._isGuest, g => g ? "visible" : "none"),
+									padding: -2,
+									isChecked: compute(model._flags, f => (f & (1 << 0)) !== 0),
+									onChange: (checked) => {
+										const peep = model._selectedPeep.get();
+										if (peep !== undefined) {
+											context.executeAction("pe-guestflags", guestFlagsExecuteArgs(peep.id, checked, "purple"));
+										}
+									}
+								}),
+								checkbox({
+									text: "Pizza",
+									visibility: compute(model._isGuest, g => g ? "visible" : "none"),
+									padding: -2,
+									isChecked: compute(model._flags, f => (f & (1 << 0)) !== 0),
+									onChange: (checked) => {
+										const peep = model._selectedPeep.get();
+										if (peep !== undefined) {
+											context.executeAction("pe-guestflags", guestFlagsExecuteArgs(peep.id, checked, "pizza"));
+										}
+									}
+								}),
+								checkbox({
+									text: "Explode",
+									visibility: compute(model._isGuest, g => g ? "visible" : "none"),
+									padding: -2,
+									isChecked: compute(model._flags, f => (f & (1 << 0)) !== 0),
+									onChange: (checked) => {
+										const peep = model._selectedPeep.get();
+										if (peep !== undefined) {
+											context.executeAction("pe-guestflags", guestFlagsExecuteArgs(peep.id, checked, "explode"));
+										}
+									}
+								}),
+								checkbox({
+									text: "Contagious",
+									visibility: compute(model._isGuest, g => g ? "visible" : "none"),
+									padding: -2,
+									isChecked: compute(model._flags, f => (f & (1 << 0)) !== 0),
+									onChange: (checked) => {
+										const peep = model._selectedPeep.get();
+										if (peep !== undefined) {
+											context.executeAction("pe-guestflags", guestFlagsExecuteArgs(peep.id, checked, "contagious"));
+										}
+									}
+								}),
+								checkbox({
+									text: "Joy",
+									visibility: compute(model._isGuest, g => g ? "visible" : "none"),
+									padding: -2,
+									isChecked: compute(model._flags, f => (f & (1 << 0)) !== 0),
+									onChange: (checked) => {
+										const peep = model._selectedPeep.get();
+										if (peep !== undefined) {
+											context.executeAction("pe-guestflags", guestFlagsExecuteArgs(peep.id, checked, "joy"));
+										}
+									}
+								}),
+								checkbox({
+									text: "Angry",
+									visibility: compute(model._isGuest, g => g ? "visible" : "none"),
+									padding: -2,
+									isChecked: compute(model._flags, f => (f & (1 << 0)) !== 0),
+									onChange: (checked) => {
+										const peep = model._selectedPeep.get();
+										if (peep !== undefined) {
+											context.executeAction("pe-guestflags", guestFlagsExecuteArgs(peep.id, checked, "angry"));
+										}
+									}
+								}),
+								checkbox({
+									text: "Ice cream",
+									visibility: compute(model._isGuest, g => g ? "visible" : "none"),
+									padding: -2,
+									isChecked: compute(model._flags, f => (f & (1 << 0)) !== 0),
+									onChange: (checked) => {
+										const peep = model._selectedPeep.get();
+										if (peep !== undefined) {
+											context.executeAction("pe-guestflags", guestFlagsExecuteArgs(peep.id, checked, "iceCream"));
+										}
+									}
+								}),
+								checkbox({
+									text: "Here we are",
+									visibility: compute(model._isGuest, g => g ? "visible" : "none"),
+									padding: -2,
+									isChecked: compute(model._flags, f => (f & (1 << 0)) !== 0),
+									onChange: (checked) => {
+										const peep = model._selectedPeep.get();
+										if (peep !== undefined) {
+											context.executeAction("pe-guestflags", guestFlagsExecuteArgs(peep.id, checked, "hereWeAre"));
+										}
+									}
+								}),
+							])
+						])
+					],
 				})
 			]
 		}),
