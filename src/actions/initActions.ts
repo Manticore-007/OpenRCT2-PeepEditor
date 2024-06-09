@@ -1,4 +1,10 @@
 import { GuestFlagsArgs, guestFlagsExecute } from "./guestFlags";
+import { GuestHappinessArgs, guestHappinessExecute } from "./guestHappiness";
+import { GuestHungerArgs, guestHungerExecute } from "./guestHunger";
+import { GuestMassArgs, guestMassExecute } from "./guestMass";
+import { GuestNauseaArgs, guestNauseaExecute } from "./guestNausea";
+import { GuestThirstArgs, guestThirstExecute } from "./guestThirst";
+import { GuestToiletArgs, guestToiletExecute } from "./guestToilet";
 import { PeepAnimationArgs, animationPeepExecute } from "./peepAnimation";
 import { PeepAnimationFrameArgs, animationFramePeepExecute } from "./peepAnimationFrame";
 import { PeepColourArgs, colourPeepExecute } from "./peepColour";
@@ -26,4 +32,10 @@ context.registerAction<StaffCostumeArgs>("pe-staffcostume", (args) => queryPermi
 context.registerAction<PeepAnimationArgs>("pe-animationpeep", (args) => queryPermissionCheck(args), (args) => animationPeepExecute(args.args));
 context.registerAction<PeepAnimationFrameArgs>("pe-animationframepeep", (args) => queryPermissionCheck(args), (args) => animationFramePeepExecute(args.args));
 context.registerAction<GuestFlagsArgs>("pe-guestflags", (args) => queryPermissionCheck(args), (args) => guestFlagsExecute(args.args));
+context.registerAction<GuestHappinessArgs>("pe-guesthappiness", (args) => queryPermissionCheck(args), (args) => guestHappinessExecute(args.args));
+context.registerAction<GuestHungerArgs>("pe-guesthunger", (args) => queryPermissionCheck(args), (args) => guestHungerExecute(args.args));
+context.registerAction<GuestThirstArgs>("pe-guestthirst", (args) => queryPermissionCheck(args), (args) => guestThirstExecute(args.args));
+context.registerAction<GuestNauseaArgs>("pe-guestnausea", (args) => queryPermissionCheck(args), (args) => guestNauseaExecute(args.args));
+context.registerAction<GuestToiletArgs>("pe-guesttoilet", (args) => queryPermissionCheck(args), (args) => guestToiletExecute(args.args));
+context.registerAction<GuestMassArgs>("pe-guestmass", (args) => queryPermissionCheck(args), (args) => guestMassExecute(args.args));
 }

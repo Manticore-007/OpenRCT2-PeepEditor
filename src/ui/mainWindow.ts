@@ -13,7 +13,7 @@ import { debug } from "../helpers/logger";
 import { movePeepExecuteArgs } from "../actions/peepMover";
 import { speedPeepExecuteArgs } from "../actions/peepSpeed";
 import { colourPeepExecuteArgs } from "../actions/peepColour";
-import { colour, colourList } from "../helpers/colours";
+import { colourList } from "../helpers/colours";
 import { customImageFor } from "../helpers/customImages";
 import { staffType, staffTypeList } from "../helpers/staffTypes";
 import { costumeList } from "../helpers/costumes";
@@ -24,6 +24,13 @@ import { animationPeepExecuteArgs } from "../actions/peepAnimation";
 import { animationFramePeepExecuteArgs } from "../actions/peepAnimationFrame";
 import { staffOrdersExecuteArgs } from "../actions/staffSetOrders";
 import { guestFlagsExecuteArgs } from "../actions/guestFlags";
+import { colourPogressBar, percentage, progressBar } from "../helpers/progressBar";
+import { guestHappinessExecuteArgs } from "../actions/guestHappiness";
+import { guestHungerExecuteArgs } from "../actions/guestHunger";
+import { guestThirstExecuteArgs } from "../actions/guestThirst";
+import { guestNauseaExecuteArgs } from "../actions/guestNausea";
+import { guestToiletExecuteArgs } from "../actions/guestToilet";
+import { guestMassExecuteArgs } from "../actions/guestMass";
 
 const securityOrders = store<boolean>(true);
 const entertainerOrders = store<boolean>(true);
@@ -31,7 +38,6 @@ const entertainerOrders = store<boolean>(true);
 const pointingFingerIcon: ImageAnimation = { frameBase: 5318, frameCount: 8, frameDuration: 2, };
 const paperIcon: ImageAnimation = { frameBase: 5277, frameCount: 7, frameDuration: 4, };
 const infoIcon: ImageAnimation = { frameBase: 5367, frameCount: 8, frameDuration: 4, };
-const gearIcon: ImageAnimation = { frameBase: 5201, frameCount: 4, frameDuration: 4, };
 const paintIcon: ImageAnimation = { frameBase: 5221, frameCount: 8, frameDuration: 4, };
 const mapIcon: ImageAnimation = { frameBase: 5192, frameCount: 1, frameDuration: 4, offset: { x: 4, y: 1 }};
 const lensIcon: ImageAnimation = {frameBase: 29401, frameCount: 1, frameDuration: 4, offset: {x: 4, y: 1}};
@@ -42,6 +48,7 @@ const nameIcon: number = 5168;
 const flagsIcon: number = 5182;
 const allGuestsIcon: number = 5193;
 const itemsIcon: number = 5326;
+const moodIcon: number = 5288;
 
 let multiplier: number = 1;
 
@@ -144,10 +151,13 @@ export const windowPeepEditor = tabwindow({
 		const peep = model._selectedPeep.get();
 		if (peep !== undefined) {
 			if (peep.peepType !== "guest" && peep.peepType !== "staff") {
+				ui.showError("Peep no longer", "available");
 				model._reset();
 			}
 			else{
-				model._animation.set(peep.animation);				
+				model._animation.set(peep.animation);
+				model._animationFrame.set(peep.animationOffset);
+				model._animationLength.set(peep.animationLength);				
 			}
 		}
 	},
@@ -216,7 +226,7 @@ export const windowPeepEditor = tabwindow({
 							horizontal([
 								label({
 									text: "Y position:",
-									height: 12,
+									height: 13,
 									padding: {top: 0, bottom: 0, left: 10},
 									disabled: compute(model._isFrozen, f => !f),
 								}),
@@ -596,6 +606,7 @@ export const windowPeepEditor = tabwindow({
 						checkbox({
 							text: "{INLINE_SPRITE}{247}{19}{0}{0} Sweep foothpaths",
 							visibility: compute(model._isHandyman, h => h ? "visible" : "none"),
+							padding: {left: 10},
 							isChecked: compute(model._orders, o => (o & (1 << 0)) !== 0),
 							onChange: (checked) => {
 								const peep = model._selectedPeep.get();
@@ -607,6 +618,7 @@ export const windowPeepEditor = tabwindow({
 						checkbox({
 							text: "{INLINE_SPRITE}{248}{19}{0}{0} Water gardens",
 							visibility: compute(model._isHandyman, h => h ? "visible" : "none"),
+							padding: {left: 10},
 							isChecked: compute(model._orders, o => (o & (1 << 1)) !== 0),
 							onChange: (checked) => {
 								const peep = model._selectedPeep.get();
@@ -618,6 +630,7 @@ export const windowPeepEditor = tabwindow({
 						checkbox({
 							text: "{INLINE_SPRITE}{249}{19}{0}{0} Empty litter bins",
 							visibility: compute(model._isHandyman, h => h ? "visible" : "none"),
+							padding: {left: 10},
 							isChecked: compute(model._orders, o => (o & (1 << 2)) !== 0),
 							onChange: (checked) => {
 								const peep = model._selectedPeep.get();
@@ -629,6 +642,7 @@ export const windowPeepEditor = tabwindow({
 						checkbox({
 							text: "{INLINE_SPRITE}{250}{19}{0}{0} Mow grass",
 							visibility: compute(model._isHandyman, h => h ? "visible" : "none"),
+							padding: {left: 10},
 							isChecked: compute(model._orders, o => (o & (1 << 3)) !== 0),
 							onChange: (checked) => {
 								const peep = model._selectedPeep.get();
@@ -640,6 +654,7 @@ export const windowPeepEditor = tabwindow({
 						checkbox({
 							text: "{INLINE_SPRITE}{251}{19}{0}{0} Inspect rides",
 							visibility: compute(model._isMechanic, m => m ? "visible" : "none"),
+							padding: {left: 10},
 							isChecked: compute(model._orders, o => (o & (1 << 0)) !== 0),
 							onChange: (checked) => {
 								const peep = model._selectedPeep.get();
@@ -651,6 +666,7 @@ export const windowPeepEditor = tabwindow({
 						checkbox({
 							text: "{INLINE_SPRITE}{252}{19}{0}{0} Fix Rides",
 							visibility: compute(model._isMechanic, m => m ? "visible" : "none"),
+							padding: {left: 10},
 							isChecked: compute(model._orders, o => (o & (1 << 1)) !== 0),
 							onChange: (checked) => {
 								const peep = model._selectedPeep.get();
@@ -662,6 +678,7 @@ export const windowPeepEditor = tabwindow({
 						checkbox({
 							text: "{INLINE_SPRITE}{253}{19}{0}{0} Surveilling park",
 							visibility: compute(model._isSecurity, s => s ? "visible" : "none"),
+							padding: {left: 10},
 							isChecked: twoway(securityOrders),
 							onChange: (checked) => {
 								if (!checked){
@@ -673,6 +690,7 @@ export const windowPeepEditor = tabwindow({
 						checkbox({
 							text: "{INLINE_SPRITE}{116}{21}{0}{0} Keep guests happy",
 							visibility: compute(model._isEntertainer, e => e ? "visible" : "none"),
+							padding: {left: 10},
 							isChecked: twoway(entertainerOrders),
 							onChange: (checked) => {
 								if (!checked){
@@ -692,8 +710,8 @@ export const windowPeepEditor = tabwindow({
 								checkbox({
 									text: "Leave park",
 									visibility: compute(model._isGuest, g => g ? "visible" : "none"),
-									padding: -2,
-									isChecked: compute(model._flags, f => (f & (1 << 0)) !== 0),
+									padding: {bottom: -2, left: 10 },
+									isChecked: compute(model._selectedPeep, p => (p?.getFlag("leavingPark"))? true : false),
 									onChange: (checked) => {
 										const peep = model._selectedPeep.get();
 										if (peep !== undefined) {
@@ -704,8 +722,8 @@ export const windowPeepEditor = tabwindow({
 								checkbox({
 									text: "Slow walk",
 									visibility: compute(model._isGuest, g => g ? "visible" : "none"),
-									padding: -2,
-									isChecked: compute(model._flags, f => (f & (1 << 0)) !== 0),
+									padding: {top: -2, bottom: -2, left: 10 },
+									isChecked: compute(model._selectedPeep, p => (p?.getFlag("slowWalk"))? true : false),
 									onChange: (checked) => {
 										const peep = model._selectedPeep.get();
 										if (peep !== undefined) {
@@ -716,8 +734,8 @@ export const windowPeepEditor = tabwindow({
 								checkbox({
 									text: "Tracking",
 									visibility: compute(model._isGuest, g => g ? "visible" : "none"),
-									padding: -2,
-									isChecked: compute(model._flags, f => (f & (1 << 0)) !== 0),
+									padding: {top: -2, bottom: -2, left: 10 },
+									isChecked: compute(model._selectedPeep, p => (p?.getFlag("tracking"))? true : false),
 									onChange: (checked) => {
 										const peep = model._selectedPeep.get();
 										if (peep !== undefined) {
@@ -728,8 +746,8 @@ export const windowPeepEditor = tabwindow({
 								checkbox({
 									text: "Waving",
 									visibility: compute(model._isGuest, g => g ? "visible" : "none"),
-									padding: -2,
-									isChecked: compute(model._flags, f => (f & (1 << 0)) !== 0),
+									padding: {top: -2, bottom: -2, left: 10 },
+									isChecked: compute(model._selectedPeep, p => (p?.getFlag("waving"))? true : false),
 									onChange: (checked) => {
 										const peep = model._selectedPeep.get();
 										if (peep !== undefined) {
@@ -740,8 +758,8 @@ export const windowPeepEditor = tabwindow({
 								checkbox({
 									text: "Photo",
 									visibility: compute(model._isGuest, g => g ? "visible" : "none"),
-									padding: -2,
-									isChecked: compute(model._flags, f => (f & (1 << 0)) !== 0),
+									padding: {top: -2, bottom: -2, left: 10 },
+									isChecked: compute(model._selectedPeep, p => (p?.getFlag("photo"))? true : false),
 									onChange: (checked) => {
 										const peep = model._selectedPeep.get();
 										if (peep !== undefined) {
@@ -752,8 +770,8 @@ export const windowPeepEditor = tabwindow({
 								checkbox({
 									text: "Painting",
 									visibility: compute(model._isGuest, g => g ? "visible" : "none"),
-									padding: -2,
-									isChecked: compute(model._flags, f => (f & (1 << 0)) !== 0),
+									padding: {top: -2, bottom: -2, left: 10 },
+									isChecked: compute(model._selectedPeep, p => (p?.getFlag("painting"))? true : false),
 									onChange: (checked) => {
 										const peep = model._selectedPeep.get();
 										if (peep !== undefined) {
@@ -764,8 +782,8 @@ export const windowPeepEditor = tabwindow({
 								checkbox({
 									text: "Wow",
 									visibility: compute(model._isGuest, g => g ? "visible" : "none"),
-									padding: -2,
-									isChecked: compute(model._flags, f => (f & (1 << 0)) !== 0),
+									padding: {top: -2, bottom: -2, left: 10 },
+									isChecked: compute(model._selectedPeep, p => (p?.getFlag("wow"))? true : false),
 									onChange: (checked) => {
 										const peep = model._selectedPeep.get();
 										if (peep !== undefined) {
@@ -776,8 +794,8 @@ export const windowPeepEditor = tabwindow({
 								checkbox({
 									text: "Litter",
 									visibility: compute(model._isGuest, g => g ? "visible" : "none"),
-									padding: -2,
-									isChecked: compute(model._flags, f => (f & (1 << 0)) !== 0),
+									padding: {top: -2, bottom: -2, left: 10 },
+									isChecked: compute(model._selectedPeep, p => (p?.getFlag("litter"))? true : false),
 									onChange: (checked) => {
 										const peep = model._selectedPeep.get();
 										if (peep !== undefined) {
@@ -788,8 +806,8 @@ export const windowPeepEditor = tabwindow({
 								checkbox({
 									text: "Lost",
 									visibility: compute(model._isGuest, g => g ? "visible" : "none"),
-									padding: -2,
-									isChecked: compute(model._flags, f => (f & (1 << 0)) !== 0),
+									padding: {top: -2, bottom: -2, left: 10 },
+									isChecked: compute(model._selectedPeep, p => (p?.getFlag("lost"))? true : false),
 									onChange: (checked) => {
 										const peep = model._selectedPeep.get();
 										if (peep !== undefined) {
@@ -800,8 +818,8 @@ export const windowPeepEditor = tabwindow({
 								checkbox({
 									text: "Hunger",
 									visibility: compute(model._isGuest, g => g ? "visible" : "none"),
-									padding: -2,
-									isChecked: compute(model._flags, f => (f & (1 << 0)) !== 0),
+									padding: {top: -2, bottom: -2, left: 10 },
+									isChecked: compute(model._selectedPeep, p => (p?.getFlag("hunger"))? true : false),
 									onChange: (checked) => {
 										const peep = model._selectedPeep.get();
 										if (peep !== undefined) {
@@ -812,8 +830,8 @@ export const windowPeepEditor = tabwindow({
 								checkbox({
 									text: "Toilet",
 									visibility: compute(model._isGuest, g => g ? "visible" : "none"),
-									padding: -2,
-									isChecked: compute(model._flags, f => (f & (1 << 0)) !== 0),
+									padding: {top: -2, bottom: 10, left: 10 },
+									isChecked: compute(model._selectedPeep, p => (p?.getFlag("toilet"))? true : false),
 									onChange: (checked) => {
 										const peep = model._selectedPeep.get();
 										if (peep !== undefined) {
@@ -826,8 +844,8 @@ export const windowPeepEditor = tabwindow({
 								checkbox({
 									text: "Crowded",
 									visibility: compute(model._isGuest, g => g ? "visible" : "none"),
-									padding: -2,
-									isChecked: compute(model._flags, f => (f & (1 << 0)) !== 0),
+									padding: {bottom: -2},
+									isChecked: compute(model._selectedPeep, p => (p?.getFlag("crowded"))? true : false),
 									onChange: (checked) => {
 										const peep = model._selectedPeep.get();
 										if (peep !== undefined) {
@@ -838,8 +856,8 @@ export const windowPeepEditor = tabwindow({
 								checkbox({
 									text: "Happiness",
 									visibility: compute(model._isGuest, g => g ? "visible" : "none"),
-									padding: -2,
-									isChecked: compute(model._flags, f => (f & (1 << 0)) !== 0),
+									padding: {top: -2, bottom: -2},
+									isChecked: compute(model._selectedPeep, p => (p?.getFlag("happiness"))? true : false),
 									onChange: (checked) => {
 										const peep = model._selectedPeep.get();
 										if (peep !== undefined) {
@@ -850,8 +868,8 @@ export const windowPeepEditor = tabwindow({
 								checkbox({
 									text: "Nausea",
 									visibility: compute(model._isGuest, g => g ? "visible" : "none"),
-									padding: -2,
-									isChecked: compute(model._flags, f => (f & (1 << 0)) !== 0),
+									padding: {top: -2, bottom: -2},
+									isChecked: compute(model._selectedPeep, p => (p?.getFlag("nausea"))? true : false),
 									onChange: (checked) => {
 										const peep = model._selectedPeep.get();
 										if (peep !== undefined) {
@@ -862,8 +880,8 @@ export const windowPeepEditor = tabwindow({
 								checkbox({
 									text: "Purple",
 									visibility: compute(model._isGuest, g => g ? "visible" : "none"),
-									padding: -2,
-									isChecked: compute(model._flags, f => (f & (1 << 0)) !== 0),
+									padding: {top: -2, bottom: -2},
+									isChecked: compute(model._selectedPeep, p => (p?.getFlag("purple"))? true : false),
 									onChange: (checked) => {
 										const peep = model._selectedPeep.get();
 										if (peep !== undefined) {
@@ -874,8 +892,8 @@ export const windowPeepEditor = tabwindow({
 								checkbox({
 									text: "Pizza",
 									visibility: compute(model._isGuest, g => g ? "visible" : "none"),
-									padding: -2,
-									isChecked: compute(model._flags, f => (f & (1 << 0)) !== 0),
+									padding: {top: -2, bottom: -2},
+									isChecked: compute(model._selectedPeep, p => (p?.getFlag("pizza"))? true : false),
 									onChange: (checked) => {
 										const peep = model._selectedPeep.get();
 										if (peep !== undefined) {
@@ -886,8 +904,8 @@ export const windowPeepEditor = tabwindow({
 								checkbox({
 									text: "Explode",
 									visibility: compute(model._isGuest, g => g ? "visible" : "none"),
-									padding: -2,
-									isChecked: compute(model._flags, f => (f & (1 << 0)) !== 0),
+									padding: {top: -2, bottom: -2},
+									isChecked: compute(model._selectedPeep, p => (p?.getFlag("explode"))? true : false),
 									onChange: (checked) => {
 										const peep = model._selectedPeep.get();
 										if (peep !== undefined) {
@@ -898,8 +916,8 @@ export const windowPeepEditor = tabwindow({
 								checkbox({
 									text: "Contagious",
 									visibility: compute(model._isGuest, g => g ? "visible" : "none"),
-									padding: -2,
-									isChecked: compute(model._flags, f => (f & (1 << 0)) !== 0),
+									padding: {top: -2, bottom: -2},
+									isChecked: compute(model._selectedPeep, p => (p?.getFlag("contagious"))? true : false),
 									onChange: (checked) => {
 										const peep = model._selectedPeep.get();
 										if (peep !== undefined) {
@@ -910,8 +928,8 @@ export const windowPeepEditor = tabwindow({
 								checkbox({
 									text: "Joy",
 									visibility: compute(model._isGuest, g => g ? "visible" : "none"),
-									padding: -2,
-									isChecked: compute(model._flags, f => (f & (1 << 0)) !== 0),
+									padding: {top: -2, bottom: -2},
+									isChecked: compute(model._selectedPeep, p => (p?.getFlag("joy"))? true : false),
 									onChange: (checked) => {
 										const peep = model._selectedPeep.get();
 										if (peep !== undefined) {
@@ -922,8 +940,8 @@ export const windowPeepEditor = tabwindow({
 								checkbox({
 									text: "Angry",
 									visibility: compute(model._isGuest, g => g ? "visible" : "none"),
-									padding: -2,
-									isChecked: compute(model._flags, f => (f & (1 << 0)) !== 0),
+									padding: {top: -2, bottom: -2},
+									isChecked: compute(model._selectedPeep, p => (p?.getFlag("angry"))? true : false),
 									onChange: (checked) => {
 										const peep = model._selectedPeep.get();
 										if (peep !== undefined) {
@@ -934,8 +952,8 @@ export const windowPeepEditor = tabwindow({
 								checkbox({
 									text: "Ice cream",
 									visibility: compute(model._isGuest, g => g ? "visible" : "none"),
-									padding: -2,
-									isChecked: compute(model._flags, f => (f & (1 << 0)) !== 0),
+									padding: {top: -2, bottom: -2},
+									isChecked: compute(model._selectedPeep, p => (p?.getFlag("iceCream"))? true : false),
 									onChange: (checked) => {
 										const peep = model._selectedPeep.get();
 										if (peep !== undefined) {
@@ -946,8 +964,8 @@ export const windowPeepEditor = tabwindow({
 								checkbox({
 									text: "Here we are",
 									visibility: compute(model._isGuest, g => g ? "visible" : "none"),
-									padding: -2,
-									isChecked: compute(model._flags, f => (f & (1 << 0)) !== 0),
+									padding: {top: -2, bottom: 10},
+									isChecked: compute(model._selectedPeep, p => (p?.getFlag("hereWeAre"))? true : false),
 									onChange: (checked) => {
 										const peep = model._selectedPeep.get();
 										if (peep !== undefined) {
@@ -962,13 +980,297 @@ export const windowPeepEditor = tabwindow({
 			]
 		}),
 		tab({
-			image: itemsIcon,
+			image: moodIcon,
+			height: "auto",
 			content: [
-				label({
-					text: "{WHITE}Items",
-					alignment: "centred",
-					padding: [3, 0]
-				})
+				groupbox({
+					text: "Physiology",
+					spacing: 2,
+					visibility: compute(model._isPeepSelected, p => p ? "visible" : "none"),
+					content: [
+						label({
+							text: "Here you can set a guest's mood",
+							alignment: "centred",
+							visibility: compute(model._isPeepSelected, p => p ? "visible" : "none"),
+						}),
+					]
+				}),
+				groupbox({
+					text: "Physiology",
+					spacing: 2,
+					visibility: compute(model._isGuest, g => g ? "visible" : "none"),
+					content: [
+						horizontal([
+							label({
+								text: "Happiness:",
+								height: 13,
+								width: "30%",
+								padding: {top: 0, bottom: 0, left: 10},
+								disabled: compute(model._isGuest, g => !g),
+								visibility: compute(model._isGuest, g => g ? "visible" : "none"),
+							}),
+							progressBar({
+								background: 19,
+								percentFilled: compute(model._happiness, h => percentage(h, 255)),
+								foreground: compute(compute(model._happiness, h => percentage(h, 255)), p => colourPogressBar(true, p)),
+								visibility: compute(model._isGuest, g => g ? "visible" : "none"),
+							}),
+							spinner({
+								minimum: 0,
+								maximum: 255,
+								value: model._happiness,
+								height: 13,
+								width: "25%",
+								wrapMode: "clamp",
+								padding: {top: 0, right: 10,  bottom: 0},
+								disabled: compute(model._isGuest, g => !g),
+								disabledMessage: "N/A",
+								visibility: compute(model._isGuest, g => g ? "visible" : "none"),
+								step: 1,
+								onChange: (_, adjustment: number) => {
+									const peep = model._selectedPeep.get();
+									if (peep !== undefined)
+									context.executeAction("pe-guesthappiness", guestHappinessExecuteArgs(peep.id, (adjustment*multiplier)));
+								}
+							})
+						]),
+						horizontal([
+							label({
+								text: "Energy:",
+								height: 13,
+								width: "30%",
+								padding: {top: 0, bottom: 0, left: 10},
+								disabled: compute(model._isGuest, g => !g),
+								visibility: compute(model._isGuest, g => g ? "visible" : "none"),
+							}),
+							progressBar({
+								background: 19,
+								percentFilled: compute(model._energy, h => percentage(h, 128)),
+								foreground: compute(compute(model._energy, e => percentage(e, 128)), p => colourPogressBar(true, p)),
+								visibility: compute(model._isGuest, g => g ? "visible" : "none"),
+							}),
+							spinner({
+								minimum: 32,
+								maximum: 128,
+								wrapMode: "clamp",
+								value: model._energy,
+								height: 13,
+								width: "25%",
+								padding: {top: 0, right: 10, bottom: 0},
+								disabled: compute(model._isGuest, g => !g),
+								disabledMessage: "N/A",
+								visibility: compute(model._isGuest, g => g ? "visible" : "none"),
+								onChange: (_, adjustment: number) => {
+									const peep = model._selectedPeep.get();
+									if (peep !== undefined)
+									context.executeAction("pe-speedpeep", speedPeepExecuteArgs(peep.id, (adjustment*multiplier)));
+								}
+							})
+						]),
+						horizontal([
+							label({
+								text: "Hunger:",
+								height: 13,
+								width: "30%",
+								padding: {top: 0, bottom: 0, left: 10},
+								disabled: compute(model._isGuest, g => !g),
+								visibility: compute(model._isGuest, g => g ? "visible" : "none"),
+							}),
+							progressBar({
+								background: 19,
+								percentFilled: compute(model._hunger, h => 1-percentage(h, 255)),
+								foreground: compute(compute(model._hunger, h => 1-percentage(h, 255)), p => colourPogressBar(false, p)),
+								visibility: compute(model._isGuest, g => g ? "visible" : "none"),
+							}),
+							spinner({
+								minimum: 0,
+								maximum: 255,
+								wrapMode: "clamp",
+								value: compute(model._hunger, h => 255-h),
+								height: 13,
+								width: "25%",
+								padding: {top: 0, right: 10, bottom: 0},
+								disabled: compute(model._isGuest, g => !g),
+								disabledMessage: "N/A",
+								visibility: compute(model._isGuest, g => g ? "visible" : "none"),
+								onChange: (_, adjustment: number) => {
+									const peep = model._selectedPeep.get();
+									if (peep !== undefined)
+									context.executeAction("pe-guesthunger", guestHungerExecuteArgs(peep.id, (adjustment*multiplier)));
+								}
+							})
+						]),
+						horizontal([
+							label({
+								text: "Thirst:",
+								height: 13,
+								width: "30%",
+								padding: {top: 0, bottom: 0, left: 10},
+								disabled: compute(model._isGuest, g => !g),
+								visibility: compute(model._isGuest, g => g ? "visible" : "none"),
+							}),
+							progressBar({
+								background: 19,
+								percentFilled: compute(model._thirst, t => 1-percentage(t, 255)),
+								foreground: compute(compute(model._thirst, t => 1-percentage(t, 255)), p => colourPogressBar(false, p)),
+								visibility: compute(model._isGuest, g => g ? "visible" : "none"),
+							}),
+							spinner({
+								minimum: 0,
+								maximum: 255,
+								wrapMode: "clamp",
+								value: compute(model._thirst, t => 255-t),
+								height: 13,
+								width: "25%",
+								padding: {top: 0, right: 10, bottom: 0},
+								disabled: compute(model._isGuest, g => !g),
+								disabledMessage: "N/A",
+								visibility: compute(model._isGuest, g => g ? "visible" : "none"),
+								onChange: (_, adjustment: number) => {
+									const peep = model._selectedPeep.get();
+									if (peep !== undefined)
+									context.executeAction("pe-guestthirst", guestThirstExecuteArgs(peep.id, (adjustment*multiplier)));
+								}
+							})
+						]),
+						horizontal([
+							label({
+								text: "Nausea:",
+								height: 13,
+								width: "30%",
+								padding: {top: 0, bottom: 0, left: 10},
+								disabled: compute(model._isGuest, g => !g),
+								visibility: compute(model._isGuest, g => g ? "visible" : "none"),
+							}),
+							progressBar({
+								background: 19,
+								percentFilled: compute(model._nausea, n => percentage(n, 255)),
+								foreground: compute(compute(model._nausea, n => percentage(n, 255)), p => colourPogressBar(false, p)),
+								visibility: compute(model._isGuest, g => g ? "visible" : "none"),
+							}),
+							spinner({
+								minimum: 0,
+								maximum: 255,
+								wrapMode: "clamp",
+								value: model._nausea,
+								height: 13,
+								width: "25%",
+								padding: {top: 0, right: 10, bottom: 0},
+								disabled: compute(model._isGuest, g => !g),
+								disabledMessage: "N/A",
+								visibility: compute(model._isGuest, g => g ? "visible" : "none"),
+								onChange: (_, adjustment: number) => {
+									const peep = model._selectedPeep.get();
+									if (peep !== undefined)
+									context.executeAction("pe-guestnausea", guestNauseaExecuteArgs(peep.id, (adjustment*multiplier)));
+								}
+							})
+						]),
+						horizontal([
+							label({
+								text: "Toilet:",
+								height: 13,
+								width: "30%",
+								padding: {top: 0, bottom: 0, left: 10},
+								disabled: compute(model._isGuest, g => !g),
+								visibility: compute(model._isGuest, g => g ? "visible" : "none"),
+							}),
+							progressBar({
+								background: 19,
+								percentFilled: compute(model._toilet, t => percentage(t, 255)),
+								foreground: compute(compute(model._toilet, t => percentage(t, 255)), p => colourPogressBar(false, p)),
+								visibility: compute(model._isGuest, g => g ? "visible" : "none"),
+							}),
+							spinner({
+								minimum: 0,
+								maximum: 255,
+								wrapMode: "clamp",
+								value: model._toilet,
+								height: 13,
+								width: "25%",
+								padding: {top: 0, right: 10, bottom: 0},
+								disabled: compute(model._isGuest, g => !g),
+								disabledMessage: "N/A",
+								visibility: compute(model._isGuest, g => g ? "visible" : "none"),
+								onChange: (_, adjustment: number) => {
+									const peep = model._selectedPeep.get();
+									if (peep !== undefined)
+									context.executeAction("pe-guesttoilet", guestToiletExecuteArgs(peep.id, (adjustment*multiplier)));
+								}
+							})
+						]),
+						horizontal([
+							label({
+								text: "Mass:",
+								height: 13,
+								width: "30%",
+								padding: {top: 0, bottom: 0, left: 10},
+								disabled: compute(model._isGuest, g => !g),
+								visibility: compute(model._isGuest, g => g ? "visible" : "none"),
+							}),
+							progressBar({
+								background: 19,
+								percentFilled: compute(model._mass, m => percentage(m, 255)),
+								foreground: compute(compute(model._mass, m => percentage(m, 255)), p => colourPogressBar(false, p)),
+								visibility: compute(model._isGuest, g => g ? "visible" : "none"),
+							}),
+							spinner({
+								minimum: 0,
+								maximum: 255,
+								wrapMode: "clamp",
+								value: model._mass,
+								height: 13,
+								width: "25%",
+								padding: {top: 0, right: 10, bottom: 0},
+								disabled: compute(model._isGuest, g => !g),
+								disabledMessage: "N/A",
+								visibility: compute(model._isGuest, g => g ? "visible" : "none"),
+								onChange: (_, adjustment: number) => {
+									const peep = model._selectedPeep.get();
+									if (peep !== undefined)
+									context.executeAction("pe-guestmass", guestMassExecuteArgs(peep.id, (adjustment*multiplier)));
+								}
+							})
+						]),
+					]
+				}),
+				horizontal([
+					label({
+						text: "Multiplier:",
+						height: 13,
+						padding: [5, -20, 7, "1w"],
+						visibility: compute(model._isGuest, g => g ? "visible" : "none"),
+					}),
+					dropdown({
+						padding: [5, 15, 7, -20],
+						width: "20%",
+						height: 13,
+						items: ["1x", "10x", "100x"],
+						visibility: compute(model._isGuest, g => g ? "visible" : "none"),
+						onChange: (number: number) => {
+							if (number === 0) { multiplier = 1};
+							if (number === 1) { multiplier = 10};
+							if (number === 2) { multiplier = 100};
+							debug(`Multiplier set to ${multiplier}`)
+						}
+					})
+				]),
+			]
+		}),
+		tab({
+			image: itemsIcon,
+			height: "auto",
+			content: [
+				groupbox({
+					text: "Items",
+					content: [
+						label({
+							text: "Here you can set guest items",
+							alignment: "centred",
+							visibility: compute(model._isPeepSelected, p => p ? "visible" : "none"),
+						})
+					]
+				}),
 			]
 		}),
 		tab({
@@ -976,16 +1278,6 @@ export const windowPeepEditor = tabwindow({
 			content: [
 				label({
 					text: "{WHITE}Statistics",
-					alignment: "centred",
-					padding: [3, 0]
-				})
-			]
-		}),
-		tab({
-			image: gearIcon,
-			content: [
-				label({
-					text: "{WHITE}Debug Stuff",
 					alignment: "centred",
 					padding: [3, 0]
 				})
@@ -1005,7 +1297,7 @@ export const windowPeepEditor = tabwindow({
 						width: "25%"
 					}),
 					label({
-						text: versionString()+`\n\n{WHITE}Manticore-007\n\n{WHITE}FlexUI by Basssiiie\n\n{WHITE}Basssiiie, Gymnasiast, ItsSmitty\nSpacek531, AaronVanGeffen\nSadret and Enox`,
+						text: versionString()+`\n\n{WHITE}Manticore-007\n\n{WHITE}FlexUI by Basssiiie\n\n{WHITE}Basssiiie, Gymnasiast, ItsSmitty\nSpacek531, AaronVanGeffen\nSadret, mrmagic2020, Isoitiro\nand Enox`,
 					}),
 				]),
 				label({
@@ -1104,7 +1396,7 @@ function versionString(): string
     else return `{WHITE}${pluginVersion}`;
 }
 
-function drawImage(g: GraphicsContext, image: number, property: keyof Guest): void
+function drawImage(g: GraphicsContext, image: number, property?: keyof Guest): void
 {
     const img = g.getImage(image);
     const guest = <Guest>model._selectedPeep.get();
@@ -1118,7 +1410,7 @@ function drawImage(g: GraphicsContext, image: number, property: keyof Guest): vo
     }
     else
     if (img) {
-        g.paletteId = colour["Void"];
+        g.paletteId = Colour.Void;
         g.image(img.id, 0, 0);
     }
 }
