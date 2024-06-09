@@ -8,7 +8,7 @@ export class peepViewModel
     readonly _selectedPeep = store<Guest | Staff | undefined>(undefined);
     readonly _name = store<string>(windowTitle);
     readonly _destination = store<CoordsXYZ | null>(null);
-    readonly _energy = store<number>(96);
+    readonly _energy = store<number>(0);
     readonly _energyTarget = store<number>(96);
     readonly _x = store<number>(0);
     readonly _y = store<number>(0);
@@ -41,8 +41,8 @@ export class peepViewModel
     readonly _happinessTarget = store<number>(0);
     readonly _nausea = store<number>(0);
     readonly _nauseaTarget = store<number>(0);
-    readonly _hunger = store<number>(0);
-    readonly _thirst = store<number>(0);
+    readonly _hunger = store<number>(255);
+    readonly _thirst = store<number>(255);
     readonly _toilet = store<number>(0);
     readonly _mass = store<number>(0);
     readonly _minIntensity = store<number>(0);
@@ -94,7 +94,13 @@ export class peepViewModel
         this._x.set(0);
         this._y.set(0);
         this._z.set(0);
-        this._energy.set(96);
+        this._happiness.set(0);
+        this._energy.set(0);
+        this._hunger.set(255);
+        this._thirst.set(255);
+        this._nausea.set(0);
+        this._toilet.set(0);
+        this._mass.set(0);
         this._isStaff.set(false);
         this._isGuest.set(false);
         this._colour.set(100);
@@ -157,10 +163,7 @@ export class peepViewModel
             this._name.set(peep.name);
             this._energy.set(peep.energy);
             this._availableAnimations.set(peep.availableAnimations);
-            // this._animation.set(peep.animation);
-            // this._animationFrame.set(peep.animationOffset);
-            // this._animationLength.set(peep.animationLength);
-            // peep.energy === 0 ? this._isFrozen.set(true) : this._isFrozen.set(false);
+            peep.energy === 0 ? this._isFrozen.set(true) : this._isFrozen.set(false);
             if (peep.peepType === "staff"){
                 this._isStaff.set(true); this._isGuest.set(false)
                 this._colour.set(staff.colour);
@@ -182,6 +185,12 @@ export class peepViewModel
                 this._balloonColour.set(guest.balloonColour);
                 this._umbrellaColour.set(guest.umbrellaColour);
                 this._availableGuestAnimations.set(guest.availableAnimations);
+                this._happiness.set(guest.happiness);
+                this._hunger.set(guest.hunger);
+                this._thirst.set(guest.thirst);
+                this._nausea.set(guest.nausea);
+                this._toilet.set(guest.toilet);
+                this._mass.set(guest.mass);
                 guest.hasItem({type: "hat"})? this._hasHat.set(true) : this._hasHat.set(false);
                 guest.hasItem({type: "balloon"})? this._hasBalloon.set(true) : this._hasBalloon.set(false);
                 guest.hasItem({type: "umbrella"})? this._hasUmbrella.set(true) : this._hasUmbrella.set(false);
