@@ -30,7 +30,8 @@ import {
   ): WidgetCreator<FlexiblePosition> {
     return graphics({
       width: params.width ?? "1w",
-      height: params.height ?? 14,
+      height: params.height ?? 10,
+      padding: {top: 2},
       visibility: params.visibility || "visible",
       disabled: params.disabled,
       onDraw: (g) => {
