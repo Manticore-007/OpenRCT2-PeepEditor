@@ -65,6 +65,7 @@ export class peepViewModel
     //custom
 
     readonly _image = store<number>(6430 | (Colour.SalmonPink) << 19 | (Colour.SalmonPink << 24) | (0b111 << 29))
+    readonly _peepFace = store<ImageAnimation>();
     readonly _isGuest = store<boolean>(false);
     readonly _isStaff = store<boolean>(false);
     readonly _isHandyman = store<boolean>(false);

@@ -985,9 +985,26 @@ export const windowPeepEditor = tabwindow({
 			content: [
 				groupbox({
 					text: "Physiology",
-					spacing: 2,
-					visibility: compute(model._isPeepSelected, p => p ? "visible" : "none"),
+					visibility: compute(model._isGuest, g => !g ? "visible" : "none"),
 					content: [
+						label({
+							text: "All staff members are very happy,",
+							alignment: "centred",
+							padding: -2,
+							visibility: compute(model._isStaff, s => s ? "visible" : "none"),
+						}),
+						label({
+							text: "well fed and hydrated,",
+							alignment: "centred",
+							padding: -2,
+							visibility: compute(model._isStaff, s => s ? "visible" : "none"),
+						}),
+						label({
+							text: "and just had their toilet break.",
+							alignment: "centred",
+							padding: -2,
+							visibility: compute(model._isStaff, s => s ? "visible" : "none"),
+						}),
 						label({
 							text: "Here you can set a guest's mood",
 							alignment: "centred",
@@ -997,7 +1014,6 @@ export const windowPeepEditor = tabwindow({
 				}),
 				groupbox({
 					text: "Physiology",
-					spacing: 2,
 					visibility: compute(model._isGuest, g => g ? "visible" : "none"),
 					content: [
 						horizontal([
@@ -1026,7 +1042,6 @@ export const windowPeepEditor = tabwindow({
 								disabled: compute(model._isGuest, g => !g),
 								disabledMessage: "N/A",
 								visibility: compute(model._isGuest, g => g ? "visible" : "none"),
-								step: 1,
 								onChange: (_, adjustment: number) => {
 									const peep = model._selectedPeep.get();
 									if (peep !== undefined)
