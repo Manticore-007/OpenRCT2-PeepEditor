@@ -49,12 +49,12 @@ import {
           : params.disabled
   
         g.colour = background
-        g.well(0, 0, g.width, g.height)
+        g.well(0, 0, 94, 10)
         if (!disabled) {
           g.colour = foreground
-          g.box(1, 1, g.width * percentFilled - 2, g.height - 2)
+          g.box(1, 1, 94 * percentFilled - 2, 10 - 2)
         } else {
-          g.box(1, 1, g.width - 2, g.height - 2)
+          g.box(1, 1, 94 - 2, 10 - 2)
         }
       }
     })
