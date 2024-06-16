@@ -1623,7 +1623,7 @@ function itemName(item: GuestItemType): string {
 		case "ice_cream": return `Ice Cream`;
 		case "iced_tea": return `Iced Tea`;
 		case "lemonade": return `Lemonade`;
-		case "map": return `Map of "${park.name}"`;
+		case "map": return `Map of ${park.name}`;
 		case "meatball_soup": return `Meatball Soup`;
 		case "photo1": return `On-ride Photo`;
 		case "photo2": return `On-ride Photo`;
