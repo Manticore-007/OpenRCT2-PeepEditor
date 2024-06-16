@@ -180,6 +180,7 @@ export const windowPeepEditor = tabwindow({
 				model._animation.set(peep.animation);
 				model._animationFrame.set(peep.animationOffset);
 				model._animationLength.set(peep.animationLength);
+				if (peep.peepType === "guest")
 				guestItemTypeList.forEach(item => {
 					hasItemArray.push(guest.hasItem({type: item}));
 				})
