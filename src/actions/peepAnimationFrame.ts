@@ -1,4 +1,3 @@
-import { debug } from "../helpers/logger";
 export interface PeepAnimationFrameArgs {
     id: number | null;
     value: number;
@@ -11,7 +10,6 @@ export function animationFramePeepExecute(args: PeepAnimationFrameArgs): GameAct
     const entity = map.getEntity(args.id);
     const peep = <Guest|Staff>entity;
     peep.animationOffset += args.frame;
-    debug(`Animation frame set to "${peep.animationOffset}"`);
     return{}
 }
 

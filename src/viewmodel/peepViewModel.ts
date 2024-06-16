@@ -53,13 +53,17 @@ export class peepViewModel
     readonly _isLost = store<boolean>(false);
     readonly _lostCountdown = store<number>(0);
     readonly _thoughts = store<Thought[]>([]);
-    readonly _items = store<GuestItem[]>([]);
-    readonly _hasItem = store<boolean>(false);
+    readonly _items = store<GuestItemType[]>([]);
+    readonly _hasItem = store<boolean[]>([]);
     readonly _hasHat = store<boolean>(false);
     readonly _hasBalloon = store<boolean>(false);
     readonly _hasUmbrella = store<boolean>(false);
     readonly _availableGuestAnimations = store<GuestAnimation[]>([]);
     readonly _flags = store<number>(0);
+    readonly _photo1 = store<GuestPhoto>();
+    readonly _photo2 = store<GuestPhoto>();
+    readonly _photo3 = store<GuestPhoto>();
+    readonly _photo4 = store<GuestPhoto>();
 
 
     //custom

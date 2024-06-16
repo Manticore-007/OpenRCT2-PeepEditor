@@ -58,3 +58,11 @@ export function firstOrNull<T>(array: T[]): T | null
 {
 	return (array.length > 0) ? array[0] : null;
 }
+
+/**
+ * Sorting function that can order an array by name alphabetically.
+ */
+export function orderByName(left: { name: string }, right: { name: string }): number
+{
+	return left.name.localeCompare(right.name);
+}

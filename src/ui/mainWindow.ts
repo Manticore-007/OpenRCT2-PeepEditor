@@ -1,7 +1,7 @@
 
 /// <reference path="../../lib/openrct2.d.ts" />
 
-import { button, horizontal, label, tab, tabwindow, vertical, viewport, toggle, twoway, compute, Colour, window, groupbox, spinner, dropdown, textbox, colourPicker, graphics, checkbox, store } from "openrct2-flexui";
+import { button, horizontal, label, tab, tabwindow, vertical, viewport, toggle, twoway, compute, Colour, window, groupbox, spinner, dropdown, textbox, colourPicker, graphics, checkbox, store, WidgetCreator, FlexiblePosition, Parsed, Bindable, ElementVisibility } from "openrct2-flexui";
 import { togglePeepPicker } from "../actions/peepPicker";
 import { locate } from "../actions/peepLocator";
 import { model } from "../viewmodel/peepViewModel";
@@ -31,6 +31,8 @@ import { guestThirstExecuteArgs } from "../actions/guestThirst";
 import { guestNauseaExecuteArgs } from "../actions/guestNausea";
 import { guestToiletExecuteArgs } from "../actions/guestToilet";
 import { guestMassExecuteArgs } from "../actions/guestMass";
+import { ParkRide, getAllRides } from "../objects/parkRides";
+import { guestItemTypeList } from "../helpers/guestItemTypes";
 
 const securityOrders = store<boolean>(true);
 const entertainerOrders = store<boolean>(true);
@@ -50,7 +52,25 @@ const allGuestsIcon: number = 5193;
 const itemsIcon: number = 5326;
 const moodIcon: number = 5288;
 
+const rideList = store<ParkRide[]>([]);
+//const selectedRide = store<[ParkRide, number] | null>(null);
+
+// rideList.subscribe(r => {
+// 	let selection: [ParkRide, number] | null = null;
+// 	if (r.length > 0)
+// 	{
+// 		const previous = selectedRide.get();
+// 		const selectedIdx = (previous && previous[1] < r.length) ? previous[1] : 0;
+// 		selection = [ r[selectedIdx], selectedIdx ];
+// 	}
+// 	debug("[updateSelectionOrNull] =>", selection);
+// 	selectedRide.set(selection);
+// })
+
+rideList.set(getAllRides());
+
 let multiplier: number = 1;
+let hasItemArray: boolean[] = []
 
 const staticControls = [
 	toggle({
@@ -149,15 +169,21 @@ export const windowPeepEditor = tabwindow({
 	onTabChange: () => ui.tool?.cancel(),
 	onUpdate: () => {
 		const peep = model._selectedPeep.get();
+		const guest = <Guest>peep;
 		if (peep !== undefined) {
 			if (peep.peepType !== "guest" && peep.peepType !== "staff") {
 				ui.showError("Peep no longer", "available");
 				model._reset();
 			}
 			else{
+				hasItemArray = [];
 				model._animation.set(peep.animation);
 				model._animationFrame.set(peep.animationOffset);
-				model._animationLength.set(peep.animationLength);				
+				model._animationLength.set(peep.animationLength);
+				guestItemTypeList.forEach(item => {
+					hasItemArray.push(guest.hasItem({type: item}));
+				})
+				model._hasItem.set(hasItemArray);
 			}
 		}
 	},
@@ -1271,30 +1297,34 @@ export const windowPeepEditor = tabwindow({
 					})
 				]),
 			]
-		}),
+		}),		
 		tab({
-			image: itemsIcon,
 			height: "auto",
+			image: itemsIcon,
 			content: [
 				groupbox({
-					text: "Items",
-					content: [
-						label({
-							text: "Here you can set guest items",
-							alignment: "centred",
-							visibility: compute(model._isPeepSelected, p => p ? "visible" : "none"),
-						})
-					]
+					spacing: 0,
+					text: "Carrying",
+					content: carryingItems()
 				}),
+				horizontal([
+					label({
+						text: "Give item:"
+					}),
+					dropdown({
+						items: itemList(),
+						selectedIndex: -1,
+						width: "75%"
+					}),
+				]),
 			]
 		}),
 		tab({
+			height: "auto",
 			image: paperIcon,
 			content: [
 				label({
-					text: "{WHITE}Statistics",
-					alignment: "centred",
-					padding: [3, 0]
+					text: "{WHITE}Statistics"
 				})
 			]
 		}),
@@ -1324,6 +1354,7 @@ export const windowPeepEditor = tabwindow({
 		}),
 	]
 });
+
 
 function peepTypeQuery(): string {
 	const peep = model._selectedPeep.get();
@@ -1383,6 +1414,52 @@ export function openWindowRemovePeep(peep: Staff | Guest): void {
 	removePeepWindow.open();
 }
 
+export function openWindowRemoveItem(item: GuestItemType): void {
+	const removeItemWindow = window({
+		onClose: () => {
+			ui.tool?.cancel();
+		},
+		title: "Remove item",
+		width: 200,
+		height: 100,
+		position: { x: ui.width / 2 - 100, y: ui.height / 2 - 50 },
+		colours: [Colour.BordeauxRed, Colour.BordeauxRed],
+		content: [
+			label({
+				width: 200,
+				alignment: "centred",
+				text: `Are you sure you want to remove\n${itemName(item)}\nfrom this guest?`,
+				padding: [25, 0, 17, 0]
+			}),
+			horizontal([
+				button({
+					border: true,
+					width: 85,
+					height: 14,
+					text: "Yes",
+					padding: [0, 4],
+					onClick: () => {
+						const guest = <Guest>model._selectedPeep.get();
+						guest.removeItem({type: item});
+						removeItemWindow.close();
+					}
+				}),
+				button({
+					border: true,
+					width: 85,
+					height: 14,
+					text: "Cancel",
+					padding: [0, 4],
+					onClick: () => {
+						removeItemWindow.close();
+					}
+				}),
+			])
+		]
+	});
+	removeItemWindow.open();
+}
+
 function textRemovePeep(peep: Guest | Staff): string {
 	if (peep.type === "guest") {
 		return `{WHITE}Are you sure you want to remove\n${peep.name}?`;
@@ -1426,6 +1503,167 @@ function drawImage(g: GraphicsContext, image: number, property?: keyof Guest): v
     else
     if (img) {
         g.paletteId = Colour.Void;
+		g.tertiaryColour = Colour.Yellow;
         g.image(img.id, 0, 0);
     }
 }
+
+function createWidget(item: GuestItemType): WidgetCreator<FlexiblePosition, Parsed<FlexiblePosition>> {
+			return (
+				horizontal([
+					graphics({
+						height: 16,
+						width: 16,
+						padding: {top: -2, bottom: -2},
+						visibility: visibilityCheck(item),
+						onDraw: function (g) { itemImage(item, g); },
+					}),
+					label({
+						text: `{BLACK}${itemName(item)}`,
+						padding: {top: -2, bottom: -2},
+						visibility: visibilityCheck(item),
+					}),
+					button({
+						text: `{RED}x`,
+						height: 10,
+						width: 10,
+						border: true,
+						padding: {top: 0, bottom: -2},
+						visibility: visibilityCheck(item),
+						onClick: () => {
+							openWindowRemoveItem(item);
+						}
+					})
+				])
+			);
+}
+
+function itemImage(item: GuestItemType, g: GraphicsContext): void {
+	switch (item) {
+		case "balloon": return drawImage(g, 5061, "balloonColour");
+		case "beef_noodles": return drawImage(g, 5097);
+		case "burger": return drawImage(g, 5067);
+		case "candyfloss": return drawImage(g, 5070);
+		case "chicken": return drawImage(g, 5085);
+		case "chips": return drawImage(g, 5068);
+		case "chocolate": return drawImage(g, 5093);
+		case "coffee": return drawImage(g, 5083);
+		case "cookie": return drawImage(g, 5105);
+		case "doughnut": return drawImage(g, 5082);
+		case "drink": return drawImage(g, 5066);
+		case "empty_bottle": return drawImage(g, 5088);
+		case "empty_bowl_blue": return drawImage(g, 5110);
+		case "empty_bowl_red": return drawImage(g, 5106);
+		case "empty_box": return drawImage(g, 5087);
+		case "empty_drink_carton": return drawImage(g, 5107);
+		case "empty_burger_box": return drawImage(g, 5073);
+		case "empty_can": return drawImage(g, 5071);
+		case "empty_cup": return drawImage(g, 5084);
+		case "empty_juice_cup": return drawImage(g, 5108);
+		case "fried_rice_noodles": return drawImage(g, 5098);
+		case "fruit_juice": return drawImage(g, 5101);
+		case "funnel_cake": return drawImage(g, 5095);
+		case "hat": return drawImage(g, 5079, "hatColour");
+		case "hot_dog": return drawImage(g, 5077);
+		case "ice_cream": return drawImage(g, 5069);
+		case "iced_tea": return drawImage(g, 5094);
+		case "lemonade": return drawImage(g, 5086);
+		case "map": return drawImage(g, 5063);
+		case "meatball_soup": return drawImage(g, 5100);
+		case "photo1": return drawImage(g, 5064);
+		case "photo2": return drawImage(g, 5089);
+		case "photo3": return drawImage(g, 5090);
+		case "photo4": return drawImage(g, 5091);
+		case "pizza": return drawImage(g, 5074);
+		case "popcorn": return drawImage(g, 5076);
+		case "pretzel": return drawImage(g, 5092);
+		case "roast_sausage": return drawImage(g, 5109);
+		case "rubbish": return drawImage(g, 5072);
+		case "soybean_milk": return drawImage(g, 5102);
+		case "sub_sandwich": return drawImage(g, 5104);
+		case "sujeonggwa": return drawImage(g, 5103);
+		case "sunglasses": return drawImage(g, 5096);
+		case "tentacle": return drawImage(g, 5078);
+		case "toffee_apple": return drawImage(g, 5080);
+		case "toy": return drawImage(g, 5062);
+		case "tshirt": return drawImage(g, 5081, "tshirtColour");
+		case "umbrella": return drawImage(g, 5065, "umbrellaColour");
+		case "voucher": return drawImage(g, 5075);
+		case "wonton_soup": return drawImage(g, 5099);
+	}
+}
+
+function itemName(item: GuestItemType): string {
+	switch (item) {
+		case "balloon": return `"${park.name}" Balloon`;
+		case "beef_noodles": return `Beef Noodles`;
+		case "burger": return `Burger`;
+		case "candyfloss": return `Candyfloss`;
+		case "chicken": return `Fried Chicken`;
+		case "chips": return `Chips`;
+		case "chocolate": return `Hot Chocolate`;
+		case "coffee": return `Coffee`;
+		case "cookie": return `Cookie`;
+		case "doughnut": return `Doughnut`;
+		case "drink": return `Drink`;
+		case "empty_bottle": return `Empty Bottle`;
+		case "empty_bowl_blue": return `Empty Bowl`;
+		case "empty_bowl_red": return `Empty Bowl`;
+		case "empty_box": return `Empty Box`;
+		case "empty_drink_carton": return `Empty Drink Carton`;
+		case "empty_burger_box": return `Empty Burger Box`;
+		case "empty_can": return `Empty Can`;
+		case "empty_cup": return `Empty Cup`;
+		case "empty_juice_cup": return `Empty Juice Cup`;
+		case "fried_rice_noodles": return `Fried Rice Noodles`;
+		case "fruit_juice": return `Fruit Juice`;
+		case "funnel_cake": return `Funnel Cake`;
+		case "hat": return `"${park.name}" Hat`;
+		case "hot_dog": return `Hot Dog`;
+		case "ice_cream": return `Ice Cream`;
+		case "iced_tea": return `Iced Tea`;
+		case "lemonade": return `Lemonade`;
+		case "map": return `Map of "${park.name}"`;
+		case "meatball_soup": return `Meatball Soup`;
+		case "photo1": return `On-ride Photo`;
+		case "photo2": return `On-ride Photo`;
+		case "photo3": return `On-ride Photo`;
+		case "photo4": return `On-ride Photo`;
+		case "pizza": return `Pizza`;
+		case "popcorn": return `Popcorn`;
+		case "pretzel": return `Pretzel`;
+		case "roast_sausage": return `Roast Sausage`;
+		case "rubbish": return `Rubbish`;
+		case "soybean_milk": return `Soy Bean Milk`;
+		case "sub_sandwich": return `Sub Sandwich`;
+		case "sujeonggwa": return `Sujeonggwa`;
+		case "sunglasses": return `Sunglasses`;
+		case "tentacle": return `Tentacle`;
+		case "toffee_apple": return `Toffee Apple`;
+		case "toy": return `"${park.name}" Cuddly Toy`;
+		case "tshirt": return `"${park.name}" T-shirt`;
+		case "umbrella": return `"${park.name}" Umbrella`;
+		case "voucher": return `Voucher`;
+		case "wonton_soup": return `Wonton Soup`;
+	}
+}
+
+	function visibilityCheck(item: GuestItemType): Bindable<ElementVisibility> {
+		return compute(model._hasItem, h => h[guestItemTypeList.indexOf(item)] ? "visible" : "none")
+		// return compute(model._selectedPeep, p => {
+		// 	if (p === undefined) return "none";
+		// 	const guest = <Guest>p;
+		// 	return guest.hasItem({ type: item }) ? "visible" : "none"
+		// });
+	}
+
+	function carryingItems(): WidgetCreator<FlexiblePosition>[] {
+		let widgetArray: WidgetCreator<FlexiblePosition>[] = []
+		guestItemTypeList.forEach(item => widgetArray.push(createWidget(item)))
+		return widgetArray;
+	}
+	function itemList(): string[] {
+		let itemNameArray: string[] = []
+		guestItemTypeList.forEach(item => itemNameArray.push(itemName(item)))
+		return itemNameArray;
+	}
