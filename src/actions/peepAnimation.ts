@@ -1,5 +1,3 @@
-import { debug } from "../helpers/logger";
-
 export interface PeepAnimationArgs {
     id: number | null;
     animation: GuestAnimation | StaffAnimation;
@@ -11,7 +9,6 @@ export function animationPeepExecute(args: PeepAnimationArgs): GameActionResult
     const entity = map.getEntity(args.id);
     const peep = <Guest|Staff>entity;
     peep.animation = args.animation;
-    debug(`Peep animation set to "${args.animation}"`);
     return{}
 }
 
