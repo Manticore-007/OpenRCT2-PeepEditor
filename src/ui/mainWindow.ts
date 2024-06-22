@@ -33,6 +33,7 @@ import { guestToiletExecuteArgs } from "../actions/guestToilet";
 import { guestMassExecuteArgs } from "../actions/guestMass";
 import { ParkRide, getAllRides } from "../objects/parkRides";
 import { guestItemTypeList } from "../helpers/guestItemTypes";
+import { guestItemRemoveExecuteArgs } from "../actions/guestItemRemove";
 
 const securityOrders = store<boolean>(true);
 const entertainerOrders = store<boolean>(true);
@@ -1441,7 +1442,7 @@ export function openWindowRemoveItem(item: GuestItemType): void {
 					padding: [0, 4],
 					onClick: () => {
 						const guest = <Guest>model._selectedPeep.get();
-						guest.removeItem({type: item});
+						context.executeAction("pe-guestitemremove", guestItemRemoveExecuteArgs(guest.id, item));
 						removeItemWindow.close();
 					}
 				}),
@@ -1596,7 +1597,7 @@ function itemImage(item: GuestItemType, g: GraphicsContext): void {
 
 function itemName(item: GuestItemType): string {
 	switch (item) {
-		case "balloon": return `"${park.name}" Balloon`;
+		case "balloon": return `“${park.name}” Balloon`;
 		case "beef_noodles": return `Beef Noodles`;
 		case "burger": return `Burger`;
 		case "candyfloss": return `Candyfloss`;
@@ -1619,7 +1620,7 @@ function itemName(item: GuestItemType): string {
 		case "fried_rice_noodles": return `Fried Rice Noodles`;
 		case "fruit_juice": return `Fruit Juice`;
 		case "funnel_cake": return `Funnel Cake`;
-		case "hat": return `"${park.name}" Hat`;
+		case "hat": return `“${park.name}” Hat`;
 		case "hot_dog": return `Hot Dog`;
 		case "ice_cream": return `Ice Cream`;
 		case "iced_tea": return `Iced Tea`;
@@ -1641,9 +1642,9 @@ function itemName(item: GuestItemType): string {
 		case "sunglasses": return `Sunglasses`;
 		case "tentacle": return `Tentacle`;
 		case "toffee_apple": return `Toffee Apple`;
-		case "toy": return `"${park.name}" Cuddly Toy`;
-		case "tshirt": return `"${park.name}" T-shirt`;
-		case "umbrella": return `"${park.name}" Umbrella`;
+		case "toy": return `“${park.name}” Cuddly Toy`;
+		case "tshirt": return `“${park.name}” T-shirt`;
+		case "umbrella": return `“${park.name}” Umbrella`;
 		case "voucher": return `Voucher`;
 		case "wonton_soup": return `Wonton Soup`;
 	}
