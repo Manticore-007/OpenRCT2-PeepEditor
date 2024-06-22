@@ -1,6 +1,7 @@
 import { GuestFlagsArgs, guestFlagsExecute } from "./guestFlags";
 import { GuestHappinessArgs, guestHappinessExecute } from "./guestHappiness";
 import { GuestHungerArgs, guestHungerExecute } from "./guestHunger";
+import { GuestItemRemoveArgs, guestItemRemoveExecute } from "./guestItemRemove";
 import { GuestMassArgs, guestMassExecute } from "./guestMass";
 import { GuestNauseaArgs, guestNauseaExecute } from "./guestNausea";
 import { GuestThirstArgs, guestThirstExecute } from "./guestThirst";
@@ -38,4 +39,5 @@ context.registerAction<GuestThirstArgs>("pe-guestthirst", (args) => queryPermiss
 context.registerAction<GuestNauseaArgs>("pe-guestnausea", (args) => queryPermissionCheck(args), (args) => guestNauseaExecute(args.args));
 context.registerAction<GuestToiletArgs>("pe-guesttoilet", (args) => queryPermissionCheck(args), (args) => guestToiletExecute(args.args));
 context.registerAction<GuestMassArgs>("pe-guestmass", (args) => queryPermissionCheck(args), (args) => guestMassExecute(args.args));
+context.registerAction<GuestItemRemoveArgs>("pe-guestitemremove", (args) => queryPermissionCheck(args), (args) => guestItemRemoveExecute(args.args));
 }
