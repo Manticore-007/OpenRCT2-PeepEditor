@@ -7,14 +7,14 @@ export interface GuestMassArgs {
 
 export function guestMassExecute(args: GuestMassArgs): GameActionResult
 {
-    if (args.id === null){return{}};
+    if (args.id === null) return {};
     const entity = map.getEntity(args.id);
     const guest = <Guest>entity;
     guest.mass += args.adjustment;
     debug(`Guest mass set to "${guest.mass}`);
-    return{}
+    return {};
 }
 
 export function guestMassExecuteArgs(id: number | null, adjustment: number): GuestMassArgs{
-    return {"id": id, "adjustment": adjustment}
+    return {"id": id, "adjustment": adjustment};
 }

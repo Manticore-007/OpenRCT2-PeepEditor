@@ -8,14 +8,14 @@ export interface StaffOrdersArgs {
 
 export function staffOrdersExecute(args: StaffOrdersArgs): GameActionResult
 {
-    if (args.id === null){return{}};
+    if (args.id === null) return {};
     const entity = map.getEntity(args.id);
     const staff = <Staff>entity;
     args.checked ? staff.orders += args.staffOrders : staff.orders -= args.staffOrders;
     debug(`Staff orders set to "${staff.orders}"`);
-    return{}
+    return {};
 }
 
 export function staffOrdersExecuteArgs(id: number | null, checked: boolean, staffOrders: number): StaffOrdersArgs{
-    return {"id": id, "checked": checked, "staffOrders": staffOrders}
+    return {"id": id, "checked": checked, "staffOrders": staffOrders};
 }

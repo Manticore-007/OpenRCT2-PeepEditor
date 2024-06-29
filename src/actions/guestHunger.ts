@@ -7,14 +7,14 @@ export interface GuestHungerArgs {
 
 export function guestHungerExecute(args: GuestHungerArgs): GameActionResult
 {
-    if (args.id === null){return{}};
+    if (args.id === null) return {};
     const entity = map.getEntity(args.id);
     const guest = <Guest>entity;
     guest.hunger -= args.adjustment;
     debug(`Guest hunger set to "${guest.hunger}`);
-    return{}
+    return {};
 }
 
 export function guestHungerExecuteArgs(id: number | null, adjustment: number): GuestHungerArgs{
-    return {"id": id, "adjustment": adjustment}
+    return {"id": id, "adjustment": adjustment};
 }

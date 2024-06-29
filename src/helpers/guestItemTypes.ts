@@ -49,4 +49,4 @@ export const guestItemTypeList: GuestItemType[] = [
         "empty_drink_carton",
         "empty_juice_cup",
         "rubbish"
-]
+];
