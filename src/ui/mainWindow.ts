@@ -48,7 +48,7 @@ const deleteIcon: number = 5165;
 const locateIcon: number = 5167;
 const nameIcon: number = 5168;
 const flagsIcon: number = 5182;
-const allGuestsIcon: number = 5193;
+//const allGuestsIcon: number = 5193;
 const itemsIcon: number = 5326;
 const moodIcon: number = 5288;
 
@@ -151,13 +151,13 @@ const staticControls = [
 				openWindowRemovePeep(peep);
 		}
 	}),
-	button({
-		height: 24,
-		width: 24,
-		image: allGuestsIcon,
-		tooltip: "Select all guests on the map",
-		padding: {top: 1},
-	})
+	// button({
+	// 	height: 24,
+	// 	width: 24,
+	// 	image: allGuestsIcon,
+	// 	tooltip: "Select all guests on the map",
+	// 	padding: {top: 1},
+	// })
 ]
 
 export const windowPeepEditor = tabwindow({
@@ -221,27 +221,35 @@ export const windowPeepEditor = tabwindow({
 		tab({ //location
 			image: mapIcon,
 			height: "auto",
+			spacing: 2,
 			content: [
 				horizontal([
 					groupbox({
 						text: "Kinematics",
-						spacing: 2,
+						spacing: 0,
 						content: [
+							label({
+								text: "Here you can set a peep's position on the map",
+								alignment: "centred",
+								visibility: compute(model._isPeepSelected, p => p ? "visible" : "none"),
+							}),
 							horizontal([
 								label({
 									text: "X position:",
 									height: 13,
-									padding: {top: 0, bottom: 0, left: 10},
+									padding: {top: 1, bottom: 1, left: 10},
 									disabled: compute(model._isFrozen, f => !f),
+									visibility: compute(model._isPeepSelected, p => !p ? "visible" : "none"),
 								}),
 								spinner({
 									minimum: 0,
 									value: model._x,
 									height: 13,
 									width: "55%",
-									padding: {top: 0, right: 10,  bottom: 0},
+									padding: {top: 1, right: 10,  bottom: 1},
 									disabled: compute(model._isFrozen, f => !f),
 									disabledMessage: "Not available",
+									visibility: compute(model._isPeepSelected, p => !p ? "visible" : "none"),
 									step: 1,
 									onChange: (_, adjustment: number) => {
 										const peep = model._selectedPeep.get();
@@ -254,17 +262,19 @@ export const windowPeepEditor = tabwindow({
 								label({
 									text: "Y position:",
 									height: 13,
-									padding: {top: 0, bottom: 0, left: 10},
+									padding: {top: 1, bottom: 1, left: 10},
 									disabled: compute(model._isFrozen, f => !f),
+									visibility: compute(model._isPeepSelected, p => !p ? "visible" : "none"),
 								}),
 								spinner({
 									minimum: 0,
 									value: model._y,
 									height: 13,
 									width: "55%",
-									padding: {top: 0, right: 10,  bottom: 0},
+									padding: {top: 1, right: 10,  bottom: 1},
 									disabled: compute(model._isFrozen, f => !f),
 									disabledMessage: "Not available",
+									visibility: compute(model._isPeepSelected, p => !p ? "visible" : "none"),
 									step: 1,
 									onChange: (_, adjustment: number) => {
 										const peep = model._selectedPeep.get();
@@ -277,17 +287,19 @@ export const windowPeepEditor = tabwindow({
 								label({
 									text: "Z position:",
 									height: 13,
-									padding: {top: 0, bottom: 0, left: 10},
+									padding: {top: 1, bottom: 1, left: 10},
 									disabled: compute(model._isFrozen, f => !f),
+									visibility: compute(model._isPeepSelected, p => !p ? "visible" : "none"),
 								}),
 								spinner({
 									minimum: 0,
 									value: model._z,
 									height: 13,
 									width: "55%",
-									padding: {top: 0, right: 10,  bottom: 0},
+									padding: {top: 1, right: 10,  bottom: 1},
 									disabled: compute(model._isFrozen, f => !f),
 									disabledMessage: "Not available",
+									visibility: compute(model._isPeepSelected, p => !p ? "visible" : "none"),
 									step: 1,
 									onChange: (_, adjustment: number) => {
 										const peep = model._selectedPeep.get();
@@ -302,6 +314,7 @@ export const windowPeepEditor = tabwindow({
 									height: 13,
 									padding: {top: 10, bottom: 5, left: 10},
 									disabled: compute(model._isStaff, s => !s),
+									visibility: compute(model._isPeepSelected, p => !p ? "visible" : "none"),
 								}),
 								spinner({
 									minimum: 0,
@@ -312,6 +325,7 @@ export const windowPeepEditor = tabwindow({
 									width: "55%",
 									padding: {top: 10, right: 10, bottom: 5},
 									disabled: compute(model._isStaff, s => !s),
+									visibility: compute(model._isPeepSelected, p => !p ? "visible" : "none"),
 									disabledMessage: "Not available",
 									onChange: (_, adjustment: number) => {
 										const peep = model._selectedPeep.get();
@@ -328,12 +342,14 @@ export const windowPeepEditor = tabwindow({
 						text: "Multiplier:",
 						height: 13,
 						padding: [5, -20, 7, "1w"],
+						visibility: compute(model._isPeepSelected, p => !p ? "visible" : "none"),
 					}),
 					dropdown({
 						padding: [5, 15, 7, -20],
 						width: "20%",
 						height: 13,
 						items: ["1x", "10x", "100x", "1000x"],
+						visibility: compute(model._isPeepSelected, p => !p ? "visible" : "none"),
 						onChange: (number: number) => {
 							if (number === 0) { multiplier = 1};
 							if (number === 1) { multiplier = 10};
@@ -349,6 +365,17 @@ export const windowPeepEditor = tabwindow({
 			image: paintIcon,
 			height: "auto",
 			content: [
+				groupbox({
+					text: "Appearance",
+					visibility: compute(model._isPeepSelected, p => p ? "visible" : "none"),
+					content:[						
+						label({
+							text: "Here you can set how a a peep looks",
+							alignment: "centred",
+							visibility: compute(model._isPeepSelected, p => p ? "visible" : "none"),
+						}),
+					]
+				}),
 				groupbox({
 					text: "Staff member appearance",
 					spacing: 2,
@@ -540,12 +567,14 @@ export const windowPeepEditor = tabwindow({
 					text: "Animation",
 					spacing: 2,
 					gap: {top: 16, bottom: 16},
+					visibility: compute(model._isPeepSelected, p => !p ? "visible" : "none"),
 					content: [
 						horizontal([
 							label({
 								text: "Animation:",
 								height: 13,
 								disabled: model._isPeepSelected,
+								visibility: compute(model._isPeepSelected, p => !p ? "visible" : "none"),
 								padding: { left: 10 },
 							}),
 							dropdown({	//No selection and Guest
@@ -1403,12 +1432,12 @@ export const windowPeepEditor = tabwindow({
 						text: "",
 						height: 13,
 						visibility: compute(model._isGuest, g => g ? "visible" : "none"),
-						padding: {bottom: 4},
+						padding: {top: 2, bottom: 4},
 					}),
 					button({
 						text: `Add item`,
 						visibility: compute(model._isGuest, g => g ? "visible" : "none"),
-						padding: {bottom: 4},
+						padding: {top: 2, bottom: 4},
 						height: 13,
 						width: "25%",
 						onClick: () => {
