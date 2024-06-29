@@ -5,13 +5,13 @@ export interface PeepAnimationArgs {
 
 export function animationPeepExecute(args: PeepAnimationArgs): GameActionResult
 {
-    if (args.id === null){return{}};
+    if (args.id === null) return {};
     const entity = map.getEntity(args.id);
     const peep = <Guest|Staff>entity;
     peep.animation = args.animation;
-    return{}
+    return {};
 }
 
 export function animationPeepExecuteArgs(id: number | null, animation: GuestAnimation | StaffAnimation): PeepAnimationArgs{
-    return {"id": id, "animation": animation}
+    return {"id": id, "animation": animation};
 }

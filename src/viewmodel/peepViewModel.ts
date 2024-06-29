@@ -73,7 +73,7 @@ export class peepViewModel
 
     //custom
 
-    readonly _image = store<number>(6430 | (Colour.SalmonPink) << 19 | (Colour.SalmonPink << 24) | (0b111 << 29))
+    readonly _image = store<number>(6430 | (Colour.SalmonPink) << 19 | (Colour.SalmonPink << 24) | (0b111 << 29));
     readonly _peepFace = store<ImageAnimation>();
     readonly _isGuest = store<boolean>(false);
     readonly _isStaff = store<boolean>(false);
@@ -87,12 +87,9 @@ export class peepViewModel
 
     private _onGameTick?: IDisposable;
 
-    constructor() {
-    }
-
     _open(): void
     {
-        this._onGameTick = context.subscribe("interval.tick", () => this._onGameTickExecuted())
+        this._onGameTick = context.subscribe("interval.tick", () => this._onGameTickExecuted());
     }
 
     _reset(): void
@@ -139,7 +136,7 @@ export class peepViewModel
 
     _select(peep: Guest | Staff): void
     {
-        this._selectedPeep.set(peep)
+        this._selectedPeep.set(peep);
     }
 
     _tabImage(peep: Guest | Staff): void {
@@ -155,10 +152,10 @@ export class peepViewModel
                     break;
                 case "mechanic":
                     this._image.set(11466 | (this._colour.get() << 19) | (0b111 << 29));
-                    break
+                    break;
                 case "security":
                     this._image.set(11906 | (this._colour.get() << 19) | (0b111 << 29));
-                    break
+                    break;
                 case "entertainer":
                     this._image.set(0);
                     break;
@@ -180,7 +177,7 @@ export class peepViewModel
             this._availableAnimations.set(peep.availableAnimations);
             peep.energy === 0 ? this._isFrozen.set(true) : this._isFrozen.set(false);
             if (peep.peepType === "staff"){
-                this._isStaff.set(true); this._isGuest.set(false)
+                this._isStaff.set(true); this._isGuest.set(false);
                 this._colour.set(staff.colour);
                 this._staffType.set(staff.staffType);
                 staff.staffType === "handyman"? this._isHandyman.set(true) : this._isHandyman.set(false);
@@ -214,10 +211,10 @@ export class peepViewModel
                 if (guest.hasItem({ type: "photo1" })) {
                     guest.items.forEach((item, index) => {
                         if (item.type === "photo1"){
-                            const photo = <GuestPhoto>guest.items[index]
+                            const photo = <GuestPhoto>guest.items[index];
                             this._photo1RideName.set(map.getRide(photo.rideId).name);
                         }
-                    })
+                    });
                 }
             }
         }

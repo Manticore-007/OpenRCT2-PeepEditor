@@ -19,11 +19,11 @@ const costumeFriendlyNames = {
     "bandit": "{INLINE_SPRITE}{6}{20}{0}{0} Bandit",
     "sheriff": "{INLINE_SPRITE}{7}{20}{0}{0} Sherrif",
     "pirate": "{INLINE_SPRITE}{8}{20}{0}{0} Pirate"
-}
+};
 
 function convertToFriendlyName(value: StaffCostume | null): string{
     if (value === null) return "";
-    return costumeFriendlyNames[value]
+    return costumeFriendlyNames[value];
 }
 
 export const costumeList = compute(model._availableCostumes, c => (c.map(convertToFriendlyName)));

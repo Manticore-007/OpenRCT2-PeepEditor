@@ -64,13 +64,13 @@ rideList.subscribe(r => {
 		selection = [ r[selectedIdx], selectedIdx ];
 	}
 	selectedRide.set(selection);
-})
+});
 
 rideList.set(getAllRides());
-model._rideId.set(rideList.get()[0]._id)
+model._rideId.set(rideList.get()[0]._id);
 
 let multiplier: number = 1;
-let hasItemArray: boolean[] = []
+let hasItemArray: boolean[] = [];
 
 const staticControls = [
 	toggle({
@@ -86,7 +86,7 @@ const staticControls = [
 			model._name.set(p.name); model._availableAnimations.set(p.availableAnimations);
 			if (p.type === "staff") {
 				const staff = <Staff>p;
-				model._availableCostumes.set(staff.availableCostumes)
+				model._availableCostumes.set(staff.availableCostumes);
 			}
 		},
 			() => model._isPicking.set(false))
@@ -123,7 +123,7 @@ const staticControls = [
 						model._name.set(text);
 						context.executeAction("pe-namepeep", namePeepExecuteArgs(peep.id, text));
 					},
-				})
+				});
 		}
 	}),
 	button({
@@ -158,7 +158,7 @@ const staticControls = [
 	// 	tooltip: "Select all guests on the map",
 	// 	padding: {top: 1},
 	// })
-]
+];
 
 export const windowPeepEditor = tabwindow({
 	title: model._name,
@@ -183,7 +183,7 @@ export const windowPeepEditor = tabwindow({
 				if (peep.peepType === "guest")
 				guestItemTypeList.forEach(item => {
 					hasItemArray.push(guest.hasItem({type: item}));
-				})
+				});
 				model._hasItem.set(hasItemArray);
 			}
 		}
@@ -351,11 +351,11 @@ export const windowPeepEditor = tabwindow({
 						items: ["1x", "10x", "100x", "1000x"],
 						visibility: compute(model._isPeepSelected, p => !p ? "visible" : "none"),
 						onChange: (number: number) => {
-							if (number === 0) { multiplier = 1};
-							if (number === 1) { multiplier = 10};
-							if (number === 2) { multiplier = 100};
-							if (number === 3) { multiplier = 1000};
-							debug(`Multiplier set to ${multiplier}`)
+							if (number === 0) multiplier = 1;
+							if (number === 1) multiplier = 10;
+							if (number === 2) multiplier = 100;
+							if (number === 3) multiplier = 1000;
+							debug(`Multiplier set to ${multiplier}`);
 						}
 					})
 				]),
@@ -1319,10 +1319,10 @@ export const windowPeepEditor = tabwindow({
 						items: ["1x", "10x", "100x"],
 						visibility: compute(model._isGuest, g => g ? "visible" : "none"),
 						onChange: (number: number) => {
-							if (number === 0) { multiplier = 1};
-							if (number === 1) { multiplier = 10};
-							if (number === 2) { multiplier = 100};
-							debug(`Multiplier set to ${multiplier}`)
+							if (number === 0) multiplier = 1;
+							if (number === 1) multiplier = 10;
+							if (number === 2) multiplier = 100;
+							debug(`Multiplier set to ${multiplier}`);
 						}
 					})
 				]),
@@ -1360,7 +1360,7 @@ export const windowPeepEditor = tabwindow({
 						visibility: compute(model._isGuest, g => g ? "visible" : "none"),
 						onChange: (idx) => {
 							const item = guestItemTypeList[idx];
-							model._item.set(item)
+							model._item.set(item);
 						}
 					}),
 				]),
@@ -1453,7 +1453,7 @@ export const windowPeepEditor = tabwindow({
 								case "photo2": guest.giveItem(<GuestPhoto>{type: "photo2", rideId: model._rideId.get()}); break;
 								case "photo3": guest.giveItem(<GuestPhoto>{type: "photo3", rideId: model._rideId.get()}); break;
 								case "photo4": guest.giveItem(<GuestPhoto>{type: "photo4", rideId: model._rideId.get()}); break;
-								default: guest.giveItem({type: item})
+								default: guest.giveItem({type: item});
 							}
 							//
 						}
@@ -1530,10 +1530,10 @@ export const windowPeepEditor = tabwindow({
 function peepTypeQuery(): string {
 	const peep = model._selectedPeep.get();
 	if (peep !== undefined && peep.type === "guest") {
-		return "Enter name for this guest:"
+		return "Enter name for this guest:";
 	}
 	else if (peep !== undefined && peep.type === "staff") {
-		return "Enter name for this member of staff:"
+		return "Enter name for this member of staff:";
 	}
 	else return "";
 }
@@ -1820,22 +1820,22 @@ function itemName(item: GuestItemType): string {
 }
 
 function visibilityCheck(item: GuestItemType): Bindable<ElementVisibility> {
-		return compute(model._selectedPeep, model._hasItem, (p, h) => p && h[guestItemTypeList.indexOf(item)] ? "visible" : "none")
+		return compute(model._selectedPeep, model._hasItem, (p, h) => p && h[guestItemTypeList.indexOf(item)] ? "visible" : "none");
 }
 
 function carryingItems(): WidgetCreator<FlexiblePosition>[] {
 	const guest = <Guest>model._selectedPeep.get();
 	if (guest !== undefined && guest.items.length === 0) {
-		return [label({ text: "Nothing", alignment: "centred" })]
+		return [label({ text: "Nothing", alignment: "centred" })];
 	}
 	else {
-		let widgetArray: WidgetCreator<FlexiblePosition>[] = []
-		guestItemTypeList.forEach(item => widgetArray.push(createWidget(item)))
+		const widgetArray: WidgetCreator<FlexiblePosition>[] = [];
+		guestItemTypeList.forEach(item => widgetArray.push(createWidget(item)));
 		return widgetArray;
 	}
 }
 function itemList(): string[] {
-	let itemNameArray: string[] = []
-	guestItemTypeList.forEach(item => itemNameArray.push(itemName(item)))
+	const itemNameArray: string[] = [];
+	guestItemTypeList.forEach(item => itemNameArray.push(itemName(item)));
 	return itemNameArray;
 }

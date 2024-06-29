@@ -36,7 +36,7 @@ const AnimationFriendlyNames = {
         "drawPicture": "Painting",
         "beingWatched": "Looking around",
         "withdrawMoney": "Withdrawing money"
-}
+};
 
 export function animationList(value: StaffAnimation | GuestAnimation): string{
     return AnimationFriendlyNames[value];

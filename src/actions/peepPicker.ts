@@ -35,5 +35,5 @@ export function togglePeepPicker(isPressed: boolean, onPick: (peep: Guest | Staf
             }
         },
         onFinish: onCancel
-    })
+    });
 }

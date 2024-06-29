@@ -7,11 +7,11 @@ export interface PeepFreezeArgs {
 
 export function freezePeepExecute(args: PeepFreezeArgs): GameActionResult
 {
-    if (args.id === null){return{}};
+    if (args.id === null) return {};
     const entity = map.getEntity(args.id);
     const peep = <Guest|Staff>entity;
     if (args.pressed) {
-        peep.energy = 0
+        peep.energy = 0;
         peep.energyTarget = 0;
         debug(`${peep.name} is frozen`);
         debug(peep.energyTarget);
@@ -19,11 +19,11 @@ export function freezePeepExecute(args: PeepFreezeArgs): GameActionResult
     else {
         peep.energy = 96;
         peep.energyTarget = 32;
-        debug(`${peep.name} is unfrozen`)
+        debug(`${peep.name} is unfrozen`);
     }
-    return{}
+    return {};
 }
 
 export function freezePeepExecuteArgs(id: number | null, pressed: boolean): PeepFreezeArgs{
-    return {"id": id, "pressed": pressed}
+    return {"id": id, "pressed": pressed};
 }

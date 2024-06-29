@@ -6,7 +6,7 @@ import {
     WidgetCreator,
     graphics,
     isStore
-  } from "openrct2-flexui"
+  } from "openrct2-flexui";
   
   interface ProgressBarParams extends ElementParams {
     /**
@@ -37,30 +37,30 @@ import {
       onDraw: (g) => {
         const background: Colour = isStore(params.background)
           ? params.background.get()
-          : params.background
+          : params.background;
         const foreground: Colour = isStore(params.foreground)
           ? params.foreground.get()
-          : params.foreground
+          : params.foreground;
         const percentFilled = isStore(params.percentFilled)
           ? params.percentFilled.get()
-          : params.percentFilled
+          : params.percentFilled;
         const disabled = isStore(params.disabled)
           ? params.disabled.get()
-          : params.disabled
+          : params.disabled;
   
-        g.colour = background
-        g.well(0, 0, 94, 10)
+        g.colour = background;
+        g.well(0, 0, 94, 10);
         if (!disabled) {
-          g.colour = foreground
-          g.box(1, 1, 94 * percentFilled - 2, 10 - 2)
+          g.colour = foreground;
+          g.box(1, 1, 94 * percentFilled - 2, 10 - 2);
         } else {
-          g.box(1, 1, 94 - 2, 10 - 2)
+          g.box(1, 1, 94 - 2, 10 - 2);
         }
       }
-    })
+    });
   }
   
-  export { type ProgressBarParams, progressBar }
+  export { type ProgressBarParams, progressBar };
 
   // Define a function named percentage that calculates the percentage of a given number.
 export function percentage(fraction: number, total: number): number
@@ -74,12 +74,12 @@ export function colourPogressBar(positive: boolean, percentage: number): number
     if (positive){
         if (percentage <= 0.5) return Colour.BrightRed;
         else if (percentage > 0.5 && percentage < 0.7) return Colour.Yellow;
-        else if (percentage >= 0.7) return Colour.BrightGreen
+        else if (percentage >= 0.7) return Colour.BrightGreen;
     }
     else {
         if (percentage <= 0.5) return Colour.BrightGreen;
         else if (percentage > 0.5 && percentage < 0.7) return Colour.Yellow;
-        else if (percentage >= 0.7) return Colour.BrightRed
+        else if (percentage >= 0.7) return Colour.BrightRed;
     }
-    return Colour.DarkYellow
+    return Colour.DarkYellow;
 }

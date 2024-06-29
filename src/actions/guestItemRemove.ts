@@ -7,14 +7,14 @@ export interface GuestItemRemoveArgs {
 
 export function guestItemRemoveExecute(args: GuestItemRemoveArgs): GameActionResult
 {
-    if (args.id === null){return{}};
+    if (args.id === null) return{};
     const entity = map.getEntity(args.id);
     const guest = <Guest>entity;
-    guest.removeItem({type: args.item})
+    guest.removeItem({type: args.item});
     debug(`Guest item removed`);
-    return{}
+    return {};
 }
 
 export function guestItemRemoveExecuteArgs(id: number | null, item: GuestItemType): GuestItemRemoveArgs{
-    return {"id": id, "item": item}
+    return {"id": id, "item": item};
 }

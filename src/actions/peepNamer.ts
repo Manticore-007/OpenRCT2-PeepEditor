@@ -7,14 +7,14 @@ export interface PeepNameArgs {
 
 export function namePeepExecute(args: PeepNameArgs): GameActionResult
 {
-    if (args.id === null){return{}};
+    if (args.id === null) return {};
     const entity = map.getEntity(args.id);
     const peep = <Guest|Staff>entity;
     peep.name = args.name;
     debug(`Peep renamed to "${args.name}"`);
-    return{}
+    return {};
 }
 
 export function namePeepExecuteArgs(id: number | null, name: string): PeepNameArgs{
-    return {"id": id, "name": name}
+    return {"id": id, "name": name};
 }

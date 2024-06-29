@@ -7,7 +7,7 @@ export interface PeepColourArgs {
 }
 
 export function colourPeepExecute(args: PeepColourArgs): GameActionResult {
-    if (args.id === null) { return {} };
+    if (args.id === null) return {};
     const entity = map.getEntity(args.id);
     if (entity.type === "staff") {
         const staff = <Staff>entity;
@@ -18,11 +18,11 @@ export function colourPeepExecute(args: PeepColourArgs): GameActionResult {
         const guest = <Guest>entity;
         guest[args.property] = args.colour;
     }
-    return {}
+    return {};
 }
 
 export function colourPeepExecuteArgs(id: number | null, colour: number, property?: GuestColours): PeepColourArgs{
-    return {"id": id, "colour": colour, "property": property}
+    return {"id": id, "colour": colour, "property": property};
 }
 
 type GuestColours = "tshirtColour" | "trousersColour" | "hatColour" | "balloonColour" | "umbrellaColour";

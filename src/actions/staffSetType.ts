@@ -7,14 +7,14 @@ export interface StaffTypeArgs {
 
 export function staffTypeExecute(args: StaffTypeArgs): GameActionResult
 {
-    if (args.id === null){return{}};
+    if (args.id === null) return {};
     const entity = map.getEntity(args.id);
     const staff = <Staff>entity;
     staff.staffType = args.staffType;
     debug(`Staff type set to "${args.staffType}"`);
-    return{}
+    return {};
 }
 
 export function staffTypeExecuteArgs(id: number | null, staffType: StaffType): StaffTypeArgs{
-    return {"id": id, "staffType": staffType}
+    return {"id": id, "staffType": staffType};
 }
