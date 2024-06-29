@@ -39,7 +39,6 @@ const securityOrders = store<boolean>(true);
 const entertainerOrders = store<boolean>(true);
 
 const pointingFingerIcon: ImageAnimation = { frameBase: 5318, frameCount: 8, frameDuration: 2, };
-const paperIcon: ImageAnimation = { frameBase: 5277, frameCount: 7, frameDuration: 4, };
 const infoIcon: ImageAnimation = { frameBase: 5367, frameCount: 8, frameDuration: 4, };
 const paintIcon: ImageAnimation = { frameBase: 5221, frameCount: 8, frameDuration: 4, };
 const mapIcon: ImageAnimation = { frameBase: 5192, frameCount: 1, frameDuration: 4, offset: { x: 4, y: 1 }};
@@ -54,21 +53,21 @@ const itemsIcon: number = 5326;
 const moodIcon: number = 5288;
 
 const rideList = store<ParkRide[]>([]);
-//const selectedRide = store<[ParkRide, number] | null>(null);
+const selectedRide = store<[ParkRide, number] | null>(null);
 
-// rideList.subscribe(r => {
-// 	let selection: [ParkRide, number] | null = null;
-// 	if (r.length > 0)
-// 	{
-// 		const previous = selectedRide.get();
-// 		const selectedIdx = (previous && previous[1] < r.length) ? previous[1] : 0;
-// 		selection = [ r[selectedIdx], selectedIdx ];
-// 	}
-// 	debug("[updateSelectionOrNull] =>", selection);
-// 	selectedRide.set(selection);
-// })
+rideList.subscribe(r => {
+	let selection: [ParkRide, number] | null = null;
+	if (r.length > 0)
+	{
+		const previous = selectedRide.get();
+		const selectedIdx = (previous && previous[1] < r.length) ? previous[1] : 0;
+		selection = [ r[selectedIdx], selectedIdx ];
+	}
+	selectedRide.set(selection);
+})
 
 rideList.set(getAllRides());
+model._rideId.set(rideList.get()[0]._id)
 
 let multiplier: number = 1;
 let hasItemArray: boolean[] = []
@@ -1303,31 +1302,134 @@ export const windowPeepEditor = tabwindow({
 		tab({
 			height: "auto",
 			image: itemsIcon,
+			spacing: 0,
 			content: [
 				groupbox({
 					spacing: 0,
+					padding: { bottom: 4 },
 					text: "Carrying",
-					content: carryingItems()
+					content: [
+						label({
+							text: "Organise a guest's inventory",
+							alignment: "centred",
+							visibility: compute(model._isGuest, g => !g ? "visible" : "none"),
+						})
+					].concat(carryingItems())
 				}),
 				horizontal([
 					label({
-						text: "Give item:"
+						text: "Item:",
+						height: 13,
+						visibility: compute(model._isGuest, g => g ? "visible" : "none"),
+						padding: {bottom: 4},
 					}),
 					dropdown({
 						items: itemList(),
-						selectedIndex: -1,
-						width: "75%"
+						height: 13,
+						width: "75%",
+						padding: {bottom: 4},
+						visibility: compute(model._isGuest, g => g ? "visible" : "none"),
+						onChange: (idx) => {
+							const item = guestItemTypeList[idx];
+							model._item.set(item)
+						}
 					}),
 				]),
-			]
-		}),
-		tab({
-			height: "auto",
-			image: paperIcon,
-			content: [
-				label({
-					text: "{WHITE}Statistics"
-				})
+				horizontal([
+					label({
+						text: "Voucher:",
+						height: 13,
+						visibility: compute(model._item, i => (i === "voucher") ? "visible" : "none"),
+						padding: {bottom: 4},
+					}),
+					dropdown({
+						items: ["Free entry", "Half-priced entry", "Free food/drink", "Free ride"],
+						height: 13,
+						width: "75%",
+						padding: {bottom: 4},
+						visibility: compute(model._item, i => (i === "voucher") ? "visible" : "none"),
+						onChange: (idx) => {
+							switch (idx) {
+								case 0: model._voucher.set(<Voucher>{type: "voucher", voucherType: "entry_free"});model._voucherType.set("entry_free"); break;
+								case 1: model._voucher.set(<Voucher>{type: "voucher", voucherType: "entry_half_price"});model._voucherType.set("entry_half_price"); break;
+								case 2: model._voucherType.set("food_drink_free"); model._voucher.set(<FoodDrinkVoucher>{type: "voucher", voucherType: model._voucherType.get(), item: model._voucherItem.get()}); break;
+								case 3: model._voucher.set(<RideVoucher>{type: "voucher", voucherType: "ride_free", rideId: model._rideId.get()});model._voucherType.set("ride_free"); break;
+							}
+						}
+					}),
+				]),
+				horizontal([
+					label({
+						text: "Ride:",
+						height: 13,
+						padding: {bottom: 4},
+						visibility: compute(model._item, model._voucherType, (i, v) => (i === "photo1" || i === "photo2" || i === "photo3" || i === "photo4" || (i === "voucher" && v === "ride_free")) ? "visible" : "none"),
+					}),
+					dropdown({
+						items: compute(rideList, c => c.map(r => r._ride().name)),
+						height: 13,
+						width: "75%",
+						padding: {bottom: 4},
+						visibility: compute(model._item, model._voucherType, (i, v) => (i === "photo1" || i === "photo2" || i === "photo3" || i === "photo4" || (i === "voucher" && v === "ride_free")) ? "visible" : "none"),
+						onChange: (idx) => {
+							const rideId = compute(rideList, c => c.map(r => r._ride().id));
+							model._rideId.set(rideId.get()[idx]);
+							model._voucher.set(<RideVoucher>{type: "voucher", voucherType: "ride_free", rideId: model._rideId.get()});
+						}
+					}),
+				]),
+				horizontal([
+					label({
+						text: "Free item:",
+						height: 13,
+						visibility: compute(model._item, model._voucherType, (i, v) => (v === "food_drink_free" && i === "voucher") ? "visible" : "none"),
+						padding: {bottom: 4},
+					}),
+					dropdown({
+						items: itemList(),
+						height: 13,
+						width: "75%",
+						padding: {bottom: 4},
+						visibility: compute(model._item, model._voucherType, (i, v) => (v === "food_drink_free" && i === "voucher") ? "visible" : "none"),
+						onChange: (idx) => {
+							const item = guestItemTypeList[idx];
+							model._voucherItem.set(item);
+							model._voucher.set(<FoodDrinkVoucher>{type: "voucher", voucherType: "food_drink_free", item: model._voucherItem.get()});
+						}
+					}),
+				]),
+				horizontal([
+					label({
+						text: "",
+						height: 13,
+						visibility: compute(model._isGuest, g => g ? "visible" : "none"),
+						padding: {bottom: 4},
+					}),
+					button({
+						text: `Add item`,
+						visibility: compute(model._isGuest, g => g ? "visible" : "none"),
+						padding: {bottom: 4},
+						height: 13,
+						width: "25%",
+						onClick: () => {
+							const guest = <Guest>model._selectedPeep.get();
+							const item = model._item.get();
+							if (guest.hasItem({type: item}) && item !== "voucher" && item !== "photo1" && item !== "photo2" && item !== "photo3" && item !== "photo4"){
+								ui.showError("Guest already", "has this item");
+								return;
+							}
+							switch (model._item.get()) {
+								case "voucher": guest.giveItem(model._voucher.get()); break;
+								case "photo1": guest.giveItem(<GuestPhoto>{type: "photo1", rideId: model._rideId.get()}); break;
+								case "photo2": guest.giveItem(<GuestPhoto>{type: "photo2", rideId: model._rideId.get()}); break;
+								case "photo3": guest.giveItem(<GuestPhoto>{type: "photo3", rideId: model._rideId.get()}); break;
+								case "photo4": guest.giveItem(<GuestPhoto>{type: "photo4", rideId: model._rideId.get()}); break;
+								default: guest.giveItem({type: item})
+							}
+							//
+						}
+					})
+				])
 			]
 		}),
 		tab({
@@ -1340,16 +1442,54 @@ export const windowPeepEditor = tabwindow({
 				}),
 				horizontal([
 					label({
-						text: "Version:\n\nAuthor:\n\nUI:\n\nSpecial\nThanks:",
+						text: "Version:",
 						width: "25%"
 					}),
 					label({
-						text: versionString()+`\n\n{WHITE}Manticore-007\n\n{WHITE}FlexUI by Basssiiie\n\n{WHITE}Basssiiie, Gymnasiast, ItsSmitty\nSpacek531, AaronVanGeffen\nSadret, mrmagic2020, Isoitiro\nand Enox`,
+						text: versionString(),
+					}),
+				]),
+				horizontal([
+					label({
+						text: "Author:",
+						width: "25%"
+					}),
+					label({
+						text: `{BLACK}Manticore-007`,
+					}),
+				]),
+				horizontal([
+					label({
+						text: "UI:",
+						width: "25%"
+					}),
+					label({
+						text: `{BLACK}FlexUI by Basssiiie`,
+					}),
+				]),
+				horizontal([
+					label({
+						text: "Special\nThanks:",
+						width: "25%"
+					}),
+					label({
+						text: `{BLACK}Basssiiie, Gymnasiast, ItsSmitty\nSpacek531, AaronVanGeffen`,
+					}),
+				]),
+				horizontal([
+					label({
+						text: "",
+						width: "25%",
+						padding: {top: 2}
+					}),
+					label({
+						text: `{BLACK}Sadret, mrmagic2020, Isoitiro\nand Enox`,
+						padding: {top: 2}
 					}),
 				]),
 				label({
 					text: "https://github.com/Manticore-007\n/OpenRCT2-PeepEditor",
-					padding: ["95%", 0, 0, 0],
+					padding: ["90%", 0, 0, 0],
 					alignment: "centred"
 				})
 			]
@@ -1485,9 +1625,9 @@ function textInputTitle(peep: Guest | Staff): string {
 function versionString(): string
 {
     if (isDevelopment) {
-        return `{WHITE}${pluginVersion} {BABYBLUE}[DEBUG]`;
+        return `{BLACK}${pluginVersion} {BABYBLUE}[DEBUG]`;
     }
-    else return `{WHITE}${pluginVersion}`;
+    else return `{BLACK}${pluginVersion}`;
 }
 
 function drawImage(g: GraphicsContext, image: number, property?: keyof Guest): void
@@ -1627,10 +1767,10 @@ function itemName(item: GuestItemType): string {
 		case "lemonade": return `Lemonade`;
 		case "map": return `Map of ${park.name}`;
 		case "meatball_soup": return `Meatball Soup`;
-		case "photo1": return `On-ride Photo`;
-		case "photo2": return `On-ride Photo`;
-		case "photo3": return `On-ride Photo`;
-		case "photo4": return `On-ride Photo`;
+		case "photo1": return `On-ride Photo 1`;
+		case "photo2": return `On-ride Photo 2`;
+		case "photo3": return `On-ride Photo 3`;
+		case "photo4": return `On-ride Photo 4`;
 		case "pizza": return `Pizza`;
 		case "popcorn": return `Popcorn`;
 		case "pretzel": return `Pretzel`;
@@ -1650,22 +1790,23 @@ function itemName(item: GuestItemType): string {
 	}
 }
 
-	function visibilityCheck(item: GuestItemType): Bindable<ElementVisibility> {
-		return compute(model._hasItem, h => h[guestItemTypeList.indexOf(item)] ? "visible" : "none")
-		// return compute(model._selectedPeep, p => {
-		// 	if (p === undefined) return "none";
-		// 	const guest = <Guest>p;
-		// 	return guest.hasItem({ type: item }) ? "visible" : "none"
-		// });
-	}
+function visibilityCheck(item: GuestItemType): Bindable<ElementVisibility> {
+		return compute(model._selectedPeep, model._hasItem, (p, h) => p && h[guestItemTypeList.indexOf(item)] ? "visible" : "none")
+}
 
-	function carryingItems(): WidgetCreator<FlexiblePosition>[] {
+function carryingItems(): WidgetCreator<FlexiblePosition>[] {
+	const guest = <Guest>model._selectedPeep.get();
+	if (guest !== undefined && guest.items.length === 0) {
+		return [label({ text: "Nothing", alignment: "centred" })]
+	}
+	else {
 		let widgetArray: WidgetCreator<FlexiblePosition>[] = []
 		guestItemTypeList.forEach(item => widgetArray.push(createWidget(item)))
 		return widgetArray;
 	}
-	function itemList(): string[] {
-		let itemNameArray: string[] = []
-		guestItemTypeList.forEach(item => itemNameArray.push(itemName(item)))
-		return itemNameArray;
-	}
+}
+function itemList(): string[] {
+	let itemNameArray: string[] = []
+	guestItemTypeList.forEach(item => itemNameArray.push(itemName(item)))
+	return itemNameArray;
+}

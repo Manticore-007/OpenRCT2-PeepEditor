@@ -53,17 +53,22 @@ export class peepViewModel
     readonly _isLost = store<boolean>(false);
     readonly _lostCountdown = store<number>(0);
     readonly _thoughts = store<Thought[]>([]);
-    readonly _items = store<GuestItemType[]>([]);
+    readonly _items = store<GuestItem[]>([]);
     readonly _hasItem = store<boolean[]>([]);
     readonly _hasHat = store<boolean>(false);
     readonly _hasBalloon = store<boolean>(false);
     readonly _hasUmbrella = store<boolean>(false);
     readonly _availableGuestAnimations = store<GuestAnimation[]>([]);
     readonly _flags = store<number>(0);
-    readonly _photo1 = store<GuestPhoto>();
-    readonly _photo2 = store<GuestPhoto>();
-    readonly _photo3 = store<GuestPhoto>();
-    readonly _photo4 = store<GuestPhoto>();
+    readonly _photo1RideName = store<string>("");
+    readonly _photo2RideId = store<number>();
+    readonly _photo3RideId = store<number>();
+    readonly _photo4RideId = store<number>();
+    readonly _item = store<GuestItemType>("balloon");
+    readonly _rideId = store<number>(0);
+    readonly _voucher = store<Voucher>(<Voucher>{type: "voucher", voucherType: "entry_free"});
+    readonly _voucherItem = store<GuestItemType>("balloon");
+    readonly _voucherType = store<VoucherType>("entry_free");
 
 
     //custom
@@ -116,6 +121,11 @@ export class peepViewModel
         this._isSecurity.set(false);
         this._isEntertainer.set(false);
         this._orders.set(0);
+        this._item.set("balloon");
+        this._rideId.set(0);
+        this._voucher.set(<Voucher>{type: "voucher", voucherType: "entry_free"});
+        this._voucherType.set("entry_free");
+        this._voucherItem.set("balloon");
     }
 
     _dispose(): void
@@ -182,7 +192,8 @@ export class peepViewModel
                 this._availableStaffAnimations.set(staff.availableAnimations);
                 this._orders.set(staff.orders);
             }
-            if (peep.peepType === "guest"){
+            if (peep.peepType === "guest")
+                {
                 this._isGuest.set(true); this._isStaff.set(false);
                 this._tshirtColour.set(guest.tshirtColour);
                 this._trousersColour.set(guest.trousersColour);
@@ -196,12 +207,22 @@ export class peepViewModel
                 this._nausea.set(guest.nausea);
                 this._toilet.set(guest.toilet);
                 this._mass.set(guest.mass);
-                guest.hasItem({type: "hat"})? this._hasHat.set(true) : this._hasHat.set(false);
-                guest.hasItem({type: "balloon"})? this._hasBalloon.set(true) : this._hasBalloon.set(false);
-                guest.hasItem({type: "umbrella"})? this._hasUmbrella.set(true) : this._hasUmbrella.set(false);
+                this._items.set(guest.items);
+                guest.hasItem({ type: "hat" }) ? this._hasHat.set(true) : this._hasHat.set(false);
+                guest.hasItem({ type: "balloon" }) ? this._hasBalloon.set(true) : this._hasBalloon.set(false);
+                guest.hasItem({ type: "umbrella" }) ? this._hasUmbrella.set(true) : this._hasUmbrella.set(false);
+                if (guest.hasItem({ type: "photo1" })) {
+                    guest.items.forEach((item, index) => {
+                        if (item.type === "photo1"){
+                            const photo = <GuestPhoto>guest.items[index]
+                            this._photo1RideName.set(map.getRide(photo.rideId).name);
+                        }
+                    })
+                }
             }
         }
     }
 }
+    
 
 export const model = new peepViewModel;
