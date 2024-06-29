@@ -17,5 +17,5 @@ export function main(): void
 	}
 	initActions();
 	initCustomSprites();
-	ui.registerMenuItem("Peep Editor FlexUI", () => windowPeepEditor.open());
+	ui.registerMenuItem("Peep Editor", () => windowPeepEditor.open());
 }
