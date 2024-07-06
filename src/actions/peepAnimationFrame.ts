@@ -9,7 +9,10 @@ export function animationFramePeepExecute(args: PeepAnimationFrameArgs): GameAct
     if (args.id === null) return {};
     const entity = map.getEntity(args.id);
     const peep = <Guest|Staff>entity;
-    peep.animationOffset += args.frame;
+    if (peep.animationOffset === 0 && args.frame === -1){
+        peep.animationOffset = peep.animationLength - 1;
+    }
+    else peep.animationOffset += args.frame;
     return {};
 }
 

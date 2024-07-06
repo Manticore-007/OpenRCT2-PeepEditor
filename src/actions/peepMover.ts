@@ -1,5 +1,3 @@
-import { debug } from "../helpers/logger";
-
 export interface PeepMoveArgs {
     id: number | null;
     axis: keyof CoordsXYZ;
@@ -10,9 +8,9 @@ export function movePeepExecute(args: PeepMoveArgs): GameActionResult
 {
     if (args.id === null) return {};
     const entity = map.getEntity(args.id);
+    if (entity === null || entity.type !== "guest" && entity.type !== "staff" ) return {} ;
     const peep = <Guest|Staff>entity;
     peep[args.axis] += args.adjustment;
-    debug(`Peep moved to "x: ${peep.x}", "y: ${peep.y}", "z: ${peep.z}"`);
     return {};
 }
 

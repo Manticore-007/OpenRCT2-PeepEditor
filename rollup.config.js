@@ -11,7 +11,7 @@ const build = process.env.BUILD || "development";
 const isDev = (build === "development");
 
 const output = (isDev)
-	? `${getPath("documents")}/OpenRCT2/plugin/PeepEditor_alpha.js`
+	? `${getPath("documents")}/OpenRCT2/plugin/PeepEditor-debug.js`
 	: "./dist/PeepEditor.js";
 
 
