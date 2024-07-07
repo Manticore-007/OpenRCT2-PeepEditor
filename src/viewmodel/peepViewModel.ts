@@ -4,6 +4,7 @@ import { guestItemTypeList } from "../helpers/guestItemTypes";
 import { peepSpeedExecuteArgs } from "../actions/peepSpeed";
 import { namePeepExecuteArgs } from "../actions/peepNamer";
 import { debug } from "../helpers/logger";
+import { getAllRides, ParkRide } from "../objects/parkRides";
 const windowTitle = "Peep Editor";
 
 type PeepMotion = "frozen" | "static" | "moving"
@@ -94,13 +95,25 @@ export class peepViewModel
     readonly _isPeepSelected = compute(this._selectedPeep, p => p ? true : false);
     readonly _allGuestsSelected = store<boolean>(false);
     readonly _allGuests = store<Entity[]>([]);
+    readonly _rideList = store<ParkRide[]>([]);
+    readonly _selectedRide = store<[ParkRide, number] | null>(null);
 
     private _onGameTick?: IDisposable;
 
     _open(): void
     {
         this._onGameTick = context.subscribe("interval.tick", () => this._onGameTickExecuted());
-
+        this._rideList.subscribe(r => {
+            let selection: [ParkRide, number] | null = null;
+            if (r.length > 0)
+            {
+                const previous = this._selectedRide.get();
+                const selectedIdx = (previous && previous[1] < r.length) ? previous[1] : 0;
+                selection = [ r[selectedIdx], selectedIdx ];
+            }
+            this._selectedRide.set(selection);
+        });        
+        this._rideList.set(getAllRides());
     }
 
     _reset(): void
@@ -156,8 +169,47 @@ export class peepViewModel
         this._allGuests.set(pickedGuest);
         this._selectedPeep.set(<Guest|Staff>pickedGuest[0]);
         this._name.set(peep.name);
+        this._animation.set(peep.animation);
         this._availableAnimations.set(peep.availableAnimations);
-        model._conversionCheck(peep);
+        this._conversionCheck(peep);
+    }
+
+    _selectAllGuests(pressed: boolean): void
+    {
+        if (pressed) {
+            this._allGuests.set(map.getAllEntities("guest"));
+            const firstGuest = <Guest>this._allGuests.get()[0]
+            this._isPicking.set(false);
+            this._name.set(`{GREEN}All guests selected`);
+            this._availableAnimations.set(firstGuest.availableAnimations);
+            this._animationLength.set(firstGuest.animationLength);
+            ui.tool?.cancel();
+        }
+        else {
+            this._allGuests.set([]);
+            this._name.set(windowTitle);
+            this._availableAnimations.set([]);
+            this._animationLength.set(0);
+        };
+        this._x.set(0);
+        this._y.set(0);
+        this._z.set(0);
+        this._isGuest.set(false);
+        this._isStaff.set(false);
+        this._selectedPeep.set(undefined);
+        this._allGuestsSelected.set(pressed);
+        this._tshirtColour.set(19);
+        this._trousersColour.set(19);
+        this._hatColour.set(19);
+        this._balloonColour.set(19);
+        this._umbrellaColour.set(19);
+        this._happiness.set(0);
+        this._energy.set(0);
+        this._hunger.set(255);
+        this._thirst.set(255);
+        this._nausea.set(0);
+        this._toilet.set(0);
+        this._mass.set(0);
     }
     
     _locate(): void
@@ -211,7 +263,7 @@ export class peepViewModel
     {
         if (peep.type === "staff") {
             const staff = <Staff>peep;
-            model._availableCostumes.set(staff.availableCostumes);
+            this._availableCostumes.set(staff.availableCostumes);
             if (staff.energy === 0) {
                 context.executeAction("pe-peepspeed", peepSpeedExecuteArgs(staff.id, 96));
                 context.executeAction("pe-guestflags", guestFlagsExecuteArgs(staff.id, true, "positionFrozen"));
@@ -230,23 +282,22 @@ export class peepViewModel
         {
 			if (peep.peepType !== "guest" && peep.peepType !== "staff") {
 				ui.showError("Peep no longer", "available");
-				model._reset();
+				this._reset();
 			}
 			else{
 				hasItemArray = [];
-				model._animation.set(peep.animation);
-				model._animationFrame.set(peep.animationOffset);
-				model._animationLength.set(peep.animationLength);
+				this._animation.set(peep.animation);
+				this._animationFrame.set(peep.animationOffset);
+				this._animationLength.set(peep.animationLength);
 				if (peep.peepType === "guest")
 				guestItemTypeList.forEach(item => {
 					hasItemArray.push(guest.hasItem({type: item}));
 				});
-				model._hasItem.set(hasItemArray);
+				this._hasItem.set(hasItemArray);
 			}
             this._x.set(peep.x);
             this._y.set(peep.y);
             this._z.set(peep.z);
-            this._name.set(peep.name);
             this._energy.set(peep.energy);
             this._availableAnimations.set(peep.availableAnimations);
             peep.getFlag("animationFrozen") ? this._isFrozen.set(true) : this._isFrozen.set(false);
