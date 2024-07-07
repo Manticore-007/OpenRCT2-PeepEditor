@@ -12,6 +12,7 @@ import { PeepColourArgs, colourPeepExecute } from "./peepColour";
 import { PeepMoveArgs, movePeepExecute } from "./peepMover";
 import { PeepNameArgs, namePeepExecute } from "./peepNamer";
 import { PeepRemoveArgs, removePeepExecute } from "./peepRemover";
+import { PeepRotateArgs, peepRotateExecute } from "./peepRotater";
 import { PeepSpeedArgs, peepSpeedExecute } from "./peepSpeed";
 import { queryPermissionCheck } from "./permissions";
 import { StaffCostumeArgs, staffCostumeExecute } from "./staffSetCostume";
@@ -38,4 +39,5 @@ context.registerAction<GuestNauseaArgs>("pe-guestnausea", (args) => queryPermiss
 context.registerAction<GuestToiletArgs>("pe-guesttoilet", (args) => queryPermissionCheck(args), (args) => guestToiletExecute(args.args));
 context.registerAction<GuestMassArgs>("pe-guestmass", (args) => queryPermissionCheck(args), (args) => guestMassExecute(args.args));
 context.registerAction<GuestItemRemoveArgs>("pe-guestitemremove", (args) => queryPermissionCheck(args), (args) => guestItemRemoveExecute(args.args));
+context.registerAction<PeepRotateArgs>("pe-peeprotate", (args) => queryPermissionCheck(args), (args) => peepRotateExecute(args.args));
 }

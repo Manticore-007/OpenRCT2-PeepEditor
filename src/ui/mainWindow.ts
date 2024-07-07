@@ -30,7 +30,7 @@ import { guestToiletExecuteArgs } from "../actions/guestToilet";
 import { guestMassExecuteArgs } from "../actions/guestMass";
 import { guestItemTypeList } from "../helpers/guestItemTypes";
 import { guestItemRemoveExecuteArgs } from "../actions/guestItemRemove";
-import { rideList } from "../helpers/rides";
+import { peepRotateExecuteArgs } from "../actions/peepRotater";
 
 const securityOrders = store<boolean>(true);
 const entertainerOrders = store<boolean>(true);
@@ -44,14 +44,14 @@ const lensIcon: ImageAnimation = {frameBase: 29401, frameCount: 1, frameDuration
 const deleteIcon: number = 5165;
 const locateIcon: number = 5167;
 const nameIcon: number = 5168;
-//const allGuestsIcon: number = 5193;
+const allGuestsIcon: number = 5193;
 const itemsIcon: number = 5326;
 const moodIcon: number = 5288;
 
 let multiplier: number = 1;
 
 export const windowPeepEditor = tabwindow({
-	title: model._name,
+	title: compute(model._name, n => n),
 	width: 260,
 	height: 230,
 	colours: [Colour.DarkYellow, Colour.DarkYellow, Colour.DarkYellow],
@@ -121,7 +121,7 @@ export const windowPeepEditor = tabwindow({
 								width: 24,
 								image: nameIcon,
 								tooltip: "Give the selected peep a new name, even a longer name than usual",
-								disabled: compute(model._isPeepSelected, p => !p),
+								disabled: compute(model._isPeepSelected, model._allGuestsSelected, (p, a) => !p || a),
 								padding: { top: -2, left: -2, bottom: -2, right: -2 },
 								onClick: () => model._rename()
 							}),
@@ -130,7 +130,7 @@ export const windowPeepEditor = tabwindow({
 								width: 24,
 								image: locateIcon,
 								tooltip: "Focus the main viewport on the selected peep",
-								disabled: compute(model._isPeepSelected, p => !p),
+								disabled: compute(model._isPeepSelected, model._allGuestsSelected, (p, a) => !p || a),
 								padding: {top: -2, left: -2, bottom: -2, right: -2},
 								onClick: () => model._locate()
 							}),
@@ -139,7 +139,7 @@ export const windowPeepEditor = tabwindow({
 								width: 24,
 								image: deleteIcon,
 								tooltip: "Remove the selected peep from existence",
-								disabled: compute(model._isPeepSelected, p => !p),
+								disabled: compute(model._isPeepSelected, model._allGuestsSelected, (p, a) => !p || a),
 								padding: {top: -2, left: -2, bottom: -2, right: -2},
 								onClick: () => {
 									const peep = model._selectedPeep.get();
@@ -147,26 +147,15 @@ export const windowPeepEditor = tabwindow({
 										openWindowRemovePeep(peep);
 								}
 							}),
-							// toggle({
-							// 	height: 24,
-							// 	width: 24,
-							// 	image: allGuestsIcon,
-							// 	tooltip: "Select all guests on the map",
-							// 	padding: {top: -2, left: -2, bottom: -2, right: -2},
-							// 	isPressed: twoway(model._allGuestsSelected),
-							// 	onChange: (pressed) => {
-							// 		if (pressed) {
-							// 			model._allGuests.set(map.getAllEntities("guest"));
-							// 			model._isPicking.set(false);
-							// 			ui.tool?.cancel();
-							// 		}
-							// 		else {
-							// 			model._allGuests.set([]);
-							// 			model._selectedPeep.set(undefined);
-							// 		};
-							// 		model._allGuestsSelected.set(pressed);
-							// 	}
-							// })
+							toggle({	//all guests
+								height: 24,
+								width: 24,
+								image: allGuestsIcon,
+								tooltip: "Select all guests on the map",
+								padding: {top: -2, left: -2, bottom: -2, right: -2},
+								isPressed: twoway(model._allGuestsSelected),
+								onChange: (pressed) => model._selectAllGuests(pressed)
+							})
 						]
 					})
 				]),
@@ -178,7 +167,7 @@ export const windowPeepEditor = tabwindow({
 				})
 			]
 		}),
-		tab({ //location
+		tab({	//location
 			image: mapIcon,
 			height: "auto",
 			spacing: 0,
@@ -191,7 +180,7 @@ export const windowPeepEditor = tabwindow({
 							label({
 								text: "Here you can set a peep's position on the map",
 								alignment: "centred",
-								visibility: compute(model._isPeepSelected, p => !p ? "visible" : "none"),
+								visibility: compute(model._isPeepSelected, model._allGuestsSelected, (p, a) => !p && !a ? "visible" : "none"),
 							}),
 							horizontal([
 								label({
@@ -199,23 +188,23 @@ export const windowPeepEditor = tabwindow({
 									height: 13,
 									padding: {top: 1, bottom: 1, left: 10},
 									disabled: compute(model._isFrozen, model._isStatic, (f, s) => !f && !s),
-									visibility: compute(model._isPeepSelected, p => p ? "visible" : "none"),
+									visibility: compute(model._isPeepSelected, model._allGuestsSelected, (p, a) => p || a ? "visible" : "none"),
 								}),
 								spinner({
-									minimum: 0,
+									minimum: compute(model._allGuestsSelected, a => a ? -(2^31) : 0 ),
 									value: model._x,
 									height: 13,
 									width: "55%",
 									padding: {top: 1, right: 10,  bottom: 1},
 									disabled: compute(model._isFrozen, model._isStatic, (f, s) => !f && !s),
 									disabledMessage: "Peep not static",
-									visibility: compute(model._isPeepSelected, p => p ? "visible" : "none"),
-									step: 1,
+									visibility: compute(model._isPeepSelected, model._allGuestsSelected, (p, a) => p || a ? "visible" : "none"),
 									onChange: (_, adjustment: number) => {
-										const peep = model._selectedPeep.get();
-										if (peep !== undefined)
-										context.executeAction("pe-movepeep", movePeepExecuteArgs(peep.id, "x", (adjustment*multiplier)));
-									}
+										model._allGuests.get().forEach(guest => {
+										if (guest !== undefined)
+										context.executeAction("pe-movepeep", movePeepExecuteArgs(guest.id, "x", (adjustment*multiplier)));
+									})
+								}
 								})
 							]),
 							horizontal([
@@ -224,23 +213,23 @@ export const windowPeepEditor = tabwindow({
 									height: 13,
 									padding: {top: 1, bottom: 1, left: 10},
 									disabled: compute(model._isFrozen, model._isStatic, (f, s) => !f && !s),
-									visibility: compute(model._isPeepSelected, p => p ? "visible" : "none"),
+									visibility: compute(model._isPeepSelected, model._allGuestsSelected, (p, a) => p || a ? "visible" : "none"),
 								}),
 								spinner({
-									minimum: 0,
+									minimum: compute(model._allGuestsSelected, a => a ? -(2^31) : 0 ),
 									value: model._y,
 									height: 13,
 									width: "55%",
 									padding: {top: 1, right: 10,  bottom: 1},
 									disabled: compute(model._isFrozen, model._isStatic, (f, s) => !f && !s),
 									disabledMessage: "Peep not static",
-									visibility: compute(model._isPeepSelected, p => p ? "visible" : "none"),
-									step: 1,
+									visibility: compute(model._isPeepSelected, model._allGuestsSelected, (p, a) => p || a ? "visible" : "none"),
 									onChange: (_, adjustment: number) => {
-										const peep = model._selectedPeep.get();
-										if (peep !== undefined)
-										context.executeAction("pe-movepeep", movePeepExecuteArgs(peep.id, "y", (adjustment*multiplier)));
-									}
+										model._allGuests.get().forEach(guest => {
+										if (guest !== undefined)
+										context.executeAction("pe-movepeep", movePeepExecuteArgs(guest.id, "y", (adjustment*multiplier)));
+									})
+								}
 								})
 							]),
 							horizontal([
@@ -249,18 +238,17 @@ export const windowPeepEditor = tabwindow({
 									height: 13,
 									padding: {top: 1, bottom: 1, left: 10},
 									disabled: compute(model._isFrozen, model._isStatic, (f, s) => !f && !s),
-									visibility: compute(model._isPeepSelected, p => p ? "visible" : "none"),
+									visibility: compute(model._isPeepSelected, model._allGuestsSelected, (p, a) => p || a ? "visible" : "none"),
 								}),
 								spinner({
-									minimum: 0,
+									minimum: compute(model._allGuestsSelected, a => a ? -(2^31) : 0 ),
 									value: model._z,
 									height: 13,
 									width: "55%",
 									padding: {top: 1, right: 10,  bottom: 1},
 									disabled: compute(model._isFrozen, model._isStatic, (f, s) => !f && !s),
 									disabledMessage: "Peep not static",
-									visibility: compute(model._isPeepSelected, p => p ? "visible" : "none"),
-									step: 1,
+									visibility: compute(model._isPeepSelected, model._allGuestsSelected, (p, a) => p || a ? "visible" : "none"),
 									onChange: (_, adjustment: number) => {
 										model._allGuests.get().forEach(guest => {
 										if (guest !== undefined)
@@ -306,31 +294,22 @@ export const windowPeepEditor = tabwindow({
 						border: false,
 						image: 5169,
 						tooltip: "Rotate a static peep",
-						visibility: compute(model._isPeepSelected, p => p ? "visible" : "none"),
+						visibility: compute(model._isPeepSelected, model._allGuestsSelected, (p, a) => p || a ? "visible" : "none"),
 						disabled: compute(model._isStatic, s => !s),
-						onClick: () => {
-							const peep = model._allGuests.get();
-							const numDirections = 4
-							if (peep !== undefined) {
-								peep.forEach(entity => {
-									const peep = <Guest|Staff>entity;
-									peep.direction = (peep.direction + 1) % numDirections;
-								})
-							}
-						}
+						onClick: () => context.executeAction("pe-peeprotate", peepRotateExecuteArgs())
 					}),
 					label({
 						text: "Multiplier:",
 						height: 13,
-						padding: [5, -15, 7, "1w"],
-						visibility: compute(model._isPeepSelected, p => p ? "visible" : "none"),
+						padding: [5, 0, 7, "1w"],
+						visibility: compute(model._isPeepSelected, model._allGuestsSelected, (p, a) => p || a ? "visible" : "none"),
 					}),
 					dropdown({
 						padding: [5, 15, 7, -10],
 						width: "25%",
 						height: 13,
 						items: ["1x", "10x", "100x", "1000x"],
-						visibility: compute(model._isPeepSelected, p => p ? "visible" : "none"),
+						visibility: compute(model._isPeepSelected, model._allGuestsSelected, (p, a) => p || a ? "visible" : "none"),
 						onChange: (number: number) => {
 							if (number === 0) multiplier = 1;
 							if (number === 1) multiplier = 10;
@@ -348,12 +327,12 @@ export const windowPeepEditor = tabwindow({
 			content: [
 				groupbox({
 					text: "Appearance",
-					visibility: compute(model._isPeepSelected, p => !p ? "visible" : "none"),
+					visibility: compute(model._isPeepSelected, model._allGuestsSelected, (p, a) => !p && !a ? "visible" : "none"),
 					content:[						
 						label({
 							text: "Here you can set how a a peep looks",
 							alignment: "centred",
-							visibility: compute(model._isPeepSelected, p => !p ? "visible" : "none"),
+							visibility: compute(model._isPeepSelected, model._allGuestsSelected, (p, a) => !p && !a ? "visible" : "none"),
 						}),
 					]
 				}),
@@ -368,14 +347,12 @@ export const windowPeepEditor = tabwindow({
 								text: "Staff type:",
 								height: 13,
 								visibility: compute(model._isStaff, s => s ? "visible" : "none"),
-								disabled: !model._isPeepSelected,
 								padding: { left: 10 },
 							}),
 							dropdown({
 								height: 13,
 								width: "55%",
 								visibility: compute(model._isStaff, s => s ? "visible" : "none"),
-								disabled: !model._isPeepSelected,
 								disabledMessage: "Not available",
 								padding: { right: 10 },
 								items: staffTypeList,
@@ -392,15 +369,13 @@ export const windowPeepEditor = tabwindow({
 							label({
 								text: "Costume:",
 								height: 13,
-								visibility: compute(model._isPeepSelected, model._isEntertainer, (p, e) => (p &&e) ? "visible" : "none"),
-								disabled: !model._isPeepSelected,
+								visibility: compute(model._isPeepSelected, model._isEntertainer, (p, e) => (p && e) ? "visible" : "none"),
 								padding: { left: 10 },
 							}),
 							dropdown({
 								height: 13,
 								width: "55%",
-								visibility: compute(model._isPeepSelected, model._isEntertainer, (p, e) => (p &&e) ? "visible" : "none"),
-								disabled: !model._isPeepSelected,
+								visibility: compute(model._isPeepSelected, model._isEntertainer, (p, e) => (p && e) ? "visible" : "none"),
 								disabledMessage: "Not available",
 								padding: { right: 10 },
 								items: costumeList,
@@ -418,7 +393,6 @@ export const windowPeepEditor = tabwindow({
 								text: "Uniform colour:",
 								height: 13,
 								visibility: compute(model._isPeepSelected, model._costume, model._isGuest, (p, c, g) => (p && (c === "none" || c === "handyman" || c === "mechanic" || c === "security1" || c === "security2") && !g) ? "visible" : "none"),
-								disabled: !model._isPeepSelected,
 								padding: { left: 10 },
 							}),
 							textbox({
@@ -431,7 +405,6 @@ export const windowPeepEditor = tabwindow({
 							colourPicker({
 								colour: compute(model._colour, c => (c) || 0),
 								visibility: compute(model._isPeepSelected, model._costume, model._isGuest, (p, c, g) => (p && (c === "none" || c === "handyman" || c === "mechanic" || c === "security1" || c === "security2") && !g) ? "visible" : "none"),
-								disabled: !model._isPeepSelected,
 								padding: { right: 10 },
 								onChange: (colour) => {
 									const peep = model._selectedPeep.get();
@@ -446,23 +419,25 @@ export const windowPeepEditor = tabwindow({
 				groupbox({
 					text: "Guest appearance",
 					spacing: 2,
-					visibility: compute(model._isGuest, g => (g) ? "visible" : "none"),
+					visibility: compute(model._isGuest, model._allGuestsSelected, (g, a) => g || a ? "visible" : "none"),
 					content: [
 						horizontal([
 							graphics({
 								height: 16,
 								width: 16,
 								padding: { left: 10 },
-								visibility: compute(model._isGuest, g => (g) ? "visible" : "none"),
+								visibility: compute(model._isGuest, model._allGuestsSelected, (g, a) => g || a ? "visible" : "none"),
 								onDraw: function (g) { drawImage(g, 5081, "tshirtColour"); },
 							}),
 							colourPicker({
 								colour: model._tshirtColour,
-								visibility: compute(model._isGuest, g => (g) ? "visible" : "none"),
+								visibility: compute(model._isGuest, model._allGuestsSelected, (g, a) => g || a ? "visible" : "none"),
 								onChange: (colour) => {
-									const peep = model._selectedPeep.get();
-									if (peep !== undefined) {
-										context.executeAction("pe-colourpeep", colourPeepExecuteArgs(peep.id, colour, "tshirtColour"));
+									const allGuests = model._allGuests.get()
+									if (allGuests !== undefined) {
+										allGuests.forEach( guest => {
+										context.executeAction("pe-colourpeep", colourPeepExecuteArgs(guest.id, colour, "tshirtColour"));
+										})
 									}
 								}
 							}),
@@ -470,16 +445,18 @@ export const windowPeepEditor = tabwindow({
 								height: 16,
 								width: 16,
 								padding: { top: -1, left: 10 },
-								visibility: compute(model._isGuest, g => (g) ? "visible" : "none"),
+								visibility: compute(model._isGuest, model._allGuestsSelected, (g, a) => g || a ? "visible" : "none"),
 								onDraw: function (g) { drawImage(g, customImageFor("trousers"), "trousersColour"); },
 							}),
 							colourPicker({
 								colour: model._trousersColour,
-								visibility: compute(model._isGuest, g => (g) ? "visible" : "none"),
+								visibility: compute(model._isGuest, model._allGuestsSelected, (g, a) => g || a ? "visible" : "none"),
 								onChange: (colour) => {
-									const peep = model._selectedPeep.get();
-									if (peep !== undefined) {
-										context.executeAction("pe-colourpeep", colourPeepExecuteArgs(peep.id, colour, "trousersColour"));
+									const allGuests = model._allGuests.get()
+									if (allGuests !== undefined) {
+										allGuests.forEach( guest => {
+										context.executeAction("pe-colourpeep", colourPeepExecuteArgs(guest.id, colour, "trousersColour"));
+										})
 									}
 								}
 							}),
@@ -487,58 +464,64 @@ export const windowPeepEditor = tabwindow({
 								height: 16,
 								width: 16,
 								padding: { left: 10 },
-								disabled: compute(model._hasHat, h => !h),
-								visibility: compute(model._isGuest, g => (g) ? "visible" : "none"),
+								disabled: compute(model._hasHat, model._allGuestsSelected, (h, a) => !h || !a),
+								visibility: compute(model._isGuest, model._allGuestsSelected, (g, a) => g || a ? "visible" : "none"),
 								onDraw: function (g) { drawImage(g, 5079, "hatColour"); },
 							}),
 							colourPicker({
 								colour: model._hatColour,
-								disabled: compute(model._hasHat, h => !h),
-								visibility: compute(model._isGuest, g => (g) ? "visible" : "none"),
+								disabled: compute(model._hasHat, model._allGuestsSelected, (h, a) => !h && !a),
+								visibility: compute(model._isGuest, model._allGuestsSelected, (g, a) => g || a ? "visible" : "none"),
 								onChange: (colour) => {
-									const peep = model._selectedPeep.get();
-									if (peep !== undefined) {
-										context.executeAction("pe-colourpeep", colourPeepExecuteArgs(peep.id, colour, "hatColour"));
-									}
+									const allGuests = model._allGuests.get()
+									if (allGuests !== undefined) {
+										allGuests.forEach( guest => {
+										context.executeAction("pe-colourpeep", colourPeepExecuteArgs(guest.id, colour, "hatColour"));
+									})
+								}
 								}
 							}),
 							graphics({
 								height: 16,
 								width: 16,
 								padding: { left: 10 },
-								disabled: compute(model._hasBalloon, b => !b),
-								visibility: compute(model._isGuest, g => (g) ? "visible" : "none"),
+								disabled: compute(model._hasBalloon, model._allGuestsSelected, (b, a) => !b && !a),
+								visibility: compute(model._isGuest, model._allGuestsSelected, (g, a) => g || a ? "visible" : "none"),
 								onDraw: function (g) { drawImage(g, 5061, "balloonColour"); },
 							}),
 							colourPicker({
 								colour: model._balloonColour,
-								disabled: compute(model._hasBalloon, b => !b),
-								visibility: compute(model._isGuest, g => (g) ? "visible" : "none"),
+								disabled: compute(model._hasBalloon, model._allGuestsSelected, (b, a) => !b && !a),
+								visibility: compute(model._isGuest, model._allGuestsSelected, (g, a) => g || a ? "visible" : "none"),
 								onChange: (colour) => {
-									const peep = model._selectedPeep.get();
-									if (peep !== undefined) {
-										context.executeAction("pe-colourpeep", colourPeepExecuteArgs(peep.id, colour, "balloonColour"));
-									}
+									const allGuests = model._allGuests.get()
+									if (allGuests !== undefined) {
+										allGuests.forEach( guest => {
+										context.executeAction("pe-colourpeep", colourPeepExecuteArgs(guest.id, colour, "balloonColour"));
+									})
+								}
 								}
 							}),
 							graphics({
 								height: 16,
 								width: 16,
 								padding: { left: 10 },
-								disabled: compute(model._hasUmbrella, u => !u),
-								visibility: compute(model._isGuest, g => (g) ? "visible" : "none"),
+								disabled: compute(model._hasUmbrella, model._allGuestsSelected, (u, a) => !u && !a),
+								visibility: compute(model._isGuest, model._allGuestsSelected, (g, a) => g || a ? "visible" : "none"),
 								onDraw: function (g) { drawImage(g, 5065, "umbrellaColour"); },
 							}),
 							colourPicker({
 								colour: model._umbrellaColour,
-								disabled: compute(model._hasUmbrella, u => !u),
-								visibility: compute(model._isGuest, g => (g) ? "visible" : "none"),
+								disabled: compute(model._hasUmbrella, model._allGuestsSelected, (u, a) => !u && !a),
+								visibility: compute(model._isGuest, model._allGuestsSelected, (g, a) => g || a ? "visible" : "none"),
 								padding: { right: 12 },
 								onChange: (colour) => {
-									const peep = model._selectedPeep.get();
-									if (peep !== undefined) {
-										context.executeAction("pe-colourpeep", colourPeepExecuteArgs(peep.id, colour, "umbrellaColour"));
-									}
+									const allGuests = model._allGuests.get()
+									if (allGuests !== undefined) {
+										allGuests.forEach( guest => {
+										context.executeAction("pe-colourpeep", colourPeepExecuteArgs(guest.id, colour, "umbrellaColour"));
+									})
+								}
 								}
 							})
 						]),
@@ -546,30 +529,32 @@ export const windowPeepEditor = tabwindow({
 				}),
 				groupbox({
 					text: "Animation",
-					visibility: compute(model._isPeepSelected, p => p ? "visible" : "none"),
+					visibility: compute(model._isPeepSelected, model._allGuestsSelected, ( p, a ) => p || a ? "visible" : "none"),
 					content: [
 						horizontal([
 							label({
 								text: "Animation:",
 								height: 13,
-								disabled: compute(model._isPeepSelected, p => !p),
-								visibility: compute(model._isPeepSelected, p => p ? "visible" : "none"),
+								disabled: compute(model._isPeepSelected, model._allGuestsSelected, ( p, a ) => !p && !a),
+								visibility: compute(model._isPeepSelected, model._allGuestsSelected, ( p, a ) => p || a ? "visible" : "none"),
 								padding: { left: 10 },
 							}),
 							dropdown({	//No selection and Guest
 								height: 13,
 								width: "55%",
-								disabled: compute(model._isPeepSelected, p => !p),
+								disabled: compute(model._isPeepSelected, model._allGuestsSelected, ( p, a ) => !p && !a),
 								disabledMessage: "Not available",
 								padding: { right: 10, },
-								visibility: compute(model._isPeepSelected, model._isGuest, (p, g) => (!p || g)? "visible" : "none"),
+								visibility: compute(model._isGuest, model._allGuestsSelected, (g, a) => g || a ? "visible" : "none"),
 								items: compute(model._availableAnimations, a => a.map(animationList)),
 								selectedIndex: compute(model._animation, a => model._availableGuestAnimations.get().indexOf(<GuestAnimation>a)),
 								onChange: (index) => {
-									const peep = model._selectedPeep.get();
-									if (peep !== undefined){
-										context.executeAction("pe-animationpeep", animationPeepExecuteArgs(peep.id, model._availableAnimations.get()[index]));
-									}
+									const allGuests = model._allGuests.get()
+									if (allGuests !== undefined) {
+										allGuests.forEach( guest => {
+										context.executeAction("pe-animationpeep", animationPeepExecuteArgs(guest.id, model._availableAnimations.get()[index]));
+									})
+								}
 								}
 							}),
 							dropdown({ 	//Staff
@@ -593,13 +578,15 @@ export const windowPeepEditor = tabwindow({
 							label({
 								text: compute(model._animationLength, l => `Frame: (max: ${l-1})` || "Frame:"),
 								height: 13,
-								disabled: compute(model._isPeepSelected, model._isFrozen, (p,f) => !p || !f),
+								visibility: compute(model._isPeepSelected, model._allGuestsSelected, ( p, a ) => p || a ? "visible" : "none"),
+								disabled: compute(model._isPeepSelected, model._allGuestsSelected, model._isFrozen, (p, a, f) => (!p && !a) || !f),
 								padding: { left: 10 },
 							}),
 							spinner({
 								height: 13,
 								width: "55%",
-								disabled: compute(model._isPeepSelected, model._isFrozen, (p,f) => !p || !f),
+								visibility: compute(model._isPeepSelected, model._allGuestsSelected, ( p, a ) => p || a ? "visible" : "none"),
+								disabled: compute(model._isPeepSelected, model._allGuestsSelected, model._isFrozen, (p, a, f) => (!p && !a) || !f),
 								disabledMessage: "Peep not frozen",
 								padding: { right: 10 },
 								value: model._animationFrame,
@@ -624,12 +611,12 @@ export const windowPeepEditor = tabwindow({
 			content: [
 				groupbox({
 					text: "Options",
-					visibility: compute(model._isPeepSelected, p => !p ? "visible" : "none"),
+					visibility: compute(model._isPeepSelected, model._allGuestsSelected, (p, a) => !p && !a? "visible" : "none"),
 					content: [
 						label({
 							text: "Here you can set staff orders or guest flags",
 							alignment: "centred",
-							visibility: compute(model._isPeepSelected, p => !p ? "visible" : "none"),
+							visibility: compute(model._isPeepSelected, model._allGuestsSelected, (p, a) => !p && !a? "visible" : "none"),
 						})
 					]
 				}),
@@ -739,274 +726,274 @@ export const windowPeepEditor = tabwindow({
 				}),
 				groupbox({
 					text: "Guest flags",
-					visibility: compute(model._isGuest, g => g ? "visible" : "none"),
+					visibility: compute(model._isGuest, model._allGuestsSelected, (g, a) => g || a ? "visible" : "none"),
 					content: [
 						horizontal([
 							vertical([
 								checkbox({
 									text: "Leave park",
-									visibility: compute(model._isGuest, g => g ? "visible" : "none"),
+									visibility: compute(model._isGuest, model._allGuestsSelected, (g, a) => g || a ? "visible" : "none"),
 									padding: {bottom: -2, left: 10 },
 									isChecked: compute(model._selectedPeep, p => (p?.getFlag("leavingPark"))? true : false),
 									onChange: (checked) => {
-										const peep = model._selectedPeep.get();
-										if (peep !== undefined) {
-											context.executeAction("pe-guestflags", guestFlagsExecuteArgs(peep.id, checked, "leavingPark"));
-										}
+										model._allGuests.get().forEach(guest => {
+										if (guest !== undefined)
+											context.executeAction("pe-guestflags", guestFlagsExecuteArgs(guest.id, checked, "leavingPark"));
+										})
 									}
 								}),
 								checkbox({
 									text: "Slow walk",
-									visibility: compute(model._isGuest, g => g ? "visible" : "none"),
+									visibility: compute(model._isGuest, model._allGuestsSelected, (g, a) => g || a ? "visible" : "none"),
 									padding: {top: -2, bottom: -2, left: 10 },
 									isChecked: compute(model._selectedPeep, p => (p?.getFlag("slowWalk"))? true : false),
 									onChange: (checked) => {
-										const peep = model._selectedPeep.get();
-										if (peep !== undefined) {
-											context.executeAction("pe-guestflags", guestFlagsExecuteArgs(peep.id, checked, "slowWalk"));
-										}
+										model._allGuests.get().forEach(guest => {
+										if (guest !== undefined)
+											context.executeAction("pe-guestflags", guestFlagsExecuteArgs(guest.id, checked, "slowWalk"));
+										})
 									}
 								}),
 								checkbox({
 									text: "Tracking",
-									visibility: compute(model._isGuest, g => g ? "visible" : "none"),
+									visibility: compute(model._isGuest, model._allGuestsSelected, (g, a) => g || a ? "visible" : "none"),
 									padding: {top: -2, bottom: -2, left: 10 },
 									isChecked: compute(model._selectedPeep, p => (p?.getFlag("tracking"))? true : false),
 									onChange: (checked) => {
-										const peep = model._selectedPeep.get();
-										if (peep !== undefined) {
-											context.executeAction("pe-guestflags", guestFlagsExecuteArgs(peep.id, checked, "tracking"));
-										}
+										model._allGuests.get().forEach(guest => {
+										if (guest !== undefined)
+											context.executeAction("pe-guestflags", guestFlagsExecuteArgs(guest.id, checked, "tracking"));
+										})
 									}
 								}),
 								checkbox({
 									text: "Waving",
-									visibility: compute(model._isGuest, g => g ? "visible" : "none"),
+									visibility: compute(model._isGuest, model._allGuestsSelected, (g, a) => g || a ? "visible" : "none"),
 									padding: {top: -2, bottom: -2, left: 10 },
 									isChecked: compute(model._selectedPeep, p => (p?.getFlag("waving"))? true : false),
 									onChange: (checked) => {
-										const peep = model._selectedPeep.get();
-										if (peep !== undefined) {
-											context.executeAction("pe-guestflags", guestFlagsExecuteArgs(peep.id, checked, "waving"));
-										}
+										model._allGuests.get().forEach(guest => {
+										if (guest !== undefined)
+											context.executeAction("pe-guestflags", guestFlagsExecuteArgs(guest.id, checked, "waving"));
+										})
 									}
 								}),
 								checkbox({
 									text: "Photo",
-									visibility: compute(model._isGuest, g => g ? "visible" : "none"),
+									visibility: compute(model._isGuest, model._allGuestsSelected, (g, a) => g || a ? "visible" : "none"),
 									padding: {top: -2, bottom: -2, left: 10 },
 									isChecked: compute(model._selectedPeep, p => (p?.getFlag("photo"))? true : false),
 									onChange: (checked) => {
-										const peep = model._selectedPeep.get();
-										if (peep !== undefined) {
-											context.executeAction("pe-guestflags", guestFlagsExecuteArgs(peep.id, checked, "photo"));
-										}
+										model._allGuests.get().forEach(guest => {
+										if (guest !== undefined)
+											context.executeAction("pe-guestflags", guestFlagsExecuteArgs(guest.id, checked, "photo"));
+										})
 									}
 								}),
 								checkbox({
 									text: "Painting",
-									visibility: compute(model._isGuest, g => g ? "visible" : "none"),
+									visibility: compute(model._isGuest, model._allGuestsSelected, (g, a) => g || a ? "visible" : "none"),
 									padding: {top: -2, bottom: -2, left: 10 },
 									isChecked: compute(model._selectedPeep, p => (p?.getFlag("painting"))? true : false),
 									onChange: (checked) => {
-										const peep = model._selectedPeep.get();
-										if (peep !== undefined) {
-											context.executeAction("pe-guestflags", guestFlagsExecuteArgs(peep.id, checked, "painting"));
-										}
+										model._allGuests.get().forEach(guest => {
+										if (guest !== undefined)
+											context.executeAction("pe-guestflags", guestFlagsExecuteArgs(guest.id, checked, "painting"));
+										})
 									}
 								}),
 								checkbox({
 									text: "Wow",
-									visibility: compute(model._isGuest, g => g ? "visible" : "none"),
+									visibility: compute(model._isGuest, model._allGuestsSelected, (g, a) => g || a ? "visible" : "none"),
 									padding: {top: -2, bottom: -2, left: 10 },
 									isChecked: compute(model._selectedPeep, p => (p?.getFlag("wow"))? true : false),
 									onChange: (checked) => {
-										const peep = model._selectedPeep.get();
-										if (peep !== undefined) {
-											context.executeAction("pe-guestflags", guestFlagsExecuteArgs(peep.id, checked, "wow"));
-										}
+										model._allGuests.get().forEach(guest => {
+										if (guest !== undefined)
+											context.executeAction("pe-guestflags", guestFlagsExecuteArgs(guest.id, checked, "wow"));
+										})
 									}
 								}),
 								checkbox({
 									text: "Litter",
-									visibility: compute(model._isGuest, g => g ? "visible" : "none"),
+									visibility: compute(model._isGuest, model._allGuestsSelected, (g, a) => g || a ? "visible" : "none"),
 									padding: {top: -2, bottom: -2, left: 10 },
 									isChecked: compute(model._selectedPeep, p => (p?.getFlag("litter"))? true : false),
 									onChange: (checked) => {
-										const peep = model._selectedPeep.get();
-										if (peep !== undefined) {
-											context.executeAction("pe-guestflags", guestFlagsExecuteArgs(peep.id, checked, "litter"));
-										}
+										model._allGuests.get().forEach(guest => {
+										if (guest !== undefined)
+											context.executeAction("pe-guestflags", guestFlagsExecuteArgs(guest.id, checked, "litter"));
+										})
 									}
 								}),
 								checkbox({
 									text: "Lost",
-									visibility: compute(model._isGuest, g => g ? "visible" : "none"),
+									visibility: compute(model._isGuest, model._allGuestsSelected, (g, a) => g || a ? "visible" : "none"),
 									padding: {top: -2, bottom: -2, left: 10 },
 									isChecked: compute(model._selectedPeep, p => (p?.getFlag("lost"))? true : false),
 									onChange: (checked) => {
-										const peep = model._selectedPeep.get();
-										if (peep !== undefined) {
-											context.executeAction("pe-guestflags", guestFlagsExecuteArgs(peep.id, checked, "lost"));
-										}
+										model._allGuests.get().forEach(guest => {
+										if (guest !== undefined)
+											context.executeAction("pe-guestflags", guestFlagsExecuteArgs(guest.id, checked, "lost"));
+										})
 									}
 								}),
 								checkbox({
 									text: "Hunger",
-									visibility: compute(model._isGuest, g => g ? "visible" : "none"),
+									visibility: compute(model._isGuest, model._allGuestsSelected, (g, a) => g || a ? "visible" : "none"),
 									padding: {top: -2, bottom: -2, left: 10 },
 									isChecked: compute(model._selectedPeep, p => (p?.getFlag("hunger"))? true : false),
 									onChange: (checked) => {
-										const peep = model._selectedPeep.get();
-										if (peep !== undefined) {
-											context.executeAction("pe-guestflags", guestFlagsExecuteArgs(peep.id, checked, "hunger"));
-										}
+										model._allGuests.get().forEach(guest => {
+										if (guest !== undefined)
+											context.executeAction("pe-guestflags", guestFlagsExecuteArgs(guest.id, checked, "hunger"));
+										})
 									}
 								}),
 								checkbox({
 									text: "Toilet",
-									visibility: compute(model._isGuest, g => g ? "visible" : "none"),
+									visibility: compute(model._isGuest, model._allGuestsSelected, (g, a) => g || a ? "visible" : "none"),
 									padding: {top: -2, bottom: 10, left: 10 },
 									isChecked: compute(model._selectedPeep, p => (p?.getFlag("toilet"))? true : false),
 									onChange: (checked) => {
-										const peep = model._selectedPeep.get();
-										if (peep !== undefined) {
-											context.executeAction("pe-guestflags", guestFlagsExecuteArgs(peep.id, checked, "toilet"));
-										}
+										model._allGuests.get().forEach(guest => {
+										if (guest !== undefined)
+											context.executeAction("pe-guestflags", guestFlagsExecuteArgs(guest.id, checked, "toilet"));
+										})
 									}
 								}),
 							]),
 							vertical([
 								checkbox({
 									text: "Crowded",
-									visibility: compute(model._isGuest, g => g ? "visible" : "none"),
+									visibility: compute(model._isGuest, model._allGuestsSelected, (g, a) => g || a ? "visible" : "none"),
 									padding: {bottom: -2},
 									isChecked: compute(model._selectedPeep, p => (p?.getFlag("crowded"))? true : false),
 									onChange: (checked) => {
-										const peep = model._selectedPeep.get();
-										if (peep !== undefined) {
-											context.executeAction("pe-guestflags", guestFlagsExecuteArgs(peep.id, checked, "crowded"));
-										}
+										model._allGuests.get().forEach(guest => {
+										if (guest !== undefined)
+											context.executeAction("pe-guestflags", guestFlagsExecuteArgs(guest.id, checked, "crowded"));
+										})
 									}
 								}),
 								checkbox({
 									text: "Happiness",
-									visibility: compute(model._isGuest, g => g ? "visible" : "none"),
+									visibility: compute(model._isGuest, model._allGuestsSelected, (g, a) => g || a ? "visible" : "none"),
 									padding: {top: -2, bottom: -2},
 									isChecked: compute(model._selectedPeep, p => (p?.getFlag("happiness"))? true : false),
 									onChange: (checked) => {
-										const peep = model._selectedPeep.get();
-										if (peep !== undefined) {
-											context.executeAction("pe-guestflags", guestFlagsExecuteArgs(peep.id, checked, "happiness"));
-										}
+										model._allGuests.get().forEach(guest => {
+										if (guest !== undefined)
+											context.executeAction("pe-guestflags", guestFlagsExecuteArgs(guest.id, checked, "happiness"));
+										})
 									}
 								}),
 								checkbox({
 									text: "Nausea",
-									visibility: compute(model._isGuest, g => g ? "visible" : "none"),
+									visibility: compute(model._isGuest, model._allGuestsSelected, (g, a) => g || a ? "visible" : "none"),
 									padding: {top: -2, bottom: -2},
 									isChecked: compute(model._selectedPeep, p => (p?.getFlag("nausea"))? true : false),
 									onChange: (checked) => {
-										const peep = model._selectedPeep.get();
-										if (peep !== undefined) {
-											context.executeAction("pe-guestflags", guestFlagsExecuteArgs(peep.id, checked, "nausea"));
-										}
+										model._allGuests.get().forEach(guest => {
+										if (guest !== undefined)
+											context.executeAction("pe-guestflags", guestFlagsExecuteArgs(guest.id, checked, "nausea"));
+										})
 									}
 								}),
 								checkbox({
 									text: "Purple",
-									visibility: compute(model._isGuest, g => g ? "visible" : "none"),
+									visibility: compute(model._isGuest, model._allGuestsSelected, (g, a) => g || a ? "visible" : "none"),
 									padding: {top: -2, bottom: -2},
 									isChecked: compute(model._selectedPeep, p => (p?.getFlag("purple"))? true : false),
 									onChange: (checked) => {
-										const peep = model._selectedPeep.get();
-										if (peep !== undefined) {
-											context.executeAction("pe-guestflags", guestFlagsExecuteArgs(peep.id, checked, "purple"));
-										}
+										model._allGuests.get().forEach(guest => {
+										if (guest !== undefined)
+											context.executeAction("pe-guestflags", guestFlagsExecuteArgs(guest.id, checked, "purple"));
+										})
 									}
 								}),
 								checkbox({
 									text: "Pizza",
-									visibility: compute(model._isGuest, g => g ? "visible" : "none"),
+									visibility: compute(model._isGuest, model._allGuestsSelected, (g, a) => g || a ? "visible" : "none"),
 									padding: {top: -2, bottom: -2},
 									isChecked: compute(model._selectedPeep, p => (p?.getFlag("pizza"))? true : false),
 									onChange: (checked) => {
-										const peep = model._selectedPeep.get();
-										if (peep !== undefined) {
-											context.executeAction("pe-guestflags", guestFlagsExecuteArgs(peep.id, checked, "pizza"));
-										}
+										model._allGuests.get().forEach(guest => {
+										if (guest !== undefined)
+											context.executeAction("pe-guestflags", guestFlagsExecuteArgs(guest.id, checked, "pizza"));
+										})
 									}
 								}),
 								checkbox({
 									text: "Explode",
-									visibility: compute(model._isGuest, g => g ? "visible" : "none"),
+									visibility: compute(model._isGuest, model._allGuestsSelected, (g, a) => g || a ? "visible" : "none"),
 									padding: {top: -2, bottom: -2},
 									isChecked: compute(model._selectedPeep, p => (p?.getFlag("explode"))? true : false),
 									onChange: (checked) => {
-										const peep = model._selectedPeep.get();
-										if (peep !== undefined) {
-											context.executeAction("pe-guestflags", guestFlagsExecuteArgs(peep.id, checked, "explode"));
-										}
+										model._allGuests.get().forEach(guest => {
+										if (guest !== undefined)
+											context.executeAction("pe-guestflags", guestFlagsExecuteArgs(guest.id, checked, "explode"));
+										})
 									}
 								}),
 								checkbox({
 									text: "Contagious",
-									visibility: compute(model._isGuest, g => g ? "visible" : "none"),
+									visibility: compute(model._isGuest, model._allGuestsSelected, (g, a) => g || a ? "visible" : "none"),
 									padding: {top: -2, bottom: -2},
 									isChecked: compute(model._selectedPeep, p => (p?.getFlag("contagious"))? true : false),
 									onChange: (checked) => {
-										const peep = model._selectedPeep.get();
-										if (peep !== undefined) {
-											context.executeAction("pe-guestflags", guestFlagsExecuteArgs(peep.id, checked, "contagious"));
-										}
+										model._allGuests.get().forEach(guest => {
+										if (guest !== undefined)
+											context.executeAction("pe-guestflags", guestFlagsExecuteArgs(guest.id, checked, "contagious"));
+										})
 									}
 								}),
 								checkbox({
 									text: "Joy",
-									visibility: compute(model._isGuest, g => g ? "visible" : "none"),
+									visibility: compute(model._isGuest, model._allGuestsSelected, (g, a) => g || a ? "visible" : "none"),
 									padding: {top: -2, bottom: -2},
 									isChecked: compute(model._selectedPeep, p => (p?.getFlag("joy"))? true : false),
 									onChange: (checked) => {
-										const peep = model._selectedPeep.get();
-										if (peep !== undefined) {
-											context.executeAction("pe-guestflags", guestFlagsExecuteArgs(peep.id, checked, "joy"));
-										}
+										model._allGuests.get().forEach(guest => {
+										if (guest !== undefined)
+											context.executeAction("pe-guestflags", guestFlagsExecuteArgs(guest.id, checked, "joy"));
+										})
 									}
 								}),
 								checkbox({
 									text: "Angry",
-									visibility: compute(model._isGuest, g => g ? "visible" : "none"),
+									visibility: compute(model._isGuest, model._allGuestsSelected, (g, a) => g || a ? "visible" : "none"),
 									padding: {top: -2, bottom: -2},
 									isChecked: compute(model._selectedPeep, p => (p?.getFlag("angry"))? true : false),
 									onChange: (checked) => {
-										const peep = model._selectedPeep.get();
-										if (peep !== undefined) {
-											context.executeAction("pe-guestflags", guestFlagsExecuteArgs(peep.id, checked, "angry"));
-										}
+										model._allGuests.get().forEach(guest => {
+										if (guest !== undefined)
+											context.executeAction("pe-guestflags", guestFlagsExecuteArgs(guest.id, checked, "angry"));
+										})
 									}
 								}),
 								checkbox({
 									text: "Ice cream",
-									visibility: compute(model._isGuest, g => g ? "visible" : "none"),
+									visibility: compute(model._isGuest, model._allGuestsSelected, (g, a) => g || a ? "visible" : "none"),
 									padding: {top: -2, bottom: -2},
 									isChecked: compute(model._selectedPeep, p => (p?.getFlag("iceCream"))? true : false),
 									onChange: (checked) => {
-										const peep = model._selectedPeep.get();
-										if (peep !== undefined) {
-											context.executeAction("pe-guestflags", guestFlagsExecuteArgs(peep.id, checked, "iceCream"));
-										}
+										model._allGuests.get().forEach(guest => {
+										if (guest !== undefined)
+											context.executeAction("pe-guestflags", guestFlagsExecuteArgs(guest.id, checked, "iceCream"));
+										})
 									}
 								}),
 								checkbox({
 									text: "Here we are",
-									visibility: compute(model._isGuest, g => g ? "visible" : "none"),
+									visibility: compute(model._isGuest, model._allGuestsSelected, (g, a) => g || a ? "visible" : "none"),
 									padding: {top: -2, bottom: 10},
 									isChecked: compute(model._selectedPeep, p => (p?.getFlag("hereWeAre"))? true : false),
 									onChange: (checked) => {
-										const peep = model._selectedPeep.get();
-										if (peep !== undefined) {
-											context.executeAction("pe-guestflags", guestFlagsExecuteArgs(peep.id, checked, "hereWeAre"));
-										}
+										model._allGuests.get().forEach(guest => {
+										if (guest !== undefined)
+											context.executeAction("pe-guestflags", guestFlagsExecuteArgs(guest.id, checked, "hereWeAre"));
+										})
 									}
 								}),
 							])
@@ -1022,7 +1009,7 @@ export const windowPeepEditor = tabwindow({
 			content: [
 				groupbox({
 					text: "Physiology",
-					visibility: compute(model._isGuest, g => !g ? "visible" : "none"),
+					visibility: compute(model._isGuest, model._allGuestsSelected, (g, a) => !g && !a ? "visible" : "none"),
 					content: [
 						label({
 							text: "All staff members are very happy,",
@@ -1045,7 +1032,18 @@ export const windowPeepEditor = tabwindow({
 						label({
 							text: "Here you can set a guest's mood",
 							alignment: "centred",
-							visibility: compute(model._isPeepSelected, p => !p ? "visible" : "none"),
+							visibility: compute(model._isPeepSelected, model._allGuestsSelected, (p, a) => !p && !a ? "visible" : "none"),
+						}),
+					]
+				}),
+				groupbox({
+					text: "Physiology",
+					visibility: compute(model._allGuestsSelected, a => a ? "visible" : "none"),
+					content: [
+						label({
+							text: `{BLACK}Under Construction`,
+							alignment: "centred",
+							visibility: compute(model._allGuestsSelected, a => a ? "visible" : "none"),
 						}),
 					]
 				}),
@@ -1059,7 +1057,6 @@ export const windowPeepEditor = tabwindow({
 								height: 13,
 								width: "30%",
 								padding: {top: 0, bottom: 0, left: 10},
-								disabled: compute(model._isGuest, g => !g),
 								visibility: compute(model._isGuest, g => g ? "visible" : "none"),
 							}),
 							progressBar({
@@ -1071,13 +1068,11 @@ export const windowPeepEditor = tabwindow({
 							spinner({
 								minimum: 0,
 								maximum: 255,
-								value: model._happiness,
+								value: compute(model._happiness, h => h),
 								height: 13,
 								width: "25%",
 								wrapMode: "clamp",
 								padding: {top: 0, right: 10,  bottom: 0},
-								disabled: compute(model._isGuest, g => !g),
-								disabledMessage: "N/A",
 								visibility: compute(model._isGuest, g => g ? "visible" : "none"),
 								onChange: (_, adjustment: number) => {
 									const peep = model._selectedPeep.get();
@@ -1092,7 +1087,6 @@ export const windowPeepEditor = tabwindow({
 								height: 13,
 								width: "30%",
 								padding: {top: 0, bottom: 0, left: 10},
-								disabled: compute(model._isGuest, g => !g),
 								visibility: compute(model._isGuest, g => g ? "visible" : "none"),
 							}),
 							progressBar({
@@ -1105,12 +1099,10 @@ export const windowPeepEditor = tabwindow({
 								minimum: 32,
 								maximum: 128,
 								wrapMode: "clamp",
-								value: model._energy,
+								value: compute(model._energy, e => e),
 								height: 13,
 								width: "25%",
 								padding: {top: 0, right: 10, bottom: 0},
-								disabled: compute(model._isGuest, g => !g),
-								disabledMessage: "N/A",
 								visibility: compute(model._isGuest, g => g ? "visible" : "none"),
 								onChange: (_, adjustment: number) => {
 									const peep = model._selectedPeep.get();
@@ -1125,7 +1117,6 @@ export const windowPeepEditor = tabwindow({
 								height: 13,
 								width: "30%",
 								padding: {top: 0, bottom: 0, left: 10},
-								disabled: compute(model._isGuest, g => !g),
 								visibility: compute(model._isGuest, g => g ? "visible" : "none"),
 							}),
 							progressBar({
@@ -1142,8 +1133,6 @@ export const windowPeepEditor = tabwindow({
 								height: 13,
 								width: "25%",
 								padding: {top: 0, right: 10, bottom: 0},
-								disabled: compute(model._isGuest, g => !g),
-								disabledMessage: "N/A",
 								visibility: compute(model._isGuest, g => g ? "visible" : "none"),
 								onChange: (_, adjustment: number) => {
 									const peep = model._selectedPeep.get();
@@ -1158,7 +1147,6 @@ export const windowPeepEditor = tabwindow({
 								height: 13,
 								width: "30%",
 								padding: {top: 0, bottom: 0, left: 10},
-								disabled: compute(model._isGuest, g => !g),
 								visibility: compute(model._isGuest, g => g ? "visible" : "none"),
 							}),
 							progressBar({
@@ -1175,8 +1163,6 @@ export const windowPeepEditor = tabwindow({
 								height: 13,
 								width: "25%",
 								padding: {top: 0, right: 10, bottom: 0},
-								disabled: compute(model._isGuest, g => !g),
-								disabledMessage: "N/A",
 								visibility: compute(model._isGuest, g => g ? "visible" : "none"),
 								onChange: (_, adjustment: number) => {
 									const peep = model._selectedPeep.get();
@@ -1191,7 +1177,6 @@ export const windowPeepEditor = tabwindow({
 								height: 13,
 								width: "30%",
 								padding: {top: 0, bottom: 0, left: 10},
-								disabled: compute(model._isGuest, g => !g),
 								visibility: compute(model._isGuest, g => g ? "visible" : "none"),
 							}),
 							progressBar({
@@ -1204,12 +1189,10 @@ export const windowPeepEditor = tabwindow({
 								minimum: 0,
 								maximum: 255,
 								wrapMode: "clamp",
-								value: model._nausea,
+								value: compute(model._nausea, n => n),
 								height: 13,
 								width: "25%",
 								padding: {top: 0, right: 10, bottom: 0},
-								disabled: compute(model._isGuest, g => !g),
-								disabledMessage: "N/A",
 								visibility: compute(model._isGuest, g => g ? "visible" : "none"),
 								onChange: (_, adjustment: number) => {
 									const peep = model._selectedPeep.get();
@@ -1224,7 +1207,6 @@ export const windowPeepEditor = tabwindow({
 								height: 13,
 								width: "30%",
 								padding: {top: 0, bottom: 0, left: 10},
-								disabled: compute(model._isGuest, g => !g),
 								visibility: compute(model._isGuest, g => g ? "visible" : "none"),
 							}),
 							progressBar({
@@ -1237,12 +1219,10 @@ export const windowPeepEditor = tabwindow({
 								minimum: 0,
 								maximum: 255,
 								wrapMode: "clamp",
-								value: model._toilet,
+								value: compute(model._toilet, t => t),
 								height: 13,
 								width: "25%",
 								padding: {top: 0, right: 10, bottom: 0},
-								disabled: compute(model._isGuest, g => !g),
-								disabledMessage: "N/A",
 								visibility: compute(model._isGuest, g => g ? "visible" : "none"),
 								onChange: (_, adjustment: number) => {
 									const peep = model._selectedPeep.get();
@@ -1257,7 +1237,6 @@ export const windowPeepEditor = tabwindow({
 								height: 13,
 								width: "30%",
 								padding: {top: 0, bottom: 0, left: 10},
-								disabled: compute(model._isGuest, g => !g),
 								visibility: compute(model._isGuest, g => g ? "visible" : "none"),
 							}),
 							progressBar({
@@ -1270,12 +1249,10 @@ export const windowPeepEditor = tabwindow({
 								minimum: 0,
 								maximum: 255,
 								wrapMode: "clamp",
-								value: model._mass,
+								value: compute(model._mass, m => m),
 								height: 13,
 								width: "25%",
 								padding: {top: 0, right: 10, bottom: 0},
-								disabled: compute(model._isGuest, g => !g),
-								disabledMessage: "N/A",
 								visibility: compute(model._isGuest, g => g ? "visible" : "none"),
 								onChange: (_, adjustment: number) => {
 									const peep = model._selectedPeep.get();
@@ -1316,20 +1293,31 @@ export const windowPeepEditor = tabwindow({
 			content: [
 				groupbox({
 					text: "Items",
-					visibility: compute(model._isPeepSelected, p => !p ? "visible" : "none"),
+					visibility: compute(model._isPeepSelected, model._allGuestsSelected, (p, a) => !p && !a ? "visible" : "none"),
 					content: [
 						label({
 							text: "Organise a guest's inventory",
 							alignment: "centred",
-							visibility: compute(model._isPeepSelected, p => !p ? "visible" : "none"),
+							visibility: compute(model._isPeepSelected, model._allGuestsSelected, (p, a) => !p && !a ? "visible" : "none"),
 						})
+					]
+				}),
+				groupbox({
+					text: "Items",
+					visibility: compute(model._isStaff, model._allGuestsSelected, (s, a) => s || a ? "visible" : "none"),
+					content: [
+						label({
+							text: `{BLACK}Under Construction`,
+							alignment: "centred",
+							visibility: compute(model._isStaff, model._allGuestsSelected, (s, a) => s || a ? "visible" : "none"),
+						}),
 					]
 				}),
 				groupbox({
 					text: "Carrying",
 					padding: {bottom: 4},
 					spacing: 0,
-					visibility: compute(model._isPeepSelected, p => p ? "visible" : "none"),
+					visibility: compute(model._isGuest, model._isPeepSelected, (g, p) => g && p ? "visible" : "none"),
 					content: carryingItems()
 				}),
 				horizontal([
@@ -1382,13 +1370,16 @@ export const windowPeepEditor = tabwindow({
 						visibility: compute(model._item, model._voucherType, (i, v) => (i === "photo1" || i === "photo2" || i === "photo3" || i === "photo4" || (i === "voucher" && v === "ride_free")) ? "visible" : "none"),
 					}),
 					dropdown({
-						items: compute(rideList, c => c.map(r => r._ride().name)),
+						items: compute(model._rideList, c => c.map(r => r._ride().name)),
+						selectedIndex: compute(model._selectedRide, r => r ? r[1] : 0),
+						disabledMessage: "No rides in this park",
+						autoDisable: "empty",
 						height: 13,
 						padding: {bottom: 4},
 						width: "75%",
 						visibility: compute(model._item, model._voucherType, (i, v) => (i === "photo1" || i === "photo2" || i === "photo3" || i === "photo4" || (i === "voucher" && v === "ride_free")) ? "visible" : "none"),
 						onChange: (idx) => {
-							const rideId = compute(rideList, c => c.map(r => r._ride().id));
+							const rideId = compute(model._rideList, c => c.map(r => r._ride().id));
 							model._rideId.set(rideId.get()[idx]);
 							model._voucher.set(<RideVoucher>{type: "voucher", voucherType: "ride_free", rideId: model._rideId.get()});
 						}
@@ -1428,8 +1419,13 @@ export const windowPeepEditor = tabwindow({
 						onClick: () => {
 							const guest = <Guest>model._selectedPeep.get();
 							const item = model._item.get();
+							const rideId = model._rideId.get()
 							if (guest.hasItem({type: item}) && item !== "voucher" && item !== "photo1" && item !== "photo2" && item !== "photo3" && item !== "photo4"){
 								ui.showError("Guest already", "has this item");
+								return;
+							}
+							if (map.getRide(rideId) === null && (item === "photo1" || item === "photo2" || item === "photo3" || item === "photo4" || model._voucherType.get() === "ride_free")) {
+								ui.showError("There are no rides", "in your park!");
 								return;
 							}
 							switch (model._item.get()) {
@@ -1620,7 +1616,7 @@ function textRemovePeep(peep: Guest | Staff): string {
 function versionString(): string
 {
     if (isDevelopment) {
-        return `{BLACK}${pluginVersion} {BABYBLUE}[DEBUG]`;
+        return `{BLACK}${pluginVersion} {BABYBLUE}[BETA]`;
     }
     else return `{BLACK}${pluginVersion}`;
 }
@@ -1629,7 +1625,15 @@ function drawImage(g: GraphicsContext, image: number, property?: keyof Guest): v
 {
     const img = g.getImage(image);
     const guest = <Guest>model._selectedPeep.get();
-    if (property === "tshirtColour" || property === "trousersColour" || (property === "hatColour" && guest.hasItem({type: "hat"})) || (property === "umbrellaColour" && guest.hasItem({type: "umbrella"})) || (property === "balloonColour" && guest.hasItem({type: "balloon"})))
+	if (model._allGuestsSelected.get())
+	{
+		if (img) {
+			g.paletteId = Colour.Yellow;
+			g.tertiaryColour = Colour.Yellow;
+			g.image(img.id, 0, 0);
+		}
+	}
+    else if (property === "tshirtColour" || property === "trousersColour" || (property === "hatColour" && guest.hasItem({type: "hat"})) || (property === "umbrellaColour" && guest.hasItem({type: "umbrella"})) || (property === "balloonColour" && guest.hasItem({type: "balloon"})))
     {
         const colour = guest[property];
         if (img) {

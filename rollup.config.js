@@ -45,7 +45,7 @@ const config = {
 				wrap_iife: true,
 				preamble: "// Get the latest version: https://github.com/Manticore-007/OpenRCT2-PeepEditor",
 
-				beautify: true,
+				beautify: false,
 			},
 			mangle: {
 				properties: {
