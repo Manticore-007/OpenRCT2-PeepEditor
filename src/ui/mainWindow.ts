@@ -1,12 +1,12 @@
-import { button, Colour, colourPicker, compute, groupbox, horizontal, label, store, tab, tabwindow, toggle, twoway, vertical, viewport, window } from "openrct2-flexui";
+import { button, Colour, colourPicker, compute, groupbox, horizontal, label, store, tab, tabwindow, toggle, twoway, vertical, viewport } from "openrct2-flexui";
 import { model } from "../viewmodel/peepViewModel";
 import { sideWindow, sideWindowColour } from "./sideWindow";
 import { togglePeepPicker } from "../actions/peepPicker";
 import { isDevelopment, pluginVersion } from "../helpers/environment";
 import { getWindow } from "../helpers/getWindow";
-import { removePeepExecuteArgs } from "../actions/peepRemover";
 import { ProgressBarColour } from "../helpers/progressBar";
 import { getColour, setColour } from "../helpers/settings";
+import { openWindowRemovePeep } from "./removePeepWindow";
 
 const deleteIcon: number = 5165;
 const locateIcon: number = 5167;
@@ -31,22 +31,15 @@ export const mainWindow = tabwindow({
     height: 230,
     colours: [mainWindowColour.primary.get(), mainWindowColour.secondary.get(), mainWindowColour.tertiary.get()],
     padding: 5,
+    onOpen: () => { main = getWindow("Peep Editor"); side = getWindow("Properties"); },
     onClose: () => sideWindow.close(),
-    onOpen: () => {
-        main = getWindow("Peep Editor");
-        side = getWindow("Properties")
-        if (main) {
-            main.colours = [mainWindowColour.primary.get(), mainWindowColour.secondary.get(), mainWindowColour.tertiary.get()]
-        }
-    },
+    onUpdate: () => {if (main) {main.colours = [mainWindowColour.primary.get(), mainWindowColour.secondary.get(), mainWindowColour.tertiary.get()]}},
     tabs: [
         tab({ //main tab
             image: lensIcon,
             content: [
                 horizontal([
-                    viewport({
-                        target: compute(model._selectedPeep, p => p ? p.id : null)
-                    }),
+                    viewport({target: compute(model._selectedPeep, p => p ? p.id : null)}),
                     vertical({
                         content: [
                             button({	//red traffic light
@@ -270,9 +263,6 @@ export const mainWindow = tabwindow({
                         ProgressBarColour.bar.danger.set(Colour.BrightRed);
                         ProgressBarColour.bar.warning.set(Colour.Yellow);
                         ProgressBarColour.bar.safe.set(Colour.BrightGreen);
-                        if (main) main.colours = [c,c,c]
-                        if (side) side.colours = [c,c,c]
-
                     }
                 })
             ]
@@ -280,60 +270,32 @@ export const mainWindow = tabwindow({
 		tab({
 			image: infoIcon,
 			content: [
-				label({
-					text: "Peep Editor, a plugin for OpenRCT2",
-					alignment: "centred",
-					padding: [4, 0, 8, 0]
-				}),
+				label({ text: "Peep Editor, a plugin for OpenRCT2", alignment: "centred", padding: [4, 0, 8, 0] }),
 				horizontal([
-					label({
-						text: "Version:",
-						width: "25%"
-					}),
-					label({text: versionString()})
+					label({ text: "Version:", width: "25%" }),
+					label({ text: versionString()})
 				]),
 				horizontal([
-					label({
-						text: "Author:",
-						width: "25%"
-					}),
-					label({text: `{BLACK}Manticore-007`})
+					label({ text: "Author:", width: "25%" }),
+					label({ text: `{BLACK}Manticore-007`})
 				]),
 				horizontal([
-					label({
-						text: "UI:",
-						width: "25%"
-					}),
-					label({text: `{BLACK}FlexUI by Basssiiie`})
+					label({ text: "UI:", width: "25%" }),
+					label({ text: `{BLACK}FlexUI by Basssiiie`})
 				]),
 				horizontal([
-					label({
-						text: "Special\nThanks:",
-						width: "25%"
-					}),
-					label({text: `{BLACK}Basssiiie, Gymnasiast, ItsSmitty\nSpacek531, AaronVanGeffen`})
+					label({ text: "Special\nThanks:", width: "25%" }),
+					label({ text: `{BLACK}Basssiiie, Gymnasiast, ItsSmitty\nSpacek531, AaronVanGeffen`})
 				]),
 				horizontal([
-					label({
-						text: "",
-						width: "25%",
-						padding: {top: 2}
-					}),
-					label({
-						text: `{BLACK}Sadret, mrmagic2020, Isoitiro\nand Enox`,
-						padding: {top: 2}
-					}),
+					label({ text: "", width: "25%", padding: {top: 2} }),
+					label({ text: `{BLACK}Sadret, mrmagic2020, Isoitiro\nand Enox`, padding: {top: 2} }),
 				]),
-				label({
-					text: "https://github.com/Manticore-007\n/OpenRCT2-PeepEditor",
-					padding: ["80%", 0, 0, 0],
-					alignment: "centred"
-				})
+				label({ text: "https://github.com/Manticore-007\n/OpenRCT2-PeepEditor", padding: ["80%", 0, 0, 0], alignment: "centred" })
 			]
 		}),
     ]
 })
-
 
 function versionString(): string
 {
@@ -341,62 +303,4 @@ function versionString(): string
         return `{BLACK}${pluginVersion} {BABYBLUE}[BETA]`;
     }
     else return `{BLACK}${pluginVersion}`;
-}
-
-function openWindowRemovePeep(peep: Staff | Guest): void {
-	const removePeepWindow = window({
-		onClose: () => {
-			ui.tool?.cancel();
-		},
-		title: "Remove peep",
-		width: 200,
-		height: 100,
-		position: { x: ui.width / 2 - 100, y: ui.height / 2 - 50 },
-		colours: [Colour.BordeauxRed, Colour.BordeauxRed],
-		content: [
-			label({
-				width: 200,
-				alignment: "centred",
-				text: textRemovePeep(peep),
-				padding: [25, 0, 17, 0]
-			}),
-			horizontal([
-				button({
-					border: true,
-					width: 85,
-					height: 14,
-					text: "Yes",
-					padding: [0, 4],
-					onClick: () => {
-						if (peep !== undefined)
-							context.executeAction("pe-removepeep", removePeepExecuteArgs(peep.id));
-						removePeepWindow.close();
-                        sideWindow.close();
-						model._selectedPeep.set(undefined);
-					}
-				}),
-				button({
-					border: true,
-					width: 85,
-					height: 14,
-					text: "Cancel",
-					padding: [0, 4],
-					onClick: () => {
-						removePeepWindow.close();
-					}
-				}),
-			])
-		]
-	});
-	removePeepWindow.open();
-}
-
-function textRemovePeep(peep: Guest | Staff): string {
-	if (peep.type === "guest") {
-		return `{WHITE}Are you sure you want to remove\n${peep.name}?`;
-	}
-	else if (peep.type === "staff") {
-		return `{WHITE}Are you sure you want to sack\n${peep.name}?`;
-	}
-	else return "";
 }
