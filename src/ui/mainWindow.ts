@@ -221,32 +221,33 @@ export const mainWindow = tabwindow({
                                 }
                             }),
                         ]),
+                        button({
+                            text: "Reset to default colours",
+                            height: 14,
+                            width: "60%",
+                            padding: {top: 4, left: "1w"},
+                            onClick: () => {
+                                const c = Colour.DarkYellow
+                                setColour("pe.main.primary", c)
+                                setColour("pe.main.secondary", c)
+                                setColour("pe.side.primary", c)
+                                setColour("pe.side.secondary", c)
+                                setColour("pe.bar.safe", Colour.BrightGreen)
+                                setColour("pe.bar.warning", Colour.Yellow)
+                                setColour("pe.bar.danger", Colour.BrightRed)
+                                setColour("pe.bar.background", c)
+                                mainWindowColour.primary.set(c);
+                                mainWindowColour.secondary.set(c);
+                                sideWindowColour.primary.set(c);
+                                sideWindowColour.secondary.set(c);
+                                ProgressBarColour.background.set(c);
+                                ProgressBarColour.bar.danger.set(Colour.BrightRed);
+                                ProgressBarColour.bar.warning.set(Colour.Yellow);
+                                ProgressBarColour.bar.safe.set(Colour.BrightGreen);
+                            }
+                        })
                     ]
                 }),
-                button({
-                    text: "Reset to default colours",
-                    height: 14,
-                    padding: {top: "1w"},
-                    onClick: () => {
-                        const c = Colour.DarkYellow
-                        setColour("pe.main.primary", c)
-                        setColour("pe.main.secondary", c)
-                        setColour("pe.side.primary", c)
-                        setColour("pe.side.secondary", c)
-                        setColour("pe.bar.safe", Colour.BrightGreen)
-                        setColour("pe.bar.warning", Colour.Yellow)
-                        setColour("pe.bar.danger", Colour.BrightRed)
-                        setColour("pe.bar.background", c)
-                        mainWindowColour.primary.set(c);
-                        mainWindowColour.secondary.set(c);
-                        sideWindowColour.primary.set(c);
-                        sideWindowColour.secondary.set(c);
-                        ProgressBarColour.background.set(c);
-                        ProgressBarColour.bar.danger.set(Colour.BrightRed);
-                        ProgressBarColour.bar.warning.set(Colour.Yellow);
-                        ProgressBarColour.bar.safe.set(Colour.BrightGreen);
-                    }
-                })
             ]
         }),
 		tab({
