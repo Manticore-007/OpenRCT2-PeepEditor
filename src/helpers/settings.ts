@@ -15,3 +15,12 @@ export function setSticky(isSticky: boolean): void {
 export function getSticky(isSticky: boolean): boolean {
     return context.sharedStorage.get("pe.sticky", isSticky);
 }
+
+export type Theme = "rct1" | "rct2";
+
+export function setTheme(theme: Theme): void {
+    return context.sharedStorage.set("pe.theme", theme);
+}
+export function getTheme(theme: Theme): Theme {
+    return context.sharedStorage.get("pe.theme", theme);
+}
