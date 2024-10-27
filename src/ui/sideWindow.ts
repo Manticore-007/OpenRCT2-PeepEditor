@@ -78,14 +78,11 @@ export const sideWindow = tabwindow({
 	padding: 5,
 	onTabChange: () => ui.tool?.cancel(),
 	onUpdate: () => {
-		if (main && side) {
-			side.x = main.x + main.width;
-			side.y = main.y;
+		isSideWindowSticky();
 			if (side) {
 				side.colours = [sideWindowColour.primary.get(), sideWindowColour.secondary.get(), sideWindowColour.tertiary.get()]
 			}
-		}
-	},
+		},
 	onOpen: () => {
 		main = getWindow(model._name.get());
 		side = getWindow("Properties");
@@ -1616,4 +1613,13 @@ function itemList(): string[] {
 	const itemNameArray: string[] = [];
 	guestItemTypeList.forEach(item => itemNameArray.push(itemName(item)));
 	return itemNameArray;
+}
+
+function isSideWindowSticky() {
+	if (context.sharedStorage.get("pe.sticky"))
+		if (main && side) {
+			side.x = main.x + main.width;
+			side.y = main.y;
+		}
+		else return
 }

@@ -1,11 +1,11 @@
-import { button, Colour, colourPicker, compute, groupbox, horizontal, label, store, tab, tabwindow, toggle, twoway, vertical, viewport } from "openrct2-flexui";
+import { button, checkbox, Colour, colourPicker, compute, groupbox, horizontal, label, store, tab, tabwindow, toggle, twoway, vertical, viewport } from "openrct2-flexui";
 import { model } from "../viewmodel/peepViewModel";
 import { sideWindow, sideWindowColour } from "./sideWindow";
 import { togglePeepPicker } from "../actions/peepPicker";
 import { isDevelopment, pluginVersion } from "../helpers/environment";
 import { getWindow } from "../helpers/getWindow";
 import { ProgressBarColour } from "../helpers/progressBar";
-import { getColour, setColour } from "../helpers/settings";
+import { getColour, setColour, setSticky } from "../helpers/settings";
 import { openWindowRemovePeep } from "./removePeepWindow";
 
 const deleteIcon: number = 5165;
@@ -14,13 +14,15 @@ const nameIcon: number = 5168;
 const allGuestsIcon: number = 5193;
 const lensIcon: ImageAnimation = { frameBase: 29401, frameCount: 1, frameDuration: 4, offset: { x: 4, y: 1 } };
 const infoIcon: ImageAnimation = { frameBase: 5367, frameCount: 8, frameDuration: 4, };
-const paintIcon: ImageAnimation = { frameBase: 5221, frameCount: 8, frameDuration: 4, };
+const gearIcon: ImageAnimation = { frameBase: 5201, frameCount: 4, frameDuration: 4, };
 
 const mainWindowColour = {
     primary: store<Colour>(getColour("pe.main.primary", Colour.DarkYellow)),
     secondary: store<Colour>(getColour("pe.main.secondary", Colour.DarkYellow)),
     tertiary: store<Colour>(Colour.DarkYellow),
 }
+
+const stickySideWindow = store<boolean>(context.sharedStorage.get("pe.sticky", true));
 
 let main: Window | undefined;
 let side: Window | undefined;
@@ -137,15 +139,36 @@ export const mainWindow = tabwindow({
             ]
         }),
         tab({
-            image: paintIcon,
-            height: "auto",
+            image: gearIcon,
+            height: "inherit",
             content: [
                 groupbox({
-                    text: "Main window colours",
+                    text: "Options",
+                    content: [
+                        checkbox({
+                            text: "Side window sticks to main window",
+                            isChecked: stickySideWindow,
+                            onChange: (checked) => {
+                                stickySideWindow.set(checked);
+                                setSticky(checked);
+                            }
+                        })
+                    ]
+                }),
+                groupbox({
+                    text: "Colours",
                     spacing: 0,
                     content: [
                         horizontal([
-                            label({text: "Foreground"}),
+                            label({text: "Main window:"}),
+                            colourPicker({
+                                colour: mainWindowColour.primary,
+                                onChange: (colour) => {
+                                    mainWindowColour.primary.set(colour)
+                                    if (main) main.colours = [mainWindowColour.primary.get(), mainWindowColour.secondary.get(), mainWindowColour.tertiary.get()]
+                                    setColour("pe.main.primary", colour)
+                                }
+                            }),
                             colourPicker({
                                 colour: mainWindowColour.secondary,
                                 onChange: (colour) => {
@@ -156,35 +179,7 @@ export const mainWindow = tabwindow({
                             }),
                         ]),
                         horizontal([
-                            label({text: "Background"}),
-                            colourPicker({
-                                colour: mainWindowColour.primary,
-                                onChange: (colour) => {
-                                    mainWindowColour.primary.set(colour)
-                                    if (main) main.colours = [mainWindowColour.primary.get(), mainWindowColour.secondary.get(), mainWindowColour.tertiary.get()]
-                                    setColour("pe.main.primary", colour)
-                                }
-                            }),
-                        ])
-                    ]
-                }),
-                groupbox({
-                    text: "Side window colours",
-                    spacing: 0,
-                    content: [
-                        horizontal([
-                            label({text: "Foreground"}),
-                            colourPicker({
-                                colour: sideWindowColour.secondary,
-                                onChange: (colour) => {
-                                    sideWindowColour.secondary.set(colour);
-                                    if (side) side.colours = [sideWindowColour.primary.get(), sideWindowColour.secondary.get(), sideWindowColour.tertiary.get()]
-                                    setColour("pe.side.secondary", colour)
-                                }
-                            }),
-                        ]),
-                        horizontal([
-                            label({text: "Background"}),
+                            label({text: "Side window:"}),
                             colourPicker({
                                 colour: sideWindowColour.primary,
                                 onChange: (colour) => {
@@ -193,15 +188,19 @@ export const mainWindow = tabwindow({
                                     setColour("pe.side.primary", colour)
                                 }
                             }),
-                        ])
-                    ]
-                }),
-                groupbox({
-                    text: "Progress Bar colours",
-                    spacing: 0,
-                    content: [
+                            colourPicker({
+                                colour: sideWindowColour.secondary,
+                                onChange: (colour) => {
+                                    sideWindowColour.secondary.set(colour);
+                                    if (side) side.colours = [sideWindowColour.primary.get(), sideWindowColour.secondary.get(), sideWindowColour.tertiary.get()]
+                                    setColour("pe.side.secondary", colour)
+                                    ProgressBarColour.background.set(colour);
+                                    setColour("pe.bar.background", colour)
+                                }
+                            }),
+                        ]),
                         horizontal([
-                            label({text: "Safe"}),
+                            label({text: "Progress bar:"}),
                             colourPicker({
                                 colour: ProgressBarColour.bar.safe,
                                 onChange: (colour) => {
@@ -209,9 +208,6 @@ export const mainWindow = tabwindow({
                                     setColour("pe.bar.safe", colour)
                                 }
                             }),
-                        ]),
-                        horizontal([
-                            label({text: "Warning"}),
                             colourPicker({
                                 colour: ProgressBarColour.bar.warning,
                                 onChange: (colour) => {
@@ -219,9 +215,6 @@ export const mainWindow = tabwindow({
                                     setColour("pe.bar.warning", colour)
                                 }
                             }),
-                        ]),
-                        horizontal([
-                            label({text: "Danger"}),
                             colourPicker({
                                 colour: ProgressBarColour.bar.danger,
                                 onChange: (colour) => {
@@ -230,21 +223,12 @@ export const mainWindow = tabwindow({
                                 }
                             }),
                         ]),
-                        horizontal([
-                            label({text: "Background"}),
-                            colourPicker({
-                                colour: ProgressBarColour.background,
-                                onChange: (colour) => {
-                                    ProgressBarColour.background.set(colour);
-                                    setColour("pe.bar.background", colour)
-                                }
-                            }),
-                        ])
                     ]
                 }),
                 button({
                     text: "Reset to default colours",
                     height: 14,
+                    padding: {top: "1w"},
                     onClick: () => {
                         const c = Colour.DarkYellow
                         setColour("pe.main.primary", c)
