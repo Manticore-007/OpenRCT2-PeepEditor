@@ -1,14 +1,12 @@
 import { find } from "../helpers/arrayHelper";
 import { debug } from "../helpers/logger";
 
-const requiredEditPermission: PermissionType = "guest" && "staff";
-
 /**
  * Callback for registered actions to check permissions.
  */
 export function queryPermissionCheck(args: GameActionEventArgs<unknown>): GameActionResult
 {
-	if (hasPermissions(args.player, requiredEditPermission))
+	if (hasPermissions(args.player, "guest") && hasPermissions(args.player, "staff"))
 	{
 		return {};
 	}
