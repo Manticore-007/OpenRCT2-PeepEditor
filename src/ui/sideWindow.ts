@@ -1607,16 +1607,11 @@ function visibilityCheck(item: GuestItemType): Bindable<ElementVisibility> {
 }
 
 function carryingItems(): WidgetCreator<FlexiblePosition>[] {
-	const guest = <Guest>model._selectedPeep.get();
-	if (guest !== undefined && guest.items.length === 0) {
-		return [label({ text: "Nothing", alignment: "centred" })];
-	}
-	else {
-		const widgetArray: WidgetCreator<FlexiblePosition>[] = [];
-		guestItemTypeList.forEach(item => widgetArray.push(createWidget(item)));
-		return widgetArray;
-	}
+	const widgetArray: WidgetCreator<FlexiblePosition>[] = [];
+	guestItemTypeList.forEach(item => widgetArray.push(createWidget(item)));
+	return widgetArray;
 }
+
 function itemList(): string[] {
 	const itemNameArray: string[] = [];
 	guestItemTypeList.forEach(item => itemNameArray.push(itemName(item)));
