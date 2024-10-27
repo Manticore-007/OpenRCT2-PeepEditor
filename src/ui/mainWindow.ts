@@ -1,11 +1,11 @@
-import { button, checkbox, Colour, colourPicker, compute, groupbox, horizontal, label, store, tab, tabwindow, toggle, twoway, vertical, viewport } from "openrct2-flexui";
+import { button, checkbox, Colour, colourPicker, compute, dropdown, FlexiblePosition, groupbox, horizontal, label, store, tab, tabwindow, toggle, twoway, vertical, viewport, WidgetCreator } from "openrct2-flexui";
 import { model } from "../viewmodel/peepViewModel";
 import { sideWindow, sideWindowColour } from "./sideWindow";
 import { togglePeepPicker } from "../actions/peepPicker";
 import { isDevelopment, pluginVersion } from "../helpers/environment";
 import { getWindow } from "../helpers/getWindow";
 import { ProgressBarColour } from "../helpers/progressBar";
-import { getColour, setColour, setSticky } from "../helpers/settings";
+import { getColour, setColour, setSticky, setTheme, Theme } from "../helpers/settings";
 import { openWindowRemovePeep } from "./removePeepWindow";
 
 const deleteIcon: number = 5165;
@@ -23,6 +23,7 @@ const mainWindowColour = {
 }
 
 const stickySideWindow = store<boolean>(context.sharedStorage.get("pe.sticky", true));
+const theme = store<Theme>(context.sharedStorage.get("pe.theme", "rct1"));
 
 let main: Window | undefined;
 let side: Window | undefined;
@@ -43,37 +44,8 @@ export const mainWindow = tabwindow({
                 horizontal([
                     viewport({target: compute(model._selectedPeep, p => p ? p.id : null)}),
                     vertical({
-                        content: [
-                            button({	//red traffic light
-                                width: 14,
-                                height: 14,
-                                image: compute(model._isFrozen, model._isStatic, (f, s) => f && s ? 29376 : 29374),
-                                tooltip: "Completely stop a peep from moving",
-                                padding: { top: 0, right: -2, bottom: -2, left: 2 },
-                                border: true,
-                                disabled: compute(model._isPeepSelected, model._allGuestsSelected, (p, a) => !p && !a),
-                                onClick: () => model._setMotion("frozen")
-                            }),
-                            button({	//yellow traffic light
-                                width: 14,
-                                height: 14,
-                                image: compute(model._isFrozen, model._isStatic, (f, s) => !f && s ? 29380 : 29378),
-                                tooltip: "Stop a peep in place, animation still works",
-                                padding: { top: -2, right: -2, bottom: -2, left: 2 },
-                                border: true,
-                                disabled: compute(model._isPeepSelected, model._allGuestsSelected, (p, a) => !p && !a),
-                                onClick: () => model._setMotion("static")
-                            }),
-                            button({	//green traffic light
-                                width: 14,
-                                height: 14,
-                                image: compute(model._isFrozen, model._isStatic, (f, s) => !f && !s ? 29384 : 29382),
-                                tooltip: "Let the peep roam freely around",
-                                padding: { top: -2, right: -2, bottom: -2, left: 2 },
-                                border: true,
-                                disabled: compute(model._isPeepSelected, model._allGuestsSelected, (p, a) => !p && !a),
-                                onClick: () => model._setMotion("moving")
-                            }),
+                        content: 
+                            buttonStyle().concat(
                             toggle({	//picker
                                 width: 24,
                                 height: 24,
@@ -127,7 +99,7 @@ export const mainWindow = tabwindow({
                                     if (!pressed) sideWindow.close();
                                 }
                             })
-                        ]
+                            )
                     })
                 ]),
                 label({
@@ -152,7 +124,33 @@ export const mainWindow = tabwindow({
                                 stickySideWindow.set(checked);
                                 setSticky(checked);
                             }
-                        })
+                        }),
+                        horizontal([
+                            label({
+                                text: "Button style:",
+                                width: "40%"
+                            }),
+                            dropdown({
+                                items: ["Rollercoaster Tycoon 1", "Rollercoaster Tycoon 2"],
+                                selectedIndex: compute(theme, t => t === "rct1" ? 0 : 1),
+                                onChange: (index) => {
+                                    switch (index) {
+                                        case 0: {
+                                            setTheme("rct1");
+                                            theme.set("rct1");
+                                            console.log("theme set to rct1");
+                                        }
+                                            break;
+                                        case 1: {
+                                            setTheme("rct2");
+                                            theme.set("rct2");
+                                            console.log("theme set to rct2");
+                                            break;
+                                        }
+                                    }
+                                }
+                            })
+                        ])
                     ]
                 }),
                 groupbox({
@@ -288,3 +286,70 @@ function versionString(): string
     }
     else return `{BLACK}${pluginVersion}`;
 }
+
+function buttonStyle(): WidgetCreator<FlexiblePosition>[] {
+            return [
+                button({	//red traffic light
+                    width: 14,
+                    height: 14,
+                    image: compute(model._isFrozen, model._isStatic, (f, s) => f && s ? 29376 : 29374),
+                    tooltip: "Completely stop a peep from moving",
+                    padding: { top: 0, right: -2, bottom: -2, left: 2 },
+                    border: true,
+                    disabled: compute(model._isPeepSelected, model._allGuestsSelected, (p, a) => !p && !a),
+                    visibility: compute(theme, t => t === "rct1" ? "visible" : "none"),
+                    onClick: () => model._setMotion("frozen")
+                }),
+                button({	//yellow traffic light
+                    width: 14,
+                    height: 14,
+                    image: compute(model._isFrozen, model._isStatic, (f, s) => !f && s ? 29380 : 29378),
+                    tooltip: "Stop a peep in place, animation still works",
+                    padding: { top: -2, right: -2, bottom: -2, left: 2 },
+                    border: true,
+                    disabled: compute(model._isPeepSelected, model._allGuestsSelected, (p, a) => !p && !a),
+                    visibility: compute(theme, t => t === "rct1" ? "visible" : "none"),
+                    onClick: () => model._setMotion("static")
+                }),
+                button({	//green traffic light
+                    width: 14,
+                    height: 14,
+                    image: compute(model._isFrozen, model._isStatic, (f, s) => !f && !s ? 29384 : 29382),
+                    tooltip: "Let the peep roam freely around",
+                    padding: { top: -2, right: -2, bottom: -2, left: 2 },
+                    border: true,
+                    disabled: compute(model._isPeepSelected, model._allGuestsSelected, (p, a) => !p && !a),
+                    visibility: compute(theme, t => t === "rct1" ? "visible" : "none"),
+                    onClick: () => model._setMotion("moving")
+                }),
+                button({
+                    image: compute(model._isFrozen, model._isStatic, (f, s) => flagButtonImage(f, s)),
+                    width: 24,
+                    height: 24,
+                    padding: { top: 0, left: -2, bottom: -2, right: -2 },
+                    disabled: compute(model._isPeepSelected, model._allGuestsSelected, (p, a) => !p && !a),
+                    visibility: compute(theme, t => t === "rct2" ? "visible" : "none"),
+                    onClick: () => {
+                        if (!model._isFrozen.get() && !model._isStatic.get()) {
+                            model._setMotion("frozen");
+                            return
+                        }
+                        if (model._isFrozen.get() && model._isStatic.get()) {
+                            model._setMotion("static");
+                            return;
+                        }
+                        if (!model._isFrozen.get() && model._isStatic.get()) {
+                            model._setMotion("moving");
+                            return;
+                        }
+                    }
+                }),
+            ]
+    }
+
+    function flagButtonImage(f: boolean, s: boolean): number {
+        if (f && s) return 5179;
+        if (!f && s) return 5181;
+        if (!f && !s) return 5180;
+        return 5179
+    }

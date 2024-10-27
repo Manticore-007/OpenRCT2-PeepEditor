@@ -1,5 +1,6 @@
 import { getPeepById } from "../objects/peep";
 import { sideWindow } from "../ui/sideWindow";
+import { model } from "../viewmodel/peepViewModel";
 
 export function togglePeepPicker(isPressed: boolean, onPick: (peep: Guest | Staff) => void, onCancel: () => void): void {
     if (!isPressed)
@@ -32,6 +33,7 @@ export function togglePeepPicker(isPressed: boolean, onPick: (peep: Guest | Staf
 
             if (peepToSelect)
             {
+                console.log("isFrozen: " + model._isFrozen.get() + ", isStatic: " + model._isStatic.get())
                 onPick(peepToSelect);
                 ui.tool?.cancel();
             }
