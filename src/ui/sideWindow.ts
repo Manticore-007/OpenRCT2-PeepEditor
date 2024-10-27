@@ -1,7 +1,7 @@
 
 /// <reference path="../../lib/openrct2.d.ts" />
 
-import { button, horizontal, label, tab, tabwindow, vertical, twoway, compute, Colour, window, groupbox, spinner, dropdown, textbox, colourPicker, graphics, checkbox, store, WidgetCreator, FlexiblePosition, Parsed, Bindable, ElementVisibility } from "openrct2-flexui";
+import { button, horizontal, label, tab, tabwindow, vertical, twoway, compute, Colour, window, groupbox, spinner, dropdown, textbox, colourPicker, graphics, checkbox, store, WidgetCreator, FlexiblePosition, Parsed, Bindable, ElementVisibility, Padding } from "openrct2-flexui";
 import { model } from "../viewmodel/peepViewModel";
 import { debug } from "../helpers/logger";
 import { movePeepExecuteArgs } from "../actions/peepMover";
@@ -665,272 +665,30 @@ export const sideWindow = tabwindow({
 					content: [
 						horizontal([
 							vertical([
-								checkbox({
-									text: "Leave park",
-									visibility: compute(model._isGuest, model._allGuestsSelected, (g, a) => g || a ? "visible" : "none"),
-									padding: {bottom: -3, left: 10 },
-									isChecked: compute(model._selectedPeep, p => (p?.getFlag("leavingPark"))? true : false),
-									onChange: (checked) => {
-										model._allGuests.get().forEach(guest => {
-										if (guest !== undefined)
-											context.executeAction("pe-guestflags", guestFlagsExecuteArgs(guest.id, checked, "leavingPark"));
-										})
-									}
-								}),
-								checkbox({
-									text: "Slow walk",
-									visibility: compute(model._isGuest, model._allGuestsSelected, (g, a) => g || a ? "visible" : "none"),
-									padding: {top: -2, bottom: -3, left: 10 },
-									isChecked: compute(model._selectedPeep, p => (p?.getFlag("slowWalk"))? true : false),
-									onChange: (checked) => {
-										model._allGuests.get().forEach(guest => {
-										if (guest !== undefined)
-											context.executeAction("pe-guestflags", guestFlagsExecuteArgs(guest.id, checked, "slowWalk"));
-										})
-									}
-								}),
-								checkbox({
-									text: "Tracking",
-									visibility: compute(model._isGuest, model._allGuestsSelected, (g, a) => g || a ? "visible" : "none"),
-									padding: {top: -2, bottom: -3, left: 10 },
-									isChecked: compute(model._selectedPeep, p => (p?.getFlag("tracking"))? true : false),
-									onChange: (checked) => {
-										model._allGuests.get().forEach(guest => {
-										if (guest !== undefined)
-											context.executeAction("pe-guestflags", guestFlagsExecuteArgs(guest.id, checked, "tracking"));
-										})
-									}
-								}),
-								checkbox({
-									text: "Waving",
-									visibility: compute(model._isGuest, model._allGuestsSelected, (g, a) => g || a ? "visible" : "none"),
-									padding: {top: -2, bottom: -3, left: 10 },
-									isChecked: compute(model._selectedPeep, p => (p?.getFlag("waving"))? true : false),
-									onChange: (checked) => {
-										model._allGuests.get().forEach(guest => {
-										if (guest !== undefined)
-											context.executeAction("pe-guestflags", guestFlagsExecuteArgs(guest.id, checked, "waving"));
-										})
-									}
-								}),
-								checkbox({
-									text: "Photo",
-									visibility: compute(model._isGuest, model._allGuestsSelected, (g, a) => g || a ? "visible" : "none"),
-									padding: {top: -2, bottom: -3, left: 10 },
-									isChecked: compute(model._selectedPeep, p => (p?.getFlag("photo"))? true : false),
-									onChange: (checked) => {
-										model._allGuests.get().forEach(guest => {
-										if (guest !== undefined)
-											context.executeAction("pe-guestflags", guestFlagsExecuteArgs(guest.id, checked, "photo"));
-										})
-									}
-								}),
-								checkbox({
-									text: "Painting",
-									visibility: compute(model._isGuest, model._allGuestsSelected, (g, a) => g || a ? "visible" : "none"),
-									padding: {top: -2, bottom: -3, left: 10 },
-									isChecked: compute(model._selectedPeep, p => (p?.getFlag("painting"))? true : false),
-									onChange: (checked) => {
-										model._allGuests.get().forEach(guest => {
-										if (guest !== undefined)
-											context.executeAction("pe-guestflags", guestFlagsExecuteArgs(guest.id, checked, "painting"));
-										})
-									}
-								}),
-								checkbox({
-									text: "Wow",
-									visibility: compute(model._isGuest, model._allGuestsSelected, (g, a) => g || a ? "visible" : "none"),
-									padding: {top: -2, bottom: -3, left: 10 },
-									isChecked: compute(model._selectedPeep, p => (p?.getFlag("wow"))? true : false),
-									onChange: (checked) => {
-										model._allGuests.get().forEach(guest => {
-										if (guest !== undefined)
-											context.executeAction("pe-guestflags", guestFlagsExecuteArgs(guest.id, checked, "wow"));
-										})
-									}
-								}),
-								checkbox({
-									text: "Litter",
-									visibility: compute(model._isGuest, model._allGuestsSelected, (g, a) => g || a ? "visible" : "none"),
-									padding: {top: -2, bottom: -3, left: 10 },
-									isChecked: compute(model._selectedPeep, p => (p?.getFlag("litter"))? true : false),
-									onChange: (checked) => {
-										model._allGuests.get().forEach(guest => {
-										if (guest !== undefined)
-											context.executeAction("pe-guestflags", guestFlagsExecuteArgs(guest.id, checked, "litter"));
-										})
-									}
-								}),
-								checkbox({
-									text: "Lost",
-									visibility: compute(model._isGuest, model._allGuestsSelected, (g, a) => g || a ? "visible" : "none"),
-									padding: {top: -2, bottom: -3, left: 10 },
-									isChecked: compute(model._selectedPeep, p => (p?.getFlag("lost"))? true : false),
-									onChange: (checked) => {
-										model._allGuests.get().forEach(guest => {
-										if (guest !== undefined)
-											context.executeAction("pe-guestflags", guestFlagsExecuteArgs(guest.id, checked, "lost"));
-										})
-									}
-								}),
-								checkbox({
-									text: "Hunger",
-									visibility: compute(model._isGuest, model._allGuestsSelected, (g, a) => g || a ? "visible" : "none"),
-									padding: {top: -2, bottom: -3, left: 10 },
-									isChecked: compute(model._selectedPeep, p => (p?.getFlag("hunger"))? true : false),
-									onChange: (checked) => {
-										model._allGuests.get().forEach(guest => {
-										if (guest !== undefined)
-											context.executeAction("pe-guestflags", guestFlagsExecuteArgs(guest.id, checked, "hunger"));
-										})
-									}
-								}),
-								checkbox({
-									text: "Toilet",
-									visibility: compute(model._isGuest, model._allGuestsSelected, (g, a) => g || a ? "visible" : "none"),
-									padding: {top: -2, bottom: 5, left: 10 },
-									isChecked: compute(model._selectedPeep, p => (p?.getFlag("toilet"))? true : false),
-									onChange: (checked) => {
-										model._allGuests.get().forEach(guest => {
-										if (guest !== undefined)
-											context.executeAction("pe-guestflags", guestFlagsExecuteArgs(guest.id, checked, "toilet"));
-										})
-									}
-								}),
+								createFlagCheckboxWidget("leavingPark", {bottom: -3, left: 10 }),
+								createFlagCheckboxWidget("slowWalk", {top: -2, bottom: -3, left: 10 }),
+								createFlagCheckboxWidget("tracking", {top: -2, bottom: -3, left: 10 }),
+								createFlagCheckboxWidget("waving", {top: -2, bottom: -3, left: 10 }),
+								createFlagCheckboxWidget("photo", {top: -2, bottom: -3, left: 10 }),
+								createFlagCheckboxWidget("painting", {top: -2, bottom: -3, left: 10 }),
+								createFlagCheckboxWidget("wow", {top: -2, bottom: -3, left: 10 }),
+								createFlagCheckboxWidget("litter", {top: -2, bottom: -3, left: 10 }),
+								createFlagCheckboxWidget("lost", {top: -2, bottom: -3, left: 10 }),
+								createFlagCheckboxWidget("hunger", {top: -2, bottom: -3, left: 10 }),
+								createFlagCheckboxWidget("toilet", {top: -2, bottom: 5, left: 10 }),
 							]),
 							vertical([
-								checkbox({
-									text: "Crowded",
-									visibility: compute(model._isGuest, model._allGuestsSelected, (g, a) => g || a ? "visible" : "none"),
-									padding: {bottom: -3},
-									isChecked: compute(model._selectedPeep, p => (p?.getFlag("crowded"))? true : false),
-									onChange: (checked) => {
-										model._allGuests.get().forEach(guest => {
-										if (guest !== undefined)
-											context.executeAction("pe-guestflags", guestFlagsExecuteArgs(guest.id, checked, "crowded"));
-										})
-									}
-								}),
-								checkbox({
-									text: "Happiness",
-									visibility: compute(model._isGuest, model._allGuestsSelected, (g, a) => g || a ? "visible" : "none"),
-									padding: {top: -2, bottom: -3},
-									isChecked: compute(model._selectedPeep, p => (p?.getFlag("happiness"))? true : false),
-									onChange: (checked) => {
-										model._allGuests.get().forEach(guest => {
-										if (guest !== undefined)
-											context.executeAction("pe-guestflags", guestFlagsExecuteArgs(guest.id, checked, "happiness"));
-										})
-									}
-								}),
-								checkbox({
-									text: "Nausea",
-									visibility: compute(model._isGuest, model._allGuestsSelected, (g, a) => g || a ? "visible" : "none"),
-									padding: {top: -2, bottom: -3},
-									isChecked: compute(model._selectedPeep, p => (p?.getFlag("nausea"))? true : false),
-									onChange: (checked) => {
-										model._allGuests.get().forEach(guest => {
-										if (guest !== undefined)
-											context.executeAction("pe-guestflags", guestFlagsExecuteArgs(guest.id, checked, "nausea"));
-										})
-									}
-								}),
-								checkbox({
-									text: "Purple",
-									visibility: compute(model._isGuest, model._allGuestsSelected, (g, a) => g || a ? "visible" : "none"),
-									padding: {top: -2, bottom: -3},
-									isChecked: compute(model._selectedPeep, p => (p?.getFlag("purple"))? true : false),
-									onChange: (checked) => {
-										model._allGuests.get().forEach(guest => {
-										if (guest !== undefined)
-											context.executeAction("pe-guestflags", guestFlagsExecuteArgs(guest.id, checked, "purple"));
-										})
-									}
-								}),
-								checkbox({
-									text: "Pizza",
-									visibility: compute(model._isGuest, model._allGuestsSelected, (g, a) => g || a ? "visible" : "none"),
-									padding: {top: -2, bottom: -3},
-									isChecked: compute(model._selectedPeep, p => (p?.getFlag("pizza"))? true : false),
-									onChange: (checked) => {
-										model._allGuests.get().forEach(guest => {
-										if (guest !== undefined)
-											context.executeAction("pe-guestflags", guestFlagsExecuteArgs(guest.id, checked, "pizza"));
-										})
-									}
-								}),
-								checkbox({
-									text: "Explode",
-									visibility: compute(model._isGuest, model._allGuestsSelected, (g, a) => g || a ? "visible" : "none"),
-									padding: {top: -2, bottom: -3},
-									isChecked: compute(model._selectedPeep, p => (p?.getFlag("explode"))? true : false),
-									onChange: (checked) => {
-										model._allGuests.get().forEach(guest => {
-										if (guest !== undefined)
-											context.executeAction("pe-guestflags", guestFlagsExecuteArgs(guest.id, checked, "explode"));
-										})
-									}
-								}),
-								checkbox({
-									text: "Contagious",
-									visibility: compute(model._isGuest, model._allGuestsSelected, (g, a) => g || a ? "visible" : "none"),
-									padding: {top: -2, bottom: -3},
-									isChecked: compute(model._selectedPeep, p => (p?.getFlag("contagious"))? true : false),
-									onChange: (checked) => {
-										model._allGuests.get().forEach(guest => {
-										if (guest !== undefined)
-											context.executeAction("pe-guestflags", guestFlagsExecuteArgs(guest.id, checked, "contagious"));
-										})
-									}
-								}),
-								checkbox({
-									text: "Joy",
-									visibility: compute(model._isGuest, model._allGuestsSelected, (g, a) => g || a ? "visible" : "none"),
-									padding: {top: -2, bottom: -3},
-									isChecked: compute(model._selectedPeep, p => (p?.getFlag("joy"))? true : false),
-									onChange: (checked) => {
-										model._allGuests.get().forEach(guest => {
-										if (guest !== undefined)
-											context.executeAction("pe-guestflags", guestFlagsExecuteArgs(guest.id, checked, "joy"));
-										})
-									}
-								}),
-								checkbox({
-									text: "Angry",
-									visibility: compute(model._isGuest, model._allGuestsSelected, (g, a) => g || a ? "visible" : "none"),
-									padding: {top: -2, bottom: -3},
-									isChecked: compute(model._selectedPeep, p => (p?.getFlag("angry"))? true : false),
-									onChange: (checked) => {
-										model._allGuests.get().forEach(guest => {
-										if (guest !== undefined)
-											context.executeAction("pe-guestflags", guestFlagsExecuteArgs(guest.id, checked, "angry"));
-										})
-									}
-								}),
-								checkbox({
-									text: "Ice cream",
-									visibility: compute(model._isGuest, model._allGuestsSelected, (g, a) => g || a ? "visible" : "none"),
-									padding: {top: -2, bottom: -3},
-									isChecked: compute(model._selectedPeep, p => (p?.getFlag("iceCream"))? true : false),
-									onChange: (checked) => {
-										model._allGuests.get().forEach(guest => {
-										if (guest !== undefined)
-											context.executeAction("pe-guestflags", guestFlagsExecuteArgs(guest.id, checked, "iceCream"));
-										})
-									}
-								}),
-								checkbox({
-									text: "Here we are",
-									visibility: compute(model._isGuest, model._allGuestsSelected, (g, a) => g || a ? "visible" : "none"),
-									padding: {top: -2, bottom: 5},
-									isChecked: compute(model._selectedPeep, p => (p?.getFlag("hereWeAre"))? true : false),
-									onChange: (checked) => {
-										model._allGuests.get().forEach(guest => {
-										if (guest !== undefined)
-											context.executeAction("pe-guestflags", guestFlagsExecuteArgs(guest.id, checked, "hereWeAre"));
-										})
-									}
-								}),
+								createFlagCheckboxWidget("crowded", {bottom: -3}),
+								createFlagCheckboxWidget("happiness", {top: -2, bottom: -3}),
+								createFlagCheckboxWidget("nausea", {top: -2, bottom: -3}),
+								createFlagCheckboxWidget("purple", {top: -2, bottom: -3}),
+								createFlagCheckboxWidget("pizza", {top: -2, bottom: -3}),
+								createFlagCheckboxWidget("explode", {top: -2, bottom: -3}),
+								createFlagCheckboxWidget("contagious", {top: -2, bottom: -3}),
+								createFlagCheckboxWidget("joy", {top: -2, bottom: -3}),
+								createFlagCheckboxWidget("angry", {top: -2, bottom: -3}),
+								createFlagCheckboxWidget("iceCream", {top: -2, bottom: -3}),
+								createFlagCheckboxWidget("hereWeAre", {top: -2, bottom: 5}),
 							])
 						])
 					],
@@ -1459,7 +1217,23 @@ function drawImage(g: GraphicsContext, image: number, property?: keyof Guest): v
     }
 }
 
-function createWidget(item: GuestItemType): WidgetCreator<FlexiblePosition, Parsed<FlexiblePosition>> {
+function createFlagCheckboxWidget(flag: PeepFlags, padding?: Padding | undefined): WidgetCreator<FlexiblePosition> {
+	const capitalizedFlag = flag.charAt(0).toUpperCase() + flag.slice(1);
+	const splitFlag = capitalizedFlag.replace(/([A-Z])/g, ' $1')
+	return checkbox({
+		text: splitFlag,
+		visibility: compute(model._isGuest, model._allGuestsSelected, (g, a) => g || a ? "visible" : "none"),
+		padding: padding,
+		isChecked: compute(model._selectedPeep, p => (p?.getFlag(flag)) ? true : false),
+		onChange: (checked) => {
+			model._allGuests.get().forEach(guest => {
+				if (guest !== undefined) context.executeAction("pe-guestflags", guestFlagsExecuteArgs(guest.id, checked, flag));
+			})
+		}
+	});
+}
+
+function createItemWidget(item: GuestItemType): WidgetCreator<FlexiblePosition, Parsed<FlexiblePosition>> {
 			return (
 				horizontal([
 					graphics({
@@ -1605,7 +1379,7 @@ function visibilityCheck(item: GuestItemType): Bindable<ElementVisibility> {
 
 function carryingItems(): WidgetCreator<FlexiblePosition>[] {
 	const widgetArray: WidgetCreator<FlexiblePosition>[] = [];
-	guestItemTypeList.forEach(item => widgetArray.push(createWidget(item)));
+	guestItemTypeList.forEach(item => widgetArray.push(createItemWidget(item)));
 	return widgetArray;
 }
 
@@ -1623,3 +1397,4 @@ function isSideWindowSticky() {
 		}
 		else return
 }
+
