@@ -23,7 +23,7 @@ import { guestItemRemoveExecuteArgs } from "../actions/guestItemRemove";
 import { peepRotateExecuteArgs } from "../actions/peepRotater";
 import { getWindow } from "../helpers/getWindow";
 import { getColour } from "../helpers/settings";
-import { guestFeelingExecuteArgs } from "../actions/guestFeelings";
+import { guestConditionExecuteArgs } from "../actions/guestCondition";
 
 const securityOrders = store<boolean>(true);
 const entertainerOrders = store<boolean>(true);
@@ -201,7 +201,7 @@ export const sideWindow = tabwindow({
 									onChange: (_, adjustment: number) => {
 										const peep = model._selectedPeep.get();
 										if (peep !== undefined)
-											context.executeAction("pe-guestfeeling", guestFeelingExecuteArgs(peep.id, (adjustment * multiplier), "mass"));
+											context.executeAction("pe-guestcondition", guestConditionExecuteArgs(peep.id, (adjustment * multiplier), "mass"));
 									}
 								})
 							]),
@@ -767,7 +767,7 @@ export const sideWindow = tabwindow({
 									onChange: (_, adjustment: number) => {
 										const peep = model._selectedPeep.get();
 										if (peep !== undefined)
-											context.executeAction("pe-guestfeeling", guestFeelingExecuteArgs(peep.id, (adjustment * multiplier), "happiness"));
+											context.executeAction("pe-guestcondition", guestConditionExecuteArgs(peep.id, (adjustment * multiplier), "happiness"));
 									}
 								})
 							]),
@@ -797,7 +797,7 @@ export const sideWindow = tabwindow({
 									onChange: (_, adjustment: number) => {
 										const peep = model._selectedPeep.get();
 										if (peep !== undefined)
-											context.executeAction("pe-guestfeeling", guestFeelingExecuteArgs(peep.id, (adjustment * multiplier), "energy"));
+											context.executeAction("pe-guestcondition", guestConditionExecuteArgs(peep.id, (adjustment * multiplier), "energy"));
 									}
 								})
 							]),
@@ -827,7 +827,7 @@ export const sideWindow = tabwindow({
 									onChange: (_, adjustment: number) => {
 										const peep = model._selectedPeep.get();
 										if (peep !== undefined)
-											context.executeAction("pe-guestfeeling", guestFeelingExecuteArgs(peep.id, (adjustment * multiplier), "hunger"));
+											context.executeAction("pe-guestcondition", guestConditionExecuteArgs(peep.id, (adjustment * multiplier), "hunger"));
 									}
 								})
 							]),
@@ -857,7 +857,7 @@ export const sideWindow = tabwindow({
 									onChange: (_, adjustment: number) => {
 										const peep = model._selectedPeep.get();
 										if (peep !== undefined)
-											context.executeAction("pe-guestfeeling", guestFeelingExecuteArgs(peep.id, (adjustment * multiplier), "thirst"));
+											context.executeAction("pe-guestcondition", guestConditionExecuteArgs(peep.id, (adjustment * multiplier), "thirst"));
 									}
 								})
 							]),
@@ -887,7 +887,7 @@ export const sideWindow = tabwindow({
 									onChange: (_, adjustment: number) => {
 										const peep = model._selectedPeep.get();
 										if (peep !== undefined)
-											context.executeAction("pe-guestfeeling", guestFeelingExecuteArgs(peep.id, (adjustment * multiplier), "nausea"));
+											context.executeAction("pe-guestcondition", guestConditionExecuteArgs(peep.id, (adjustment * multiplier), "nausea"));
 									}
 								})
 							]),
@@ -917,7 +917,7 @@ export const sideWindow = tabwindow({
 									onChange: (_, adjustment: number) => {
 										const peep = model._selectedPeep.get();
 										if (peep !== undefined)
-											context.executeAction("pe-guestfeeling", guestFeelingExecuteArgs(peep.id, (adjustment * multiplier), "toilet"));
+											context.executeAction("pe-guestcondition", guestConditionExecuteArgs(peep.id, (adjustment * multiplier), "toilet"));
 									}
 								})
 							]),
@@ -947,7 +947,7 @@ export const sideWindow = tabwindow({
 									onChange: (_, adjustment: number) => {
 										const peep = model._selectedPeep.get();
 										if (peep !== undefined)
-											context.executeAction("pe-guestfeeling", guestFeelingExecuteArgs(peep.id, (adjustment * multiplier), "mass"));
+											context.executeAction("pe-guestcondition", guestConditionExecuteArgs(peep.id, (adjustment * multiplier), "mass"));
 									}
 								})
 							]),
