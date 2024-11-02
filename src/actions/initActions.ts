@@ -1,4 +1,4 @@
-import { GuestFeelingArgs, guestFeelingExecute } from "./guestFeelings";
+import { GuestConditionArgs, guestConditionExecute } from "./guestCondition";
 import { GuestFlagsArgs, guestFlagsExecute } from "./guestFlags";
 import { GuestItemRemoveArgs, guestItemRemoveExecute } from "./guestItemRemove";
 import { PeepAnimationArgs, animationPeepExecute } from "./peepAnimation";
@@ -25,7 +25,7 @@ context.registerAction<StaffCostumeArgs>("pe-staffcostume", (args) => queryPermi
 context.registerAction<PeepAnimationArgs>("pe-animationpeep", (args) => queryPermissionCheck(args), (args) => animationPeepExecute(args.args));
 context.registerAction<PeepAnimationFrameArgs>("pe-animationframepeep", (args) => queryPermissionCheck(args), (args) => animationFramePeepExecute(args.args));
 context.registerAction<GuestFlagsArgs>("pe-guestflags", (args) => queryPermissionCheck(args), (args) => guestFlagsExecute(args.args));
-context.registerAction<GuestFeelingArgs>("pe-guestfeeling", (args) => queryPermissionCheck(args), (args) => guestFeelingExecute(args.args));
+context.registerAction<GuestConditionArgs>("pe-guestcondition", (args) => queryPermissionCheck(args), (args) => guestConditionExecute(args.args));
 context.registerAction<GuestItemRemoveArgs>("pe-guestitemremove", (args) => queryPermissionCheck(args), (args) => guestItemRemoveExecute(args.args));
 context.registerAction<PeepRotateArgs>("pe-peeprotate", (args) => queryPermissionCheck(args), (args) => peepRotateExecute(args.args));
 }
