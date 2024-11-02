@@ -1,10 +1,10 @@
 import { Colour, compute, store } from "openrct2-flexui";
 import { guestFlagsExecuteArgs } from "../actions/guestFlags";
 import { guestItemTypeList } from "../helpers/guestItemTypes";
-import { peepSpeedExecuteArgs } from "../actions/peepSpeed";
 import { namePeepExecuteArgs } from "../actions/peepNamer";
 import { debug } from "../helpers/logger";
 import { getAllRides, ParkRide } from "../objects/parkRides";
+import { guestFeelingExecuteArgs } from "../actions/guestFeelings";
 const windowTitle = "Peep Editor";
 
 type PeepMotion = "frozen" | "static" | "moving"
@@ -265,7 +265,7 @@ export class peepViewModel
             const staff = <Staff>peep;
             this._availableCostumes.set(staff.availableCostumes);
             if (staff.energy === 0) {
-                context.executeAction("pe-peepspeed", peepSpeedExecuteArgs(staff.id, 96));
+                context.executeAction("pe-guestfeeling", guestFeelingExecuteArgs(peep.id, 96, "energy"));
                 context.executeAction("pe-guestflags", guestFlagsExecuteArgs(staff.id, true, "positionFrozen"));
                 context.executeAction("pe-guestflags", guestFlagsExecuteArgs(staff.id, true, "animationFrozen"));
                 debug("Old freezing method converted to new method");
