@@ -5,7 +5,6 @@ import { button, horizontal, label, tab, tabwindow, vertical, twoway, compute, C
 import { model } from "../viewmodel/peepViewModel";
 import { debug } from "../helpers/logger";
 import { movePeepExecuteArgs } from "../actions/peepMover";
-import { peepSpeedExecuteArgs } from "../actions/peepSpeed";
 import { colourPeepExecuteArgs } from "../actions/peepColour";
 import { colourList } from "../helpers/colours";
 import { customImageFor } from "../helpers/customImages";
@@ -19,17 +18,12 @@ import { animationFramePeepExecuteArgs } from "../actions/peepAnimationFrame";
 import { staffOrdersExecuteArgs } from "../actions/staffSetOrders";
 import { guestFlagsExecuteArgs } from "../actions/guestFlags";
 import { percentage, progressBar, ProgressBarColour } from "../helpers/progressBar";
-import { guestHappinessExecuteArgs } from "../actions/guestHappiness";
-import { guestHungerExecuteArgs } from "../actions/guestHunger";
-import { guestThirstExecuteArgs } from "../actions/guestThirst";
-import { guestNauseaExecuteArgs } from "../actions/guestNausea";
-import { guestToiletExecuteArgs } from "../actions/guestToilet";
-import { guestMassExecuteArgs } from "../actions/guestMass";
 import { guestItemTypeList } from "../helpers/guestItemTypes";
 import { guestItemRemoveExecuteArgs } from "../actions/guestItemRemove";
 import { peepRotateExecuteArgs } from "../actions/peepRotater";
 import { getWindow } from "../helpers/getWindow";
 import { getColour } from "../helpers/settings";
+import { guestFeelingExecuteArgs } from "../actions/guestFeelings";
 
 const securityOrders = store<boolean>(true);
 const entertainerOrders = store<boolean>(true);
@@ -207,7 +201,7 @@ export const sideWindow = tabwindow({
 									onChange: (_, adjustment: number) => {
 										const peep = model._selectedPeep.get();
 										if (peep !== undefined)
-										context.executeAction("pe-peepspeed", peepSpeedExecuteArgs(peep.id, (adjustment*multiplier)));
+											context.executeAction("pe-guestfeeling", guestFeelingExecuteArgs(peep.id, (adjustment * multiplier), "mass"));
 									}
 								})
 							]),
@@ -773,7 +767,7 @@ export const sideWindow = tabwindow({
 									onChange: (_, adjustment: number) => {
 										const peep = model._selectedPeep.get();
 										if (peep !== undefined)
-											context.executeAction("pe-guesthappiness", guestHappinessExecuteArgs(peep.id, (adjustment * multiplier)));
+											context.executeAction("pe-guestfeeling", guestFeelingExecuteArgs(peep.id, (adjustment * multiplier), "happiness"));
 									}
 								})
 							]),
@@ -803,7 +797,7 @@ export const sideWindow = tabwindow({
 									onChange: (_, adjustment: number) => {
 										const peep = model._selectedPeep.get();
 										if (peep !== undefined)
-											context.executeAction("pe-peepspeed", peepSpeedExecuteArgs(peep.id, (adjustment * multiplier)));
+											context.executeAction("pe-guestfeeling", guestFeelingExecuteArgs(peep.id, (adjustment * multiplier), "energy"));
 									}
 								})
 							]),
@@ -833,7 +827,7 @@ export const sideWindow = tabwindow({
 									onChange: (_, adjustment: number) => {
 										const peep = model._selectedPeep.get();
 										if (peep !== undefined)
-											context.executeAction("pe-guesthunger", guestHungerExecuteArgs(peep.id, (adjustment * multiplier)));
+											context.executeAction("pe-guestfeeling", guestFeelingExecuteArgs(peep.id, (adjustment * multiplier), "hunger"));
 									}
 								})
 							]),
@@ -863,7 +857,7 @@ export const sideWindow = tabwindow({
 									onChange: (_, adjustment: number) => {
 										const peep = model._selectedPeep.get();
 										if (peep !== undefined)
-											context.executeAction("pe-guestthirst", guestThirstExecuteArgs(peep.id, (adjustment * multiplier)));
+											context.executeAction("pe-guestfeeling", guestFeelingExecuteArgs(peep.id, (adjustment * multiplier), "thirst"));
 									}
 								})
 							]),
@@ -893,7 +887,7 @@ export const sideWindow = tabwindow({
 									onChange: (_, adjustment: number) => {
 										const peep = model._selectedPeep.get();
 										if (peep !== undefined)
-											context.executeAction("pe-guestnausea", guestNauseaExecuteArgs(peep.id, (adjustment * multiplier)));
+											context.executeAction("pe-guestfeeling", guestFeelingExecuteArgs(peep.id, (adjustment * multiplier), "nausea"));
 									}
 								})
 							]),
@@ -923,7 +917,7 @@ export const sideWindow = tabwindow({
 									onChange: (_, adjustment: number) => {
 										const peep = model._selectedPeep.get();
 										if (peep !== undefined)
-											context.executeAction("pe-guesttoilet", guestToiletExecuteArgs(peep.id, (adjustment * multiplier)));
+											context.executeAction("pe-guestfeeling", guestFeelingExecuteArgs(peep.id, (adjustment * multiplier), "toilet"));
 									}
 								})
 							]),
@@ -953,7 +947,7 @@ export const sideWindow = tabwindow({
 									onChange: (_, adjustment: number) => {
 										const peep = model._selectedPeep.get();
 										if (peep !== undefined)
-											context.executeAction("pe-guestmass", guestMassExecuteArgs(peep.id, (adjustment * multiplier)));
+											context.executeAction("pe-guestfeeling", guestFeelingExecuteArgs(peep.id, (adjustment * multiplier), "mass"));
 									}
 								})
 							]),
