@@ -7,7 +7,7 @@ import { PeepColourArgs, colourPeepExecute } from "./peepColour";
 import { PeepMoveArgs, movePeepExecute } from "./peepMover";
 import { PeepNameArgs, namePeepExecute } from "./peepNamer";
 import { PeepRemoveArgs, removePeepExecute } from "./peepRemover";
-import { PeepRotateArgs, peepRotateExecute } from "./peepRotater";
+import { peepRotateExecute } from "./peepRotater";
 import { queryPermissionCheck } from "./permissions";
 import { StaffCostumeArgs, staffCostumeExecute } from "./staffSetCostume";
 import { StaffOrdersArgs, staffOrdersExecute } from "./staffSetOrders";
@@ -27,5 +27,5 @@ context.registerAction<PeepAnimationFrameArgs>("pe-animationframepeep", (args) =
 context.registerAction<GuestFlagsArgs>("pe-guestflags", (args) => queryPermissionCheck(args), (args) => guestFlagsExecute(args.args));
 context.registerAction<GuestConditionArgs>("pe-guestcondition", (args) => queryPermissionCheck(args), (args) => guestConditionExecute(args.args));
 context.registerAction<GuestItemRemoveArgs>("pe-guestitemremove", (args) => queryPermissionCheck(args), (args) => guestItemRemoveExecute(args.args));
-context.registerAction<PeepRotateArgs>("pe-peeprotate", (args) => queryPermissionCheck(args), (args) => peepRotateExecute(args.args));
+context.registerAction("pe-peeprotate", (args) => queryPermissionCheck(args), () => peepRotateExecute());
 }

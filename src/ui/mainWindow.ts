@@ -20,7 +20,7 @@ const mainWindowColour = {
     primary: store<Colour>(getColour("pe.main.primary", Colour.DarkYellow)),
     secondary: store<Colour>(getColour("pe.main.secondary", Colour.DarkYellow)),
     tertiary: store<Colour>(Colour.DarkYellow),
-}
+};
 
 const stickySideWindow = store<boolean>(context.sharedStorage.get("pe.sticky", true));
 const theme = store<Theme>(context.sharedStorage.get("pe.theme", "rct1"));
@@ -36,7 +36,7 @@ export const mainWindow = tabwindow({
     padding: 5,
     onOpen: () => { main = getWindow("Peep Editor"); side = getWindow("Properties"); },
     onClose: () => sideWindow.close(),
-    onUpdate: () => {if (main) {main.colours = [mainWindowColour.primary.get(), mainWindowColour.secondary.get(), mainWindowColour.tertiary.get()]}},
+    onUpdate: () => {if (main) {main.colours = [mainWindowColour.primary.get(), mainWindowColour.secondary.get(), mainWindowColour.tertiary.get()];}},
     tabs: [
         tab({ //main tab
             image: lensIcon,
@@ -162,17 +162,17 @@ export const mainWindow = tabwindow({
                             colourPicker({
                                 colour: mainWindowColour.primary,
                                 onChange: (colour) => {
-                                    mainWindowColour.primary.set(colour)
-                                    if (main) main.colours = [mainWindowColour.primary.get(), mainWindowColour.secondary.get(), mainWindowColour.tertiary.get()]
-                                    setColour("pe.main.primary", colour)
+                                    mainWindowColour.primary.set(colour);
+                                    if (main) main.colours = [mainWindowColour.primary.get(), mainWindowColour.secondary.get(), mainWindowColour.tertiary.get()];
+                                    setColour("pe.main.primary", colour);
                                 }
                             }),
                             colourPicker({
                                 colour: mainWindowColour.secondary,
                                 onChange: (colour) => {
-                                    mainWindowColour.secondary.set(colour)
-                                    if (main) main.colours = [mainWindowColour.primary.get(), mainWindowColour.secondary.get(), mainWindowColour.tertiary.get()]
-                                    setColour("pe.main.secondary", colour)
+                                    mainWindowColour.secondary.set(colour);
+                                    if (main) main.colours = [mainWindowColour.primary.get(), mainWindowColour.secondary.get(), mainWindowColour.tertiary.get()];
+                                    setColour("pe.main.secondary", colour);
                                 }
                             }),
                         ]),
@@ -182,18 +182,18 @@ export const mainWindow = tabwindow({
                                 colour: sideWindowColour.primary,
                                 onChange: (colour) => {
                                     sideWindowColour.primary.set(colour);
-                                    if (side) side.colours = [sideWindowColour.primary.get(), sideWindowColour.secondary.get(), sideWindowColour.tertiary.get()]
-                                    setColour("pe.side.primary", colour)
+                                    if (side) side.colours = [sideWindowColour.primary.get(), sideWindowColour.secondary.get(), sideWindowColour.tertiary.get()];
+                                    setColour("pe.side.primary", colour);
                                 }
                             }),
                             colourPicker({
                                 colour: sideWindowColour.secondary,
                                 onChange: (colour) => {
                                     sideWindowColour.secondary.set(colour);
-                                    if (side) side.colours = [sideWindowColour.primary.get(), sideWindowColour.secondary.get(), sideWindowColour.tertiary.get()]
-                                    setColour("pe.side.secondary", colour)
+                                    if (side) side.colours = [sideWindowColour.primary.get(), sideWindowColour.secondary.get(), sideWindowColour.tertiary.get()];
+                                    setColour("pe.side.secondary", colour);
                                     ProgressBarColour.background.set(colour);
-                                    setColour("pe.bar.background", colour)
+                                    setColour("pe.bar.background", colour);
                                 }
                             }),
                         ]),
@@ -203,21 +203,21 @@ export const mainWindow = tabwindow({
                                 colour: ProgressBarColour.bar.safe,
                                 onChange: (colour) => {
                                     ProgressBarColour.bar.safe.set(colour);
-                                    setColour("pe.bar.safe", colour)
+                                    setColour("pe.bar.safe", colour);
                                 }
                             }),
                             colourPicker({
                                 colour: ProgressBarColour.bar.warning,
                                 onChange: (colour) => {
                                     ProgressBarColour.bar.warning.set(colour);
-                                    setColour("pe.bar.warning", colour)
+                                    setColour("pe.bar.warning", colour);
                                 }
                             }),
                             colourPicker({
                                 colour: ProgressBarColour.bar.danger,
                                 onChange: (colour) => {
                                     ProgressBarColour.bar.danger.set(colour);
-                                    setColour("pe.bar.danger", colour)
+                                    setColour("pe.bar.danger", colour);
                                 }
                             }),
                         ]),
@@ -227,15 +227,15 @@ export const mainWindow = tabwindow({
                             width: "60%",
                             padding: {top: 4, left: "1w"},
                             onClick: () => {
-                                const c = Colour.DarkYellow
-                                setColour("pe.main.primary", c)
-                                setColour("pe.main.secondary", c)
-                                setColour("pe.side.primary", c)
-                                setColour("pe.side.secondary", c)
-                                setColour("pe.bar.safe", Colour.BrightGreen)
-                                setColour("pe.bar.warning", Colour.Yellow)
-                                setColour("pe.bar.danger", Colour.BrightRed)
-                                setColour("pe.bar.background", c)
+                                const c = Colour.DarkYellow;
+                                setColour("pe.main.primary", c);
+                                setColour("pe.main.secondary", c);
+                                setColour("pe.side.primary", c);
+                                setColour("pe.side.secondary", c);
+                                setColour("pe.bar.safe", Colour.BrightGreen);
+                                setColour("pe.bar.warning", Colour.Yellow);
+                                setColour("pe.bar.danger", Colour.BrightRed);
+                                setColour("pe.bar.background", c);
                                 mainWindowColour.primary.set(c);
                                 mainWindowColour.secondary.set(c);
                                 sideWindowColour.primary.set(c);
@@ -278,7 +278,7 @@ export const mainWindow = tabwindow({
 			]
 		}),
     ]
-})
+});
 
 function versionString(): string
 {
@@ -333,7 +333,7 @@ function buttonStyle(): WidgetCreator<FlexiblePosition>[] {
                     onClick: () => {
                         if (!model._isFrozen.get() && !model._isStatic.get()) {
                             model._setMotion("frozen");
-                            return
+                            return;
                         }
                         if (model._isFrozen.get() && model._isStatic.get()) {
                             model._setMotion("static");
@@ -345,12 +345,12 @@ function buttonStyle(): WidgetCreator<FlexiblePosition>[] {
                         }
                     }
                 }),
-            ]
+            ];
     }
 
     function flagButtonImage(f: boolean, s: boolean): number {
         if (f && s) return 5179;
         if (!f && s) return 5181;
         if (!f && !s) return 5180;
-        return 5179
+        return 5179;
     }

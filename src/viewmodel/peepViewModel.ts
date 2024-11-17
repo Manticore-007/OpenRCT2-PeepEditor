@@ -7,7 +7,7 @@ import { getAllRides, ParkRide } from "../objects/parkRides";
 import { guestConditionExecuteArgs } from "../actions/guestCondition";
 const windowTitle = "Peep Editor";
 
-type PeepMotion = "frozen" | "static" | "moving"
+type PeepMotion = "frozen" | "static" | "moving";
 
 export class peepViewModel
 {
@@ -164,8 +164,8 @@ export class peepViewModel
 
     _select(peep: Guest | Staff): void
     {
-        let pickedGuest: Entity[] = [];
-        pickedGuest[0] = peep
+        const pickedGuest: Entity[] = [];
+        pickedGuest[0] = peep;
         this._allGuests.set(pickedGuest);
         this._selectedPeep.set(<Guest|Staff>pickedGuest[0]);
         this._name.set(peep.name);
@@ -178,7 +178,7 @@ export class peepViewModel
     {
         if (pressed) {
             this._allGuests.set(map.getAllEntities("guest"));
-            const firstGuest = <Guest>this._allGuests.get()[0]
+            const firstGuest = <Guest>this._allGuests.get()[0];
             this._isPicking.set(false);
             this._name.set(`{GREEN}All guests selected`);
             this._availableAnimations.set(firstGuest.availableAnimations);
@@ -190,7 +190,7 @@ export class peepViewModel
             this._name.set(windowTitle);
             this._availableAnimations.set([]);
             this._animationLength.set(0);
-        };
+        }
         this._x.set(0);
         this._y.set(0);
         this._z.set(0);
@@ -248,7 +248,7 @@ export class peepViewModel
             guests.forEach(guest => {
                 context.executeAction("pe-guestflags", guestFlagsExecuteArgs(guest.id, this._isStatic.get(), "positionFrozen"));
                 context.executeAction("pe-guestflags", guestFlagsExecuteArgs(guest.id, this._isFrozen.get(), "animationFrozen"));
-            })
+            });
         }
         else {
             const peep = this._selectedPeep.get();
