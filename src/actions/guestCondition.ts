@@ -1,6 +1,6 @@
 import { debug } from "../helpers/logger";
 
-type GuestCondition = "happiness" | "energy" | "hunger" | "thirst" | "nausea" | "toilet" | "mass"
+type GuestCondition = "happiness" | "energy" | "hunger" | "thirst" | "nausea" | "toilet" | "mass";
 
 export interface GuestConditionArgs {
     id: number | null;

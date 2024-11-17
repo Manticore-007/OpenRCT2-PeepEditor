@@ -1,10 +1,10 @@
 import { Colour } from "openrct2-flexui";
 
-export function setColour(string: string, colour: Colour) {
+export function setColour(string: string, colour: Colour): void {
     return context.sharedStorage.set(string, colour);
 }
 
-export function getColour(string: string, colour: Colour) {
+export function getColour(string: string, colour: Colour): Colour {
     return context.sharedStorage.get(string, colour);
 }
 

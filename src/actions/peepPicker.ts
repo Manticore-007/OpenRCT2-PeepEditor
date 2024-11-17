@@ -33,7 +33,7 @@ export function togglePeepPicker(isPressed: boolean, onPick: (peep: Guest | Staf
 
             if (peepToSelect)
             {
-                console.log("isFrozen: " + model._isFrozen.get() + ", isStatic: " + model._isStatic.get())
+                console.log("isFrozen: " + model._isFrozen.get() + ", isStatic: " + model._isStatic.get());
                 onPick(peepToSelect);
                 ui.tool?.cancel();
             }

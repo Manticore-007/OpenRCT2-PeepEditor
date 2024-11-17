@@ -19,7 +19,7 @@ export const ProgressBarColour = {
   },
   foreground: store<Colour>(Colour.DarkYellow),
   background: store<Colour>(getColour("pe.bar.background", Colour.DarkYellow)),
-}
+};
 
 
 interface ProgressBarParams extends ElementParams {

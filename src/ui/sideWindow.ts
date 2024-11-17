@@ -51,7 +51,7 @@ const copyPasteButtons: WidgetCreator<FlexiblePosition> =
 				padding: { top: 0, left: -2, bottom: -2, right: -2 },
 			})
 		]
-	})
+	});
 
 let main: Window | undefined;
 let side: Window | undefined;
@@ -62,7 +62,7 @@ export const sideWindowColour = {
     primary: store<Colour>(getColour("pe.side.primary", Colour.DarkYellow)),
     secondary: store<Colour>(getColour("pe.side.secondary", Colour.DarkYellow)),
     tertiary: store<Colour>(Colour.DarkYellow),
-}
+};
 
 export const sideWindow = tabwindow({
 	title: "Properties",
@@ -73,10 +73,8 @@ export const sideWindow = tabwindow({
 	onTabChange: () => ui.tool?.cancel(),
 	onUpdate: () => {
 		isSideWindowSticky();
-			if (side) {
-				side.colours = [sideWindowColour.primary.get(), sideWindowColour.secondary.get(), sideWindowColour.tertiary.get()]
-			}
-		},
+		if (side) {side.colours = [sideWindowColour.primary.get(), sideWindowColour.secondary.get(), sideWindowColour.tertiary.get()];}
+	},
 	onOpen: () => {
 		main = getWindow(model._name.get());
 		side = getWindow("Properties");
@@ -125,7 +123,7 @@ export const sideWindow = tabwindow({
 										model._allGuests.get().forEach(guest => {
 										if (guest !== undefined)
 										context.executeAction("pe-movepeep", movePeepExecuteArgs(guest.id, "x", (adjustment*multiplier)));
-									})
+									});
 								}
 								})
 							]),
@@ -150,7 +148,7 @@ export const sideWindow = tabwindow({
 										model._allGuests.get().forEach(guest => {
 										if (guest !== undefined)
 										context.executeAction("pe-movepeep", movePeepExecuteArgs(guest.id, "y", (adjustment*multiplier)));
-									})
+									});
 								}
 								})
 							]),
@@ -175,7 +173,7 @@ export const sideWindow = tabwindow({
 										model._allGuests.get().forEach(guest => {
 										if (guest !== undefined)
 										context.executeAction("pe-movepeep", movePeepExecuteArgs(guest.id, "z", (adjustment*multiplier)));
-									})
+									});
 									}
 								})
 							]),
@@ -358,11 +356,11 @@ export const sideWindow = tabwindow({
 								colour: model._tshirtColour,
 								visibility: compute(model._isGuest, model._allGuestsSelected, (g, a) => g || a ? "visible" : "none"),
 								onChange: (colour) => {
-									const allGuests = model._allGuests.get()
+									const allGuests = model._allGuests.get();
 									if (allGuests !== undefined) {
 										allGuests.forEach( guest => {
 										context.executeAction("pe-colourpeep", colourPeepExecuteArgs(guest.id, colour, "tshirtColour"));
-										})
+										});
 									}
 								}
 							}),
@@ -377,11 +375,11 @@ export const sideWindow = tabwindow({
 								colour: model._trousersColour,
 								visibility: compute(model._isGuest, model._allGuestsSelected, (g, a) => g || a ? "visible" : "none"),
 								onChange: (colour) => {
-									const allGuests = model._allGuests.get()
+									const allGuests = model._allGuests.get();
 									if (allGuests !== undefined) {
 										allGuests.forEach( guest => {
 										context.executeAction("pe-colourpeep", colourPeepExecuteArgs(guest.id, colour, "trousersColour"));
-										})
+										});
 									}
 								}
 							}),
@@ -398,11 +396,11 @@ export const sideWindow = tabwindow({
 								disabled: compute(model._hasHat, model._allGuestsSelected, (h, a) => !h && !a),
 								visibility: compute(model._isGuest, model._allGuestsSelected, (g, a) => g || a ? "visible" : "none"),
 								onChange: (colour) => {
-									const allGuests = model._allGuests.get()
+									const allGuests = model._allGuests.get();
 									if (allGuests !== undefined) {
 										allGuests.forEach( guest => {
 										context.executeAction("pe-colourpeep", colourPeepExecuteArgs(guest.id, colour, "hatColour"));
-									})
+									});
 								}
 								}
 							}),
@@ -419,11 +417,11 @@ export const sideWindow = tabwindow({
 								disabled: compute(model._hasBalloon, model._allGuestsSelected, (b, a) => !b && !a),
 								visibility: compute(model._isGuest, model._allGuestsSelected, (g, a) => g || a ? "visible" : "none"),
 								onChange: (colour) => {
-									const allGuests = model._allGuests.get()
+									const allGuests = model._allGuests.get();
 									if (allGuests !== undefined) {
 										allGuests.forEach( guest => {
 										context.executeAction("pe-colourpeep", colourPeepExecuteArgs(guest.id, colour, "balloonColour"));
-									})
+									});
 								}
 								}
 							}),
@@ -441,11 +439,11 @@ export const sideWindow = tabwindow({
 								visibility: compute(model._isGuest, model._allGuestsSelected, (g, a) => g || a ? "visible" : "none"),
 								padding: { right: 9 },
 								onChange: (colour) => {
-									const allGuests = model._allGuests.get()
+									const allGuests = model._allGuests.get();
 									if (allGuests !== undefined) {
 										allGuests.forEach( guest => {
 										context.executeAction("pe-colourpeep", colourPeepExecuteArgs(guest.id, colour, "umbrellaColour"));
-									})
+									});
 								}
 								}
 							})
@@ -474,11 +472,11 @@ export const sideWindow = tabwindow({
 								items: compute(model._availableAnimations, a => a.map(animationList)),
 								selectedIndex: compute(model._animation, a => model._availableGuestAnimations.get().indexOf(<GuestAnimation>a)),
 								onChange: (index) => {
-									const allGuests = model._allGuests.get()
+									const allGuests = model._allGuests.get();
 									if (allGuests !== undefined) {
 										allGuests.forEach( guest => {
 										context.executeAction("pe-animationpeep", animationPeepExecuteArgs(guest.id, model._availableAnimations.get()[index]));
-									})
+									});
 								}
 								}
 							}),
@@ -1111,7 +1109,7 @@ export const sideWindow = tabwindow({
 						onClick: () => {
 							const guest = <Guest>model._selectedPeep.get();
 							const item = model._item.get();
-							const rideId = model._rideId.get()
+							const rideId = model._rideId.get();
 							if (guest.hasItem({type: item}) && item !== "voucher" && item !== "photo1" && item !== "photo2" && item !== "photo3" && item !== "photo4"){
 								ui.showError("Guest already", "has this item");
 								return;
@@ -1213,7 +1211,7 @@ function drawImage(g: GraphicsContext, image: number, property?: keyof Guest): v
 
 function createFlagCheckboxWidget(flag: PeepFlags, padding?: Padding | undefined): WidgetCreator<FlexiblePosition> {
 	const capitalizedFlag = flag.charAt(0).toUpperCase() + flag.slice(1);
-	const splitFlag = capitalizedFlag.replace(/([A-Z])/g, ' $1')
+	const splitFlag = capitalizedFlag.replace(/([A-Z])/g, ' $1');
 	return checkbox({
 		text: splitFlag,
 		visibility: compute(model._isGuest, model._allGuestsSelected, (g, a) => g || a ? "visible" : "none"),
@@ -1222,7 +1220,7 @@ function createFlagCheckboxWidget(flag: PeepFlags, padding?: Padding | undefined
 		onChange: (checked) => {
 			model._allGuests.get().forEach(guest => {
 				if (guest !== undefined) context.executeAction("pe-guestflags", guestFlagsExecuteArgs(guest.id, checked, flag));
-			})
+			});
 		}
 	});
 }
@@ -1383,12 +1381,12 @@ function itemList(): string[] {
 	return itemNameArray;
 }
 
-function isSideWindowSticky() {
+function isSideWindowSticky(): void {
 	if (context.sharedStorage.get("pe.sticky"))
 		if (main && side) {
 			side.x = main.x + main.width;
 			side.y = main.y;
 		}
-		else return
+		else return;
 }
 
