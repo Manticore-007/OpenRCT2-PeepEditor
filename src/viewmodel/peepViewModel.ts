@@ -1,23 +1,23 @@
-import { Colour, compute, store } from "openrct2-flexui";
+import { compute, store } from "openrct2-flexui";
 import { guestFlagsExecuteArgs } from "../actions/guestFlags";
 import { guestItemTypeList } from "../helpers/guestItemTypes";
 import { namePeepExecuteArgs } from "../actions/peepNamer";
 import { debug } from "../helpers/logger";
 import { getAllRides, ParkRide } from "../objects/parkRides";
 import { guestConditionExecuteArgs } from "../actions/guestCondition";
-const windowTitle = "Peep Editor";
 
 type PeepMotion = "frozen" | "static" | "moving";
+
+const windowTitle = "Peep Editor";
 
 export class peepViewModel
 {
     //general
 
+    readonly _allGuests = store<Entity[]>([]);
     readonly _selectedPeep = store<Guest | Staff | undefined>(undefined);
     readonly _name = store<string>(windowTitle);
-    readonly _destination = store<CoordsXYZ | null>(null);
     readonly _energy = store<number>(0);
-    readonly _energyTarget = store<number>(96);
     readonly _x = store<number>(0);
     readonly _y = store<number>(0);
     readonly _z = store<number>(0);
@@ -34,7 +34,6 @@ export class peepViewModel
     readonly _availableCostumes = store<StaffCostume[]>([]);
     readonly _costume = store<StaffCostume>("none");
     readonly _orders = store<number>(0);
-    readonly _patrolArea = store<PatrolArea | null>(null);
     readonly _availableStaffAnimations = store<StaffAnimation[]>([]);
 
 
@@ -53,25 +52,13 @@ export class peepViewModel
     readonly _thirst = store<number>(255);
     readonly _toilet = store<number>(0);
     readonly _mass = store<number>(0);
-    readonly _minIntensity = store<number>(0);
-    readonly _maxIntensity = store<number>(0);
-    readonly _nauseaTolerance = store<number>(0);
-    readonly _cash = store<number>(0);
-    readonly _isInPark = store<boolean>(false);
-    readonly _isLost = store<boolean>(false);
-    readonly _lostCountdown = store<number>(0);
-    readonly _thoughts = store<Thought[]>([]);
     readonly _items = store<GuestItem[]>([]);
     readonly _hasItem = store<boolean[]>([]);
     readonly _hasHat = store<boolean>(false);
     readonly _hasBalloon = store<boolean>(false);
     readonly _hasUmbrella = store<boolean>(false);
     readonly _availableGuestAnimations = store<GuestAnimation[]>([]);
-    readonly _flags = store<number>(0);
     readonly _photo1RideName = store<string>("");
-    readonly _photo2RideId = store<number>();
-    readonly _photo3RideId = store<number>();
-    readonly _photo4RideId = store<number>();
     readonly _item = store<GuestItemType>("balloon");
     readonly _rideId = store<number>(0);
     readonly _voucher = store<Voucher>(<Voucher>{type: "voucher", voucherType: "entry_free"});
@@ -81,8 +68,6 @@ export class peepViewModel
 
     //custom
 
-    readonly _image = store<number>(6430 | (Colour.SalmonPink) << 19 | (Colour.SalmonPink << 24) | (0b111 << 29));
-    readonly _peepFace = store<ImageAnimation>();
     readonly _isGuest = store<boolean>(false);
     readonly _isStaff = store<boolean>(false);
     readonly _isHandyman = store<boolean>(false);
@@ -94,7 +79,6 @@ export class peepViewModel
     readonly _isStatic = store<boolean>(false);
     readonly _isPeepSelected = compute(this._selectedPeep, p => p ? true : false);
     readonly _allGuestsSelected = store<boolean>(false);
-    readonly _allGuests = store<Entity[]>([]);
     readonly _rideList = store<ParkRide[]>([]);
     readonly _selectedRide = store<[ParkRide, number] | null>(null);
 
@@ -265,7 +249,7 @@ export class peepViewModel
             const staff = <Staff>peep;
             this._availableCostumes.set(staff.availableCostumes);
             if (staff.energy === 0) {
-                context.executeAction("pe-guestfeeling", guestConditionExecuteArgs(peep.id, 96, "energy"));
+                context.executeAction("pe-guestcondition", guestConditionExecuteArgs(peep.id, 96, "energy"));
                 context.executeAction("pe-guestflags", guestFlagsExecuteArgs(staff.id, true, "positionFrozen"));
                 context.executeAction("pe-guestflags", guestFlagsExecuteArgs(staff.id, true, "animationFrozen"));
                 debug("Old freezing method converted to new method");
