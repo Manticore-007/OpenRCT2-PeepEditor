@@ -30,7 +30,10 @@ export const mainWindow = tabwindow({
     height: 230,
     colours: [mainWindowColour.primary.get(), mainWindowColour.secondary.get(), mainWindowColour.tertiary.get()],
     onOpen: () => { main = getWindow("Peep Editor"); side = getWindow("Properties"); },
-    onClose: () => sideWindow.close(),
+    onClose: () => {
+        ui.tool?.cancel();
+        sideWindow.close();
+    },
     onUpdate: () => {if (main) {main.colours = [mainWindowColour.primary.get(), mainWindowColour.secondary.get(), mainWindowColour.tertiary.get()];}},
     tabs: [
         tab({ //main tab
@@ -98,7 +101,7 @@ export const mainWindow = tabwindow({
                     })
                 ]),
                 label({
-                    text: "{BLACK}Manticore-007 © 2022-2024",
+                    text: "{BLACK}Manticore-007 © 2022-2025",
                     height: 0,
                     padding: [-5, 0, 10, 0],
                     alignment: "centred"

@@ -511,7 +511,7 @@ export const sideWindow = tabwindow({
 					content: [
 						checkbox({
 							text: "{INLINE_SPRITE}{247}{19}{0}{0} Sweep foothpaths",
-							visibility: compute(model._isHandyman, h => h ? "visible" : "none"),
+							visibility: compute(model._isHandyman, model._isStaff, (h, s) => h && s ? "visible" : "none"),
 							padding: {left: 10},
 							isChecked: compute(model._orders, o => (o & (1 << 0)) !== 0),
 							onChange: (checked) => {
@@ -523,7 +523,7 @@ export const sideWindow = tabwindow({
 						}),
 						checkbox({
 							text: "{INLINE_SPRITE}{248}{19}{0}{0} Water gardens",
-							visibility: compute(model._isHandyman, h => h ? "visible" : "none"),
+							visibility: compute(model._isHandyman, model._isStaff, (h, s) => h && s ? "visible" : "none"),
 							padding: {left: 10},
 							isChecked: compute(model._orders, o => (o & (1 << 1)) !== 0),
 							onChange: (checked) => {
@@ -535,7 +535,7 @@ export const sideWindow = tabwindow({
 						}),
 						checkbox({
 							text: "{INLINE_SPRITE}{249}{19}{0}{0} Empty litter bins",
-							visibility: compute(model._isHandyman, h => h ? "visible" : "none"),
+							visibility: compute(model._isHandyman, model._isStaff, (h, s) => h && s ? "visible" : "none"),
 							padding: {left: 10},
 							isChecked: compute(model._orders, o => (o & (1 << 2)) !== 0),
 							onChange: (checked) => {
@@ -547,7 +547,7 @@ export const sideWindow = tabwindow({
 						}),
 						checkbox({
 							text: "{INLINE_SPRITE}{250}{19}{0}{0} Mow grass",
-							visibility: compute(model._isHandyman, h => h ? "visible" : "none"),
+							visibility: compute(model._isHandyman, model._isStaff, (h, s) => h && s ? "visible" : "none"),
 							padding: {left: 10},
 							isChecked: compute(model._orders, o => (o & (1 << 3)) !== 0),
 							onChange: (checked) => {
@@ -559,7 +559,7 @@ export const sideWindow = tabwindow({
 						}),
 						checkbox({
 							text: "{INLINE_SPRITE}{251}{19}{0}{0} Inspect rides",
-							visibility: compute(model._isMechanic, m => m ? "visible" : "none"),
+							visibility: compute(model._isMechanic, model._isStaff, (m, s) => m && s ? "visible" : "none"),
 							padding: {left: 10},
 							isChecked: compute(model._orders, o => (o & (1 << 0)) !== 0),
 							onChange: (checked) => {
@@ -571,7 +571,7 @@ export const sideWindow = tabwindow({
 						}),
 						checkbox({
 							text: "{INLINE_SPRITE}{252}{19}{0}{0} Fix Rides",
-							visibility: compute(model._isMechanic, m => m ? "visible" : "none"),
+							visibility: compute(model._isMechanic, model._isStaff, (m, s) => m && s ? "visible" : "none"),
 							padding: {left: 10},
 							isChecked: compute(model._orders, o => (o & (1 << 1)) !== 0),
 							onChange: (checked) => {
@@ -583,7 +583,7 @@ export const sideWindow = tabwindow({
 						}),
 						checkbox({
 							text: "{INLINE_SPRITE}{253}{19}{0}{0} Surveilling park",
-							visibility: compute(model._isSecurity, s => s ? "visible" : "none"),
+							visibility: compute(model._isSecurity, model._isStaff, (sc, s) => sc && s ? "visible" : "none"),
 							padding: {left: 10},
 							isChecked: twoway(securityOrders),
 							onChange: (checked) => {
