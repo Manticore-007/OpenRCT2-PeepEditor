@@ -103,6 +103,7 @@ export class PeepViewModel
     {
         this._selectedPeep.set(null);
         this._name.set(windowTitle);
+        this._allGuestsSelected.set(false);
     }
 
     _dispose(): void
