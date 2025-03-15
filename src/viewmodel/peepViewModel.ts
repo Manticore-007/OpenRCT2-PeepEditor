@@ -5,17 +5,18 @@ import { namePeepExecuteArgs } from "../actions/peepNamer";
 import { debug } from "../helpers/logger";
 import { getAllRides, ParkRide } from "../objects/parkRides";
 import { guestConditionExecuteArgs } from "../actions/guestCondition";
+import { getWindow } from "../helpers/getWindow";
 
 type PeepMotion = "frozen" | "static" | "moving";
 
 const windowTitle = "Peep Editor";
 
-export class peepViewModel
+export class PeepViewModel
 {
     //general
 
     readonly _allGuests = store<Entity[]>([]);
-    readonly _selectedPeep = store<Guest | Staff | undefined>(undefined);
+    readonly _selectedPeep = store<Guest | Staff | null>(null);
     readonly _name = store<string>(windowTitle);
     readonly _energy = store<number>(0);
     readonly _x = store<number>(0);
@@ -45,9 +46,7 @@ export class peepViewModel
     readonly _hatColour = store<number>(19);
     readonly _umbrellaColour = store<number>(19);
     readonly _happiness = store<number>(0);
-    readonly _happinessTarget = store<number>(0);
     readonly _nausea = store<number>(0);
-    readonly _nauseaTarget = store<number>(0);
     readonly _hunger = store<number>(255);
     readonly _thirst = store<number>(255);
     readonly _toilet = store<number>(0);
@@ -102,39 +101,8 @@ export class peepViewModel
 
     _reset(): void
     {
-        this._selectedPeep.set(undefined);
-        this._isFrozen.set(false);
-        this._isStatic.set(false);
+        this._selectedPeep.set(null);
         this._name.set(windowTitle);
-        this._availableAnimations.set([]);
-        this._x.set(0);
-        this._y.set(0);
-        this._z.set(0);
-        this._happiness.set(0);
-        this._energy.set(0);
-        this._hunger.set(255);
-        this._thirst.set(255);
-        this._nausea.set(0);
-        this._toilet.set(0);
-        this._mass.set(0);
-        this._isStaff.set(false);
-        this._isGuest.set(false);
-        this._colour.set(100);
-        this._animation.set("walking");
-        this._animationLength.set(1);
-        this._isHandyman.set(false);
-        this._isMechanic.set(false);
-        this._isSecurity.set(false);
-        this._isEntertainer.set(false);
-        this._orders.set(0);
-        this._item.set("balloon");
-        this._rideId.set(0);
-        this._voucher.set(<Voucher>{type: "voucher", voucherType: "entry_free"});
-        this._voucherType.set("entry_free");
-        this._voucherItem.set("balloon");
-        this._allGuestsSelected.set(false);
-        this._allGuests.set([]);
-        this._costume.set(<StaffCostume>"none");
     }
 
     _dispose(): void
@@ -152,7 +120,6 @@ export class peepViewModel
         pickedGuest[0] = peep;
         this._allGuests.set(pickedGuest);
         this._selectedPeep.set(<Guest|Staff>pickedGuest[0]);
-        this._name.set(peep.name);
         this._animation.set(peep.animation);
         this._availableAnimations.set(peep.availableAnimations);
         this._conversionCheck(peep);
@@ -180,26 +147,19 @@ export class peepViewModel
         this._z.set(0);
         this._isGuest.set(false);
         this._isStaff.set(false);
-        this._selectedPeep.set(undefined);
+        this._selectedPeep.set(null);
         this._allGuestsSelected.set(pressed);
         this._tshirtColour.set(19);
         this._trousersColour.set(19);
         this._hatColour.set(19);
         this._balloonColour.set(19);
         this._umbrellaColour.set(19);
-        this._happiness.set(0);
-        this._energy.set(0);
-        this._hunger.set(255);
-        this._thirst.set(255);
-        this._nausea.set(0);
-        this._toilet.set(0);
-        this._mass.set(0);
     }
     
     _locate(): void
     {
         const peep = this._selectedPeep.get();
-        if (peep !== undefined) {
+        if (peep) {
             ui.mainViewport.scrollTo({ x: peep.x, y: peep.y, z: peep.z });
         }
     }
@@ -207,15 +167,12 @@ export class peepViewModel
     _rename(): void
     {
         const peep = this._selectedPeep.get();
-        if (peep !== undefined){
+        if (peep){
             ui.showTextInput({
                 title: textInputTitle(peep),
                 description: peepTypeQuery(peep),
                 initialValue: `${peep.name}`,
-                callback: text => {
-                    this._name.set(text);
-                    context.executeAction("pe-namepeep", namePeepExecuteArgs(peep.id, text));
-                },
+                callback: text => context.executeAction("pe-namepeep", namePeepExecuteArgs(peep.id, text))
             });
         }
     }
@@ -236,7 +193,7 @@ export class peepViewModel
         }
         else {
             const peep = this._selectedPeep.get();
-            if (peep !== undefined) {
+            if (peep) {
                 context.executeAction("pe-guestflags", guestFlagsExecuteArgs(peep.id, this._isStatic.get(), "positionFrozen"));
                 context.executeAction("pe-guestflags", guestFlagsExecuteArgs(peep.id, this._isFrozen.get(), "animationFrozen"));
             }
@@ -257,28 +214,15 @@ export class peepViewModel
         }
     }
 
-    _onGameTickExecuted(): void {
+    _onGameTickExecuted(): void
+    {
         const peep = this._selectedPeep.get();
         const staff = <Staff>peep;
         const guest = <Guest>peep;
         let hasItemArray: boolean[] = [];
-        if (peep !== undefined)
+        if (peep)
         {
-			if (peep.peepType !== "guest" && peep.peepType !== "staff") {
-				ui.showError("Peep no longer", "available");
-				this._reset();
-			}
-			else{
-				hasItemArray = [];
-				this._animation.set(peep.animation);
-				this._animationFrame.set(peep.animationOffset);
-				this._animationLength.set(peep.animationLength);
-				if (peep.peepType === "guest")
-				guestItemTypeList.forEach(item => {
-					hasItemArray.push(guest.hasItem({type: item}));
-				});
-				this._hasItem.set(hasItemArray);
-			}
+            this._name.set(peep.name);
             this._x.set(peep.x);
             this._y.set(peep.y);
             this._z.set(peep.z);
@@ -286,21 +230,22 @@ export class peepViewModel
             this._availableAnimations.set(peep.availableAnimations);
             peep.getFlag("animationFrozen") ? this._isFrozen.set(true) : this._isFrozen.set(false);
             peep.getFlag("positionFrozen") ? this._isStatic.set(true) : this._isStatic.set(false);
-            if (peep.peepType === "staff"){
+            if (peep.peepType === "staff")
+            {
                 this._isStaff.set(true); this._isGuest.set(false);
                 this._colour.set(staff.colour);
                 this._staffType.set(staff.staffType);
-                staff.staffType === "handyman"? this._isHandyman.set(true) : this._isHandyman.set(false);
-                staff.staffType === "mechanic"? this._isMechanic.set(true) : this._isMechanic.set(false);
-                staff.staffType === "security"? this._isSecurity.set(true) : this._isSecurity.set(false);
-                staff.staffType === "entertainer"? this._isEntertainer.set(true) : this._isEntertainer.set(false);
+                staff.staffType === "handyman" ? this._isHandyman.set(true) : this._isHandyman.set(false);
+                staff.staffType === "mechanic" ? this._isMechanic.set(true) : this._isMechanic.set(false);
+                staff.staffType === "security" ? this._isSecurity.set(true) : this._isSecurity.set(false);
+                staff.staffType === "entertainer" ? this._isEntertainer.set(true) : this._isEntertainer.set(false);
                 this._availableCostumes.set(staff.availableCostumes);
                 this._costume.set(<StaffCostume>staff.costume);
                 this._availableStaffAnimations.set(staff.availableAnimations);
                 this._orders.set(staff.orders);
             }
             if (peep.peepType === "guest")
-                {
+            {
                 this._isGuest.set(true); this._isStaff.set(false);
                 this._tshirtColour.set(guest.tshirtColour);
                 this._trousersColour.set(guest.trousersColour);
@@ -318,14 +263,36 @@ export class peepViewModel
                 guest.hasItem({ type: "hat" }) ? this._hasHat.set(true) : this._hasHat.set(false);
                 guest.hasItem({ type: "balloon" }) ? this._hasBalloon.set(true) : this._hasBalloon.set(false);
                 guest.hasItem({ type: "umbrella" }) ? this._hasUmbrella.set(true) : this._hasUmbrella.set(false);
-                if (guest.hasItem({ type: "photo1" })) {
-                    guest.items.forEach((item, index) => {
-                        if (item.type === "photo1"){
+                if (guest.hasItem({ type: "photo1" }))
+                {
+                    guest.items.forEach((item, index) =>
+                    {
+                        if (item.type === "photo1")
+                        {
                             const photo = <GuestPhoto>guest.items[index];
                             this._photo1RideName.set(map.getRide(photo.rideId).name);
                         }
                     });
                 }
+            }
+            if (peep.peepType !== "guest" && peep.peepType !== "staff")
+            {
+                ui.showError("Peep no longer", "available");
+                this._reset();
+                getWindow("Properties")?.close();
+            }
+            else
+            {
+                hasItemArray = [];
+                this._animation.set(peep.animation);
+                this._animationFrame.set(peep.animationOffset);
+                this._animationLength.set(peep.animationLength);
+                if (peep.peepType === "guest")
+                    guestItemTypeList.forEach(item =>
+                    {
+                        hasItemArray.push(guest.hasItem({ type: item }));
+                    });
+                this._hasItem.set(hasItemArray);
             }
         }
     }
@@ -352,4 +319,4 @@ function textInputTitle(peep: Guest | Staff): string {
 }
     
 
-export const model = new peepViewModel;
+export const model = new PeepViewModel;

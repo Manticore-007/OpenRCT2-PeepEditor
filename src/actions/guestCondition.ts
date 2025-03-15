@@ -1,5 +1,3 @@
-import { debug } from "../helpers/logger";
-
 type GuestCondition = "happiness" | "energy" | "hunger" | "thirst" | "nausea" | "toilet" | "mass";
 
 export interface GuestConditionArgs {
@@ -16,7 +14,6 @@ export function guestConditionExecute(args: GuestConditionArgs): GameActionResul
     if (args.condition === "hunger" || args.condition === "thirst")
     guest[args.condition] -= args.adjustment;
     else guest[args.condition] += args.adjustment;
-    debug(`Guest ${args.condition} set to "${guest[args.condition]}`);
     return {};
 }
 

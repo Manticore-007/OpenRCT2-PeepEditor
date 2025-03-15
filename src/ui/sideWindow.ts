@@ -29,8 +29,8 @@ const securityOrders = store<boolean>(true);
 const entertainerOrders = store<boolean>(true);
 
 const pointingFingerIcon: ImageAnimation = { frameBase: 5318, frameCount: 8, frameDuration: 2, };
-const mapIcon: ImageAnimation = { frameBase: 5192, frameCount: 1, frameDuration: 4, offset: { x: 4, y: 1 }};
-const eyeIcon: ImageAnimation = { frameBase: 29428, frameCount: 1, frameDuration: 4, offset: { x: 1, y: -1 }};
+const mapIcon: ImageAnimation = { frameBase: context.getIcon("map"), frameCount: 1, frameDuration: 4, offset: { x: 4, y: 1 }};
+const eyeIcon: ImageAnimation = { frameBase: context.getIcon("view"), frameCount: 1, frameDuration: 4, offset: { x: 1, y: -1 }};
 
 const itemsIcon: number = 5326;
 const moodIcon: number = 5288;
@@ -43,12 +43,14 @@ const copyPasteButtons: WidgetCreator<FlexiblePosition> =
 				width: 24,
 				image: "copy",
 				padding: { top: 2, left: -2, bottom: -2, right: -2 },
+				disabled: true
 			}),
 			button({	//paste
 				height: 24,
 				width: 24,
 				image: "paste",
 				padding: { top: 0, left: -2, bottom: -2, right: -2 },
+				disabled: true
 			})
 		]
 	});
@@ -83,7 +85,6 @@ export const sideWindow = tabwindow({
 	onClose: () => {
 		ui.tool?.cancel();
 		model._reset();
-		model._dispose();
 		multiplier = 1;
 	},
 	tabs: [
@@ -97,18 +98,12 @@ export const sideWindow = tabwindow({
 						text: "Kinematics",
 						spacing: 0,
 						content: [
-							label({
-								text: "Here you can set a peep's position on the map",
-								alignment: "centred",
-								visibility: compute(model._isPeepSelected, model._allGuestsSelected, (p, a) => !p && !a ? "visible" : "none"),
-							}),
 							horizontal([
 								label({
 									text: "X position:",
 									height: 13,
 									padding: {top: 1, bottom: 1, left: 10},
 									disabled: compute(model._isFrozen, model._isStatic, (f, s) => !f && !s),
-									visibility: compute(model._isPeepSelected, model._allGuestsSelected, (p, a) => p || a ? "visible" : "none"),
 								}),
 								spinner({
 									minimum: compute(model._allGuestsSelected, a => a ? -(2^31) : 0 ),
@@ -118,7 +113,6 @@ export const sideWindow = tabwindow({
 									padding: {top: 1, right: 10,  bottom: 1},
 									disabled: compute(model._isFrozen, model._isStatic, (f, s) => !f && !s),
 									disabledMessage: "Peep not static",
-									visibility: compute(model._isPeepSelected, model._allGuestsSelected, (p, a) => p || a ? "visible" : "none"),
 									onChange: (_, adjustment: number) => {
 										model._allGuests.get().forEach(guest => {
 										if (guest !== undefined)
@@ -133,7 +127,6 @@ export const sideWindow = tabwindow({
 									height: 13,
 									padding: {top: 1, bottom: 1, left: 10},
 									disabled: compute(model._isFrozen, model._isStatic, (f, s) => !f && !s),
-									visibility: compute(model._isPeepSelected, model._allGuestsSelected, (p, a) => p || a ? "visible" : "none"),
 								}),
 								spinner({
 									minimum: compute(model._allGuestsSelected, a => a ? -(2^31) : 0 ),
@@ -143,7 +136,6 @@ export const sideWindow = tabwindow({
 									padding: {top: 1, right: 10,  bottom: 1},
 									disabled: compute(model._isFrozen, model._isStatic, (f, s) => !f && !s),
 									disabledMessage: "Peep not static",
-									visibility: compute(model._isPeepSelected, model._allGuestsSelected, (p, a) => p || a ? "visible" : "none"),
 									onChange: (_, adjustment: number) => {
 										model._allGuests.get().forEach(guest => {
 										if (guest !== undefined)
@@ -158,7 +150,6 @@ export const sideWindow = tabwindow({
 									height: 13,
 									padding: {top: 1, bottom: 1, left: 10},
 									disabled: compute(model._isFrozen, model._isStatic, (f, s) => !f && !s),
-									visibility: compute(model._isPeepSelected, model._allGuestsSelected, (p, a) => p || a ? "visible" : "none"),
 								}),
 								spinner({
 									minimum: compute(model._allGuestsSelected, a => a ? -(2^31) : 0 ),
@@ -168,7 +159,6 @@ export const sideWindow = tabwindow({
 									padding: {top: 1, right: 10,  bottom: 1},
 									disabled: compute(model._isFrozen, model._isStatic, (f, s) => !f && !s),
 									disabledMessage: "Peep not static",
-									visibility: compute(model._isPeepSelected, model._allGuestsSelected, (p, a) => p || a ? "visible" : "none"),
 									onChange: (_, adjustment: number) => {
 										model._allGuests.get().forEach(guest => {
 										if (guest !== undefined)
@@ -198,8 +188,8 @@ export const sideWindow = tabwindow({
 									disabledMessage: "Peep not moving",
 									onChange: (_, adjustment: number) => {
 										const peep = model._selectedPeep.get();
-										if (peep !== undefined)
-											context.executeAction("pe-guestcondition", guestConditionExecuteArgs(peep.id, (adjustment * multiplier), "mass"));
+										if (peep)
+											context.executeAction("pe-guestcondition", guestConditionExecuteArgs(peep.id, (adjustment * multiplier), "energy"));
 									}
 								})
 							]),
@@ -208,9 +198,8 @@ export const sideWindow = tabwindow({
 								width: 24,
 								padding: {left: "1w", top: 5},
 								border: false,
-								image: 5169,
+								image: "rotate_arrow",
 								tooltip: "Rotate a static peep",
-								visibility: compute(model._isPeepSelected, model._allGuestsSelected, (p, a) => p || a ? "visible" : "none"),
 								disabled: compute(model._isStatic, s => !s),
 								onClick: () => context.executeAction("pe-peeprotate", peepRotateExecuteArgs())
 							}),
@@ -223,14 +212,12 @@ export const sideWindow = tabwindow({
 						text: "Multiplier:",
 						height: 13,
 						padding: ["1w", 0, 7, "1w"],
-						visibility: compute(model._isPeepSelected, model._allGuestsSelected, (p, a) => p || a ? "visible" : "none"),
 					}),
 					dropdown({
 						padding: ["1w", 15, 7, -10],
 						width: "25%",
 						height: 13,
 						items: ["1x", "10x", "100x", "1000x"],
-						visibility: compute(model._isPeepSelected, model._allGuestsSelected, (p, a) => p || a ? "visible" : "none"),
 						onChange: (number: number) => {
 							if (number === 0) multiplier = 1;
 							if (number === 1) multiplier = 10;
@@ -248,17 +235,6 @@ export const sideWindow = tabwindow({
 			content: [
 				horizontal([
 				vertical([
-				groupbox({
-					text: "Appearance",
-					visibility: compute(model._isPeepSelected, model._allGuestsSelected, (p, a) => !p && !a ? "visible" : "none"),
-					content:[						
-						label({
-							text: "Here you can set how a a peep looks",
-							alignment: "centred",
-							visibility: compute(model._isPeepSelected, model._allGuestsSelected, (p, a) => !p && !a ? "visible" : "none"),
-						}),
-					]
-				}),
 				groupbox({
 					text: "Staff member appearance",
 					spacing: 2,
@@ -292,13 +268,13 @@ export const sideWindow = tabwindow({
 							label({
 								text: "Costume:",
 								height: 13,
-								visibility: compute(model._isPeepSelected, model._isEntertainer, (p, e) => (p && e) ? "visible" : "none"),
+								visibility: compute(model._isEntertainer, e => e ? "visible" : "none"),
 								padding: { left: 10 },
 							}),
 							dropdown({
 								height: 13,
 								width: "55%",
-								visibility: compute(model._isPeepSelected, model._isEntertainer, (p, e) => (p && e) ? "visible" : "none"),
+								visibility: compute(model._isEntertainer, e => e ? "visible" : "none"),
 								disabledMessage: "Not available",
 								padding: { right: 10 },
 								items: costumeList,
@@ -315,23 +291,23 @@ export const sideWindow = tabwindow({
 							label({
 								text: "Uniform colour:",
 								height: 13,
-								visibility: compute(model._isPeepSelected, model._costume, model._isGuest, (p, c, g) => (p && (c === "none" || c === "handyman" || c === "mechanic" || c === "security1" || c === "security2") && !g) ? "visible" : "none"),
+								visibility: compute(model._isGuest, (g) => !g ? "visible" : "none"),
 								padding: { left: 10 },
 							}),
 							textbox({
 								text: compute(model._colour, c => colourList[c] || ""),
 								width: "51%",
 								height: 13,
-								visibility: compute(model._isPeepSelected, model._costume, model._isGuest, (p, c, g) => (p && (c === "none" || c === "handyman" || c === "mechanic" || c === "security1" || c === "security2") && !g) ? "visible" : "none"),
+								visibility: compute(model._isGuest, (g) => !g ? "visible" : "none"),
 								disabled: true,
 							}),
 							colourPicker({
 								colour: compute(model._colour, c => (c) || 0),
-								visibility: compute(model._isPeepSelected, model._costume, model._isGuest, (p, c, g) => (p && (c === "none" || c === "handyman" || c === "mechanic" || c === "security1" || c === "security2") && !g) ? "visible" : "none"),
+								visibility: compute(model._isGuest, (g) => !g ? "visible" : "none"),
 								padding: { right: 10 },
 								onChange: (colour) => {
 									const peep = model._selectedPeep.get();
-									if (peep !== undefined) {
+									if (peep) {
 										context.executeAction("pe-colourpeep", colourPeepExecuteArgs(peep.id, colour));
 									}
 								}
@@ -452,21 +428,16 @@ export const sideWindow = tabwindow({
 				}),
 				groupbox({
 					text: "Animation",
-					visibility: compute(model._isPeepSelected, model._allGuestsSelected, ( p, a ) => p || a ? "visible" : "none"),
 					content: [
 						horizontal([
 							label({
 								text: "Animation:",
 								height: 13,
-								disabled: compute(model._isPeepSelected, model._allGuestsSelected, ( p, a ) => !p && !a),
-								visibility: compute(model._isPeepSelected, model._allGuestsSelected, ( p, a ) => p || a ? "visible" : "none"),
 								padding: { left: 10 },
 							}),
-							dropdown({	//No selection and Guest
+							dropdown({	//Guest
 								height: 13,
 								width: "55%",
-								disabled: compute(model._isPeepSelected, model._allGuestsSelected, ( p, a ) => !p && !a),
-								disabledMessage: "Not available",
 								padding: { right: 10, },
 								visibility: compute(model._isGuest, model._allGuestsSelected, (g, a) => g || a ? "visible" : "none"),
 								items: compute(model._availableAnimations, a => a.map(animationList)),
@@ -483,15 +454,13 @@ export const sideWindow = tabwindow({
 							dropdown({ 	//Staff
 								height: 13,
 								width: "55%",
-								disabled: compute(model._isPeepSelected, p => !p),
-								disabledMessage: "Not available",
 								padding: { right: 10, },
 								visibility: compute(model._isStaff, s => (s)? "visible" : "none"),
 								items: compute(model._availableAnimations, a => a.map(animationList)),
 								selectedIndex: compute(model._animation, a => model._availableStaffAnimations.get().indexOf(<StaffAnimation>a)),
 								onChange: (index) => {
 									const peep = model._selectedPeep.get();
-									if (peep !== undefined){
+									if (peep){
 										context.executeAction("pe-animationpeep", animationPeepExecuteArgs(peep.id, model._availableAnimations.get()[index]));
 									}
 								}
@@ -501,15 +470,13 @@ export const sideWindow = tabwindow({
 							label({
 								text: compute(model._animationLength, l => `Frame: (max: ${l-1})` || "Frame:"),
 								height: 13,
-								visibility: compute(model._isPeepSelected, model._allGuestsSelected, ( p, a ) => p || a ? "visible" : "none"),
-								disabled: compute(model._isPeepSelected, model._allGuestsSelected, model._isFrozen, (p, a, f) => (!p && !a) || !f),
+								disabled: compute(model._isFrozen, f => !f),
 								padding: { left: 10 },
 							}),
 							spinner({
 								height: 13,
 								width: "55%",
-								visibility: compute(model._isPeepSelected, model._allGuestsSelected, ( p, a ) => p || a ? "visible" : "none"),
-								disabled: compute(model._isPeepSelected, model._allGuestsSelected, model._isFrozen, (p, a, f) => (!p && !a) || !f),
+								disabled: compute(model._isFrozen, f => !f),
 								disabledMessage: "Peep not frozen",
 								padding: { right: 10 },
 								value: model._animationFrame,
@@ -517,7 +484,7 @@ export const sideWindow = tabwindow({
 								wrapMode: "wrap",
 								onChange: (value, adjustment) => {
 									const peep = model._selectedPeep.get();
-									if (peep !== undefined){
+									if (peep){
 										context.executeAction("pe-animationframepeep", animationFramePeepExecuteArgs(peep.id, value, adjustment));
 									}
 								}
@@ -536,17 +503,6 @@ export const sideWindow = tabwindow({
 			spacing: 0,
 			content: [
 				horizontal([
-				groupbox({
-					text: "Options",
-					visibility: compute(model._isPeepSelected, model._allGuestsSelected, (p, a) => !p && !a? "visible" : "none"),
-					content: [
-						label({
-							text: "Here you can set staff orders or guest flags",
-							alignment: "centred",
-							visibility: compute(model._isPeepSelected, model._allGuestsSelected, (p, a) => !p && !a? "visible" : "none"),
-						})
-					]
-				}),
 				groupbox ({
 					text: "Staff orders",
 					spacing: 2,
@@ -560,7 +516,7 @@ export const sideWindow = tabwindow({
 							isChecked: compute(model._orders, o => (o & (1 << 0)) !== 0),
 							onChange: (checked) => {
 								const peep = model._selectedPeep.get();
-								if (peep !== undefined) {
+								if (peep) {
 									context.executeAction("pe-stafforders", staffOrdersExecuteArgs(peep.id, checked, (1 << 0)));
 								}
 							}
@@ -572,7 +528,7 @@ export const sideWindow = tabwindow({
 							isChecked: compute(model._orders, o => (o & (1 << 1)) !== 0),
 							onChange: (checked) => {
 								const peep = model._selectedPeep.get();
-								if (peep !== undefined) {
+								if (peep) {
 									context.executeAction("pe-stafforders", staffOrdersExecuteArgs(peep.id, checked, (1 << 1)));
 								}
 							}
@@ -584,7 +540,7 @@ export const sideWindow = tabwindow({
 							isChecked: compute(model._orders, o => (o & (1 << 2)) !== 0),
 							onChange: (checked) => {
 								const peep = model._selectedPeep.get();
-								if (peep !== undefined) {
+								if (peep) {
 									context.executeAction("pe-stafforders", staffOrdersExecuteArgs(peep.id, checked, (1 << 2)));
 								}
 							}
@@ -596,7 +552,7 @@ export const sideWindow = tabwindow({
 							isChecked: compute(model._orders, o => (o & (1 << 3)) !== 0),
 							onChange: (checked) => {
 								const peep = model._selectedPeep.get();
-								if (peep !== undefined) {
+								if (peep) {
 									context.executeAction("pe-stafforders", staffOrdersExecuteArgs(peep.id, checked, (1 << 3)));
 								}
 							}
@@ -608,7 +564,7 @@ export const sideWindow = tabwindow({
 							isChecked: compute(model._orders, o => (o & (1 << 0)) !== 0),
 							onChange: (checked) => {
 								const peep = model._selectedPeep.get();
-								if (peep !== undefined) {
+								if (peep) {
 									context.executeAction("pe-stafforders", staffOrdersExecuteArgs(peep.id, checked, (1 << 0)));
 								}
 							}
@@ -620,7 +576,7 @@ export const sideWindow = tabwindow({
 							isChecked: compute(model._orders, o => (o & (1 << 1)) !== 0),
 							onChange: (checked) => {
 								const peep = model._selectedPeep.get();
-								if (peep !== undefined) {
+								if (peep) {
 									context.executeAction("pe-stafforders", staffOrdersExecuteArgs(peep.id, checked, (1 << 1)));
 								}
 							}
@@ -717,11 +673,6 @@ export const sideWindow = tabwindow({
 								padding: -2,
 								visibility: compute(model._isStaff, s => s ? "visible" : "none"),
 							}),
-							label({
-								text: "Here you can set a guest's mood",
-								alignment: "centred",
-								visibility: compute(model._isPeepSelected, model._allGuestsSelected, (p, a) => !p && !a ? "visible" : "none"),
-							}),
 						]
 					}),
 					groupbox({
@@ -764,7 +715,7 @@ export const sideWindow = tabwindow({
 									visibility: compute(model._isGuest, g => g ? "visible" : "none"),
 									onChange: (_, adjustment: number) => {
 										const peep = model._selectedPeep.get();
-										if (peep !== undefined)
+										if (peep)
 											context.executeAction("pe-guestcondition", guestConditionExecuteArgs(peep.id, (adjustment * multiplier), "happiness"));
 									}
 								})
@@ -794,7 +745,7 @@ export const sideWindow = tabwindow({
 									visibility: compute(model._isGuest, g => g ? "visible" : "none"),
 									onChange: (_, adjustment: number) => {
 										const peep = model._selectedPeep.get();
-										if (peep !== undefined)
+										if (peep)
 											context.executeAction("pe-guestcondition", guestConditionExecuteArgs(peep.id, (adjustment * multiplier), "energy"));
 									}
 								})
@@ -824,7 +775,7 @@ export const sideWindow = tabwindow({
 									visibility: compute(model._isGuest, g => g ? "visible" : "none"),
 									onChange: (_, adjustment: number) => {
 										const peep = model._selectedPeep.get();
-										if (peep !== undefined)
+										if (peep)
 											context.executeAction("pe-guestcondition", guestConditionExecuteArgs(peep.id, (adjustment * multiplier), "hunger"));
 									}
 								})
@@ -854,7 +805,7 @@ export const sideWindow = tabwindow({
 									visibility: compute(model._isGuest, g => g ? "visible" : "none"),
 									onChange: (_, adjustment: number) => {
 										const peep = model._selectedPeep.get();
-										if (peep !== undefined)
+										if (peep)
 											context.executeAction("pe-guestcondition", guestConditionExecuteArgs(peep.id, (adjustment * multiplier), "thirst"));
 									}
 								})
@@ -884,7 +835,7 @@ export const sideWindow = tabwindow({
 									visibility: compute(model._isGuest, g => g ? "visible" : "none"),
 									onChange: (_, adjustment: number) => {
 										const peep = model._selectedPeep.get();
-										if (peep !== undefined)
+										if (peep)
 											context.executeAction("pe-guestcondition", guestConditionExecuteArgs(peep.id, (adjustment * multiplier), "nausea"));
 									}
 								})
@@ -914,7 +865,7 @@ export const sideWindow = tabwindow({
 									visibility: compute(model._isGuest, g => g ? "visible" : "none"),
 									onChange: (_, adjustment: number) => {
 										const peep = model._selectedPeep.get();
-										if (peep !== undefined)
+										if (peep)
 											context.executeAction("pe-guestcondition", guestConditionExecuteArgs(peep.id, (adjustment * multiplier), "toilet"));
 									}
 								})
@@ -944,7 +895,7 @@ export const sideWindow = tabwindow({
 									visibility: compute(model._isGuest, g => g ? "visible" : "none"),
 									onChange: (_, adjustment: number) => {
 										const peep = model._selectedPeep.get();
-										if (peep !== undefined)
+										if (peep)
 											context.executeAction("pe-guestcondition", guestConditionExecuteArgs(peep.id, (adjustment * multiplier), "mass"));
 									}
 								})
@@ -1171,9 +1122,7 @@ export function openWindowRemoveItem(item: GuestItemType): void {
 					height: 14,
 					text: "Cancel",
 					padding: [0, 4],
-					onClick: () => {
-						removeItemWindow.close();
-					}
+					onClick: () => removeItemWindow.close()
 				}),
 			])
 		]
