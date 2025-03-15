@@ -28,11 +28,11 @@ export function openWindowRemovePeep(peep: Staff | Guest): void {
 					text: "Yes",
 					padding: [0, 4],
 					onClick: () => {
-						if (peep !== undefined)
+						if (peep)
 							context.executeAction("pe-removepeep", removePeepExecuteArgs(peep.id));
 						removePeepWindow.close();
                         sideWindow.close();
-						model._selectedPeep.set(undefined);
+						model._selectedPeep.set(null);
 					}
 				}),
 				button({

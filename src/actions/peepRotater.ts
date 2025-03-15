@@ -10,7 +10,7 @@ export function peepRotateExecute(): GameActionResult
         allGuests.forEach(entity => {
             const peep = <Guest|Staff>entity;
             if (peep.direction !== direction) peep.direction = direction;
-            peep.direction = (peep.direction + 1) % numDirections;
+            peep.direction = <Direction>((peep.direction + 1) % numDirections);
         });
     }
 

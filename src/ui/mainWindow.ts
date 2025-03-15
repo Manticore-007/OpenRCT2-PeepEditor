@@ -1,18 +1,14 @@
 import { button, checkbox, Colour, colourPicker, compute, dropdown, FlexiblePosition, groupbox, horizontal, label, store, tab, tabwindow, toggle, twoway, vertical, viewport, WidgetCreator } from "openrct2-flexui";
 import { model } from "../viewmodel/peepViewModel";
 import { sideWindow, sideWindowColour } from "./sideWindow";
-import { togglePeepPicker } from "../actions/peepPicker";
+import { togglePeepPicker } from "../services/peepPicker";
 import { isDevelopment, pluginVersion } from "../helpers/environment";
 import { getWindow } from "../helpers/getWindow";
 import { ProgressBarColour } from "../helpers/progressBar";
 import { getColour, setColour, setSticky, setTheme, Theme } from "../helpers/settings";
 import { openWindowRemovePeep } from "./removePeepWindow";
 
-const deleteIcon: number = 5165;
-const locateIcon: number = 5167;
-const nameIcon: number = 5168;
-const allGuestsIcon: number = 5193;
-const lensIcon: ImageAnimation = { frameBase: 29401, frameCount: 1, frameDuration: 4, offset: { x: 4, y: 1 } };
+const lensIcon: ImageAnimation = { frameBase: context.getIcon("search"), frameCount: 1, frameDuration: 4, offset: { x: 4, y: 1 } };
 const infoIcon: ImageAnimation = { frameBase: 5367, frameCount: 8, frameDuration: 4, };
 const gearIcon: ImageAnimation = { frameBase: 5201, frameCount: 4, frameDuration: 4, };
 
@@ -33,7 +29,6 @@ export const mainWindow = tabwindow({
     width: 260,
     height: 230,
     colours: [mainWindowColour.primary.get(), mainWindowColour.secondary.get(), mainWindowColour.tertiary.get()],
-    padding: 5,
     onOpen: () => { main = getWindow("Peep Editor"); side = getWindow("Properties"); },
     onClose: () => sideWindow.close(),
     onUpdate: () => {if (main) {main.colours = [mainWindowColour.primary.get(), mainWindowColour.secondary.get(), mainWindowColour.tertiary.get()];}},
@@ -59,7 +54,7 @@ export const mainWindow = tabwindow({
                             button({	//nametag
                                 height: 24,
                                 width: 24,
-                                image: nameIcon,
+                                image: "rename",
                                 tooltip: "Give the selected peep a new name, even a longer name than usual",
                                 disabled: compute(model._isPeepSelected, model._allGuestsSelected, (p, a) => !p || a),
                                 padding: { top: -2, left: -2, bottom: -2, right: -2 },
@@ -68,7 +63,7 @@ export const mainWindow = tabwindow({
                             button({	//locator
                                 height: 24,
                                 width: 24,
-                                image: locateIcon,
+                                image: "locate",
                                 tooltip: "Focus the main viewport on the selected peep",
                                 disabled: compute(model._isPeepSelected, model._allGuestsSelected, (p, a) => !p || a),
                                 padding: { top: -2, left: -2, bottom: -2, right: -2 },
@@ -77,26 +72,26 @@ export const mainWindow = tabwindow({
                             button({	//trashcan
                                 height: 24,
                                 width: 24,
-                                image: deleteIcon,
+                                image: "demolish",
                                 tooltip: "Remove the selected peep from existence",
                                 disabled: compute(model._isPeepSelected, model._allGuestsSelected, (p, a) => !p || a),
                                 padding: { top: -2, left: -2, bottom: -2, right: -2 },
                                 onClick: () => {
                                     const peep = model._selectedPeep.get();
-                                    if (peep !== undefined)
+                                    if (peep)
                                         openWindowRemovePeep(peep);
                                 }
                             }),
                             toggle({	//all guests
                                 height: 24,
                                 width: 24,
-                                image: allGuestsIcon,
+                                image: "guests",
                                 tooltip: "Select all guests on the map",
                                 padding: { top: -2, left: -2, bottom: -2, right: -2 },
                                 isPressed: twoway(model._allGuestsSelected),
                                 onChange: (pressed) => {
                                     model._selectAllGuests(pressed);
-                                    if (!pressed) sideWindow.close();
+                                    pressed ? sideWindow.open() : sideWindow.close();
                                 }
                             })
                             )
@@ -293,7 +288,7 @@ function buttonStyle(): WidgetCreator<FlexiblePosition>[] {
                 button({	//red traffic light
                     width: 14,
                     height: 14,
-                    image: compute(model._isFrozen, model._isStatic, (f, s) => f && s ? 29376 : 29374),
+                    image: compute(model._isFrozen, model._isStatic, (f, s) => f && s ? "rct1_close_on" : "rct1_close_off"),
                     tooltip: "Completely stop a peep from moving",
                     padding: { top: 0, right: -2, bottom: -2, left: 2 },
                     border: true,
@@ -304,7 +299,7 @@ function buttonStyle(): WidgetCreator<FlexiblePosition>[] {
                 button({	//yellow traffic light
                     width: 14,
                     height: 14,
-                    image: compute(model._isFrozen, model._isStatic, (f, s) => !f && s ? 29380 : 29378),
+                    image: compute(model._isFrozen, model._isStatic, (f, s) => !f && s ? "rct1_test_on" : "rct1_test_off"),
                     tooltip: "Stop a peep in place, animation still works",
                     padding: { top: -2, right: -2, bottom: -2, left: 2 },
                     border: true,
@@ -315,7 +310,7 @@ function buttonStyle(): WidgetCreator<FlexiblePosition>[] {
                 button({	//green traffic light
                     width: 14,
                     height: 14,
-                    image: compute(model._isFrozen, model._isStatic, (f, s) => !f && !s ? 29384 : 29382),
+                    image: compute(model._isFrozen, model._isStatic, (f, s) => !f && !s ? "rct1_open_on" : "rct1_open_off"),
                     tooltip: "Let the peep roam freely around",
                     padding: { top: -2, right: -2, bottom: -2, left: 2 },
                     border: true,
@@ -348,9 +343,9 @@ function buttonStyle(): WidgetCreator<FlexiblePosition>[] {
             ];
     }
 
-    function flagButtonImage(f: boolean, s: boolean): number {
-        if (f && s) return 5179;
-        if (!f && s) return 5181;
-        if (!f && !s) return 5180;
-        return 5179;
+    function flagButtonImage(f: boolean, s: boolean): IconName {
+        if (f && s) return "closed";
+        if (!f && s) return "testing";
+        if (!f && !s) return "open";
+        return "closed";
     }
