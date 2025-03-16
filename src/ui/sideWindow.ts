@@ -291,19 +291,19 @@ export const sideWindow = tabwindow({
 							label({
 								text: "Uniform colour:",
 								height: 13,
-								visibility: compute(model._isGuest, (g) => !g ? "visible" : "none"),
+								visibility: compute(model._isStaff, s => s ? "visible" : "none"),
 								padding: { left: 10 },
 							}),
 							textbox({
 								text: compute(model._colour, c => colourList[c] || ""),
 								width: "51%",
 								height: 13,
-								visibility: compute(model._isGuest, (g) => !g ? "visible" : "none"),
+								visibility: compute(model._isStaff, s => s ? "visible" : "none"),
 								disabled: true,
 							}),
 							colourPicker({
 								colour: compute(model._colour, c => (c) || 0),
-								visibility: compute(model._isGuest, (g) => !g ? "visible" : "none"),
+								visibility: compute(model._isStaff, s => s ? "visible" : "none"),
 								padding: { right: 10 },
 								onChange: (colour) => {
 									const peep = model._selectedPeep.get();

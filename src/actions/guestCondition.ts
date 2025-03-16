@@ -10,6 +10,7 @@ export function guestConditionExecute(args: GuestConditionArgs): GameActionResul
 {
     if (args.id === null) return {};
     const entity = map.getEntity(args.id);
+    if (entity === null) return {};
     const guest = <Guest>entity;
     if (args.condition === "hunger" || args.condition === "thirst")
     guest[args.condition] -= args.adjustment;
