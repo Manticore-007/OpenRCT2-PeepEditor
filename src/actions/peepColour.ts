@@ -9,6 +9,7 @@ export interface PeepColourArgs {
 export function colourPeepExecute(args: PeepColourArgs): GameActionResult {
     if (args.id === null) return {};
     const entity = map.getEntity(args.id);
+    if (entity === null) return {};
     if (entity.type === "staff") {
         const staff = <Staff>entity;
         staff.colour = args.colour;
