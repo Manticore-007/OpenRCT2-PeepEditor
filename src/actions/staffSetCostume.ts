@@ -9,6 +9,7 @@ export function staffCostumeExecute(args: StaffCostumeArgs): GameActionResult
 {
     if (args.id === null) return {};
     const entity = map.getEntity(args.id);
+    if (entity === null) return {};
     const staff = <Staff>entity;
     staff.costume = args.costume;
     debug(`Staff costume set to "${args.costume}"`);
