@@ -34,7 +34,8 @@ export const mainWindow = tabwindow({
         ui.tool?.cancel();
         sideWindow.close();
     },
-    onUpdate: () => {if (main) {main.colours = [mainWindowColour.primary.get(), mainWindowColour.secondary.get(), mainWindowColour.tertiary.get()];}},
+    onUpdate: () => {
+        if (main) {main.colours = [ mainWindowColour.primary.get(), mainWindowColour.secondary.get(), mainWindowColour.tertiary.get()]}},
     tabs: [
         tab({ //main tab
             image: lensIcon,
@@ -93,7 +94,7 @@ export const mainWindow = tabwindow({
                                 padding: { top: -2, left: -2, bottom: -2, right: -2 },
                                 isPressed: twoway(model._allGuestsSelected),
                                 onChange: (pressed) => {
-                                    model._selectAllGuests(pressed);
+                                    model._toggleAllGuests(pressed);
                                     pressed ? sideWindow.open() : sideWindow.close();
                                 }
                             })

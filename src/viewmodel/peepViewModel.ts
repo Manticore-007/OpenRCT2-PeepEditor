@@ -120,21 +120,26 @@ export class PeepViewModel
         const pickedGuest: Entity[] = [];
         pickedGuest[0] = peep;
         this._allGuests.set(pickedGuest);
-        this._selectedPeep.set(<Guest|Staff>pickedGuest[0]);
+        this._selectedPeep.set(<Guest|Staff>this._allGuests.get()[0]);
         this._animation.set(peep.animation);
         this._availableAnimations.set(peep.availableAnimations);
         this._conversionCheck(peep);
     }
+    
+    _getAllGuests(): void
+    {
+        this._allGuests.set(map.getAllEntities("guest"));
+        const firstGuest = <Guest>this._allGuests.get()[0];
+        this._availableAnimations.set(firstGuest.availableAnimations);
+        this._animationLength.set(firstGuest.animationLength);
+    }
 
-    _selectAllGuests(pressed: boolean): void
+    _toggleAllGuests(pressed: boolean): void
     {
         if (pressed) {
-            this._allGuests.set(map.getAllEntities("guest"));
-            const firstGuest = <Guest>this._allGuests.get()[0];
+            this._getAllGuests();
             this._isPicking.set(false);
             this._name.set(`{GREEN}All guests selected`);
-            this._availableAnimations.set(firstGuest.availableAnimations);
-            this._animationLength.set(firstGuest.animationLength);
             ui.tool?.cancel();
         }
         else {
@@ -185,20 +190,11 @@ export class PeepViewModel
             case "static": this._isStatic.set(true); this._isFrozen.set(false); break;
             case "moving": this._isStatic.set(false); this._isFrozen.set(false); break;
         }
-        if (this._allGuestsSelected) {
-            const guests = this._allGuests.get();
-            guests.forEach(guest => {
+        if (this._allGuestsSelected.get()) model._getAllGuests();
+            model._allGuests.get().forEach(guest => {
                 context.executeAction("pe-guestflags", guestFlagsExecuteArgs(guest.id, this._isStatic.get(), "positionFrozen"));
                 context.executeAction("pe-guestflags", guestFlagsExecuteArgs(guest.id, this._isFrozen.get(), "animationFrozen"));
             });
-        }
-        else {
-            const peep = this._selectedPeep.get();
-            if (peep) {
-                context.executeAction("pe-guestflags", guestFlagsExecuteArgs(peep.id, this._isStatic.get(), "positionFrozen"));
-                context.executeAction("pe-guestflags", guestFlagsExecuteArgs(peep.id, this._isFrozen.get(), "animationFrozen"));
-            }
-        }
     }
 
     _conversionCheck(peep: Entity): void
