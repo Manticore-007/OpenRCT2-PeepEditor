@@ -35,26 +35,6 @@ const eyeIcon: ImageAnimation = { frameBase: context.getIcon("view"), frameCount
 const itemsIcon: number = 5326;
 const moodIcon: number = 5288;
 
-const copyPasteButtons: WidgetCreator<FlexiblePosition> =	
-	vertical({
-		content: [
-			button({	//copy
-				height: 24,
-				width: 24,
-				image: "copy",
-				padding: { top: 2, left: -2, bottom: -2, right: -2 },
-				disabled: true
-			}),
-			button({	//paste
-				height: 24,
-				width: 24,
-				image: "paste",
-				padding: { top: 0, left: -2, bottom: -2, right: -2 },
-				disabled: true
-			})
-		]
-	});
-
 let main: Window | undefined;
 let side: Window | undefined;
 
@@ -204,8 +184,7 @@ export const sideWindow = tabwindow({
 								onClick: () => context.executeAction("pe-peeprotate", peepRotateExecuteArgs())
 							}),
 						]
-					}),
-					copyPasteButtons
+					})
 				]),
 				horizontal([
 					label({
@@ -324,7 +303,7 @@ export const sideWindow = tabwindow({
 							graphics({
 								height: 16,
 								width: 16,
-								padding: { left: 9 },
+								padding: { left: 10 },
 								visibility: compute(model._isGuest, model._allGuestsSelected, (g, a) => g || a ? "visible" : "none"),
 								onDraw: function (g) { drawImage(g, 5081, "tshirtColour"); },
 							}),
@@ -343,7 +322,7 @@ export const sideWindow = tabwindow({
 							graphics({
 								height: 16,
 								width: 16,
-								padding: { top: -1, left: 5 },
+								padding: { top: -1, left: 10 },
 								visibility: compute(model._isGuest, model._allGuestsSelected, (g, a) => g || a ? "visible" : "none"),
 								onDraw: function (g) { drawImage(g, customImageFor("trousers"), "trousersColour"); },
 							}),
@@ -362,7 +341,7 @@ export const sideWindow = tabwindow({
 							graphics({
 								height: 16,
 								width: 16,
-								padding: { left: 5 },
+								padding: { left: 10 },
 								disabled: compute(model._hasHat, model._allGuestsSelected, (h, a) => !h || !a),
 								visibility: compute(model._isGuest, model._allGuestsSelected, (g, a) => g || a ? "visible" : "none"),
 								onDraw: function (g) { drawImage(g, 5079, "hatColour"); },
@@ -383,7 +362,7 @@ export const sideWindow = tabwindow({
 							graphics({
 								height: 16,
 								width: 16,
-								padding: { left: 5 },
+								padding: { left: 10 },
 								disabled: compute(model._hasBalloon, model._allGuestsSelected, (b, a) => !b && !a),
 								visibility: compute(model._isGuest, model._allGuestsSelected, (g, a) => g || a ? "visible" : "none"),
 								onDraw: function (g) { drawImage(g, 5061, "balloonColour"); },
@@ -404,7 +383,7 @@ export const sideWindow = tabwindow({
 							graphics({
 								height: 16,
 								width: 16,
-								padding: { left: 5 },
+								padding: { left: 10 },
 								disabled: compute(model._hasUmbrella, model._allGuestsSelected, (u, a) => !u && !a),
 								visibility: compute(model._isGuest, model._allGuestsSelected, (g, a) => g || a ? "visible" : "none"),
 								onDraw: function (g) { drawImage(g, 5065, "umbrellaColour"); },
@@ -413,7 +392,7 @@ export const sideWindow = tabwindow({
 								colour: model._umbrellaColour,
 								disabled: compute(model._hasUmbrella, model._allGuestsSelected, (u, a) => !u && !a),
 								visibility: compute(model._isGuest, model._allGuestsSelected, (g, a) => g || a ? "visible" : "none"),
-								padding: { right: 9 },
+								padding: { right: 10 },
 								onChange: (colour) => {
 									const allGuests = model._allGuests.get();
 									if (allGuests !== undefined) {
@@ -492,8 +471,7 @@ export const sideWindow = tabwindow({
 						]),
 					]
 				}),
-			]),
-			copyPasteButtons
+			])
 		])
 			]
 		}),
@@ -640,8 +618,7 @@ export const sideWindow = tabwindow({
 							])
 						])
 					],
-				}),
-				copyPasteButtons
+				})
 			])
 			]
 		}),
@@ -901,8 +878,7 @@ export const sideWindow = tabwindow({
 								})
 							]),
 						]
-					}),
-				copyPasteButtons
+					})
 			]),
 				horizontal([
 					label({
