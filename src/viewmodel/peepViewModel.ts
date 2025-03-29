@@ -190,7 +190,7 @@ export class PeepViewModel
             case "static": this._isStatic.set(true); this._isFrozen.set(false); break;
             case "moving": this._isStatic.set(false); this._isFrozen.set(false); break;
         }
-        if (this._allGuestsSelected.get()) model._getAllGuests();
+        if (this._allGuestsSelected.get()) this._getAllGuests();
             model._allGuests.get().forEach(guest => {
                 context.executeAction("pe-guestflags", guestFlagsExecuteArgs(guest.id, this._isStatic.get(), "positionFrozen"));
                 context.executeAction("pe-guestflags", guestFlagsExecuteArgs(guest.id, this._isFrozen.get(), "animationFrozen"));

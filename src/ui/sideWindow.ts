@@ -95,7 +95,6 @@ export const sideWindow = tabwindow({
 									disabledMessage: "Peep not static",
 									onChange: (_, adjustment: number) => {
 										model._allGuests.get().forEach(guest => {
-										if (guest !== undefined)
 										context.executeAction("pe-movepeep", movePeepExecuteArgs(guest.id, "x", (adjustment*multiplier)));
 									});
 								}
@@ -118,7 +117,6 @@ export const sideWindow = tabwindow({
 									disabledMessage: "Peep not static",
 									onChange: (_, adjustment: number) => {
 										model._allGuests.get().forEach(guest => {
-										if (guest !== undefined)
 										context.executeAction("pe-movepeep", movePeepExecuteArgs(guest.id, "y", (adjustment*multiplier)));
 									});
 								}
@@ -141,7 +139,6 @@ export const sideWindow = tabwindow({
 									disabledMessage: "Peep not static",
 									onChange: (_, adjustment: number) => {
 										model._allGuests.get().forEach(guest => {
-										if (guest !== undefined)
 										context.executeAction("pe-movepeep", movePeepExecuteArgs(guest.id, "z", (adjustment*multiplier)));
 									});
 									}
@@ -311,12 +308,10 @@ export const sideWindow = tabwindow({
 								colour: model._tshirtColour,
 								visibility: compute(model._isGuest, model._allGuestsSelected, (g, a) => g || a ? "visible" : "none"),
 								onChange: (colour) => {
-									const allGuests = model._allGuests.get();
-									if (allGuests !== undefined) {
-										allGuests.forEach( guest => {
+									if (model._allGuestsSelected.get()) model._getAllGuests();
+									model._allGuests.get().forEach(guest => {
 										context.executeAction("pe-colourpeep", colourPeepExecuteArgs(guest.id, colour, "tshirtColour"));
-										});
-									}
+									});
 								}
 							}),
 							graphics({
@@ -330,12 +325,10 @@ export const sideWindow = tabwindow({
 								colour: model._trousersColour,
 								visibility: compute(model._isGuest, model._allGuestsSelected, (g, a) => g || a ? "visible" : "none"),
 								onChange: (colour) => {
-									const allGuests = model._allGuests.get();
-									if (allGuests !== undefined) {
-										allGuests.forEach( guest => {
+									if (model._allGuestsSelected.get()) model._getAllGuests();
+									model._allGuests.get().forEach(guest => {
 										context.executeAction("pe-colourpeep", colourPeepExecuteArgs(guest.id, colour, "trousersColour"));
-										});
-									}
+									});
 								}
 							}),
 							graphics({
@@ -351,12 +344,10 @@ export const sideWindow = tabwindow({
 								disabled: compute(model._hasHat, model._allGuestsSelected, (h, a) => !h && !a),
 								visibility: compute(model._isGuest, model._allGuestsSelected, (g, a) => g || a ? "visible" : "none"),
 								onChange: (colour) => {
-									const allGuests = model._allGuests.get();
-									if (allGuests !== undefined) {
-										allGuests.forEach( guest => {
+									if (model._allGuestsSelected.get()) model._getAllGuests();
+									model._allGuests.get().forEach(guest => {
 										context.executeAction("pe-colourpeep", colourPeepExecuteArgs(guest.id, colour, "hatColour"));
 									});
-								}
 								}
 							}),
 							graphics({
@@ -372,12 +363,10 @@ export const sideWindow = tabwindow({
 								disabled: compute(model._hasBalloon, model._allGuestsSelected, (b, a) => !b && !a),
 								visibility: compute(model._isGuest, model._allGuestsSelected, (g, a) => g || a ? "visible" : "none"),
 								onChange: (colour) => {
-									const allGuests = model._allGuests.get();
-									if (allGuests !== undefined) {
-										allGuests.forEach( guest => {
+									if (model._allGuestsSelected.get()) model._getAllGuests();
+									model._allGuests.get().forEach(guest => {
 										context.executeAction("pe-colourpeep", colourPeepExecuteArgs(guest.id, colour, "balloonColour"));
 									});
-								}
 								}
 							}),
 							graphics({
@@ -394,12 +383,10 @@ export const sideWindow = tabwindow({
 								visibility: compute(model._isGuest, model._allGuestsSelected, (g, a) => g || a ? "visible" : "none"),
 								padding: { right: 10 },
 								onChange: (colour) => {
-									const allGuests = model._allGuests.get();
-									if (allGuests !== undefined) {
-										allGuests.forEach( guest => {
+									if (model._allGuestsSelected.get()) model._getAllGuests();
+									model._allGuests.get().forEach(guest => {
 										context.executeAction("pe-colourpeep", colourPeepExecuteArgs(guest.id, colour, "umbrellaColour"));
 									});
-								}
 								}
 							})
 						]),
