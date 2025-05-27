@@ -58,3 +58,5 @@ export enum colour {
 }
 
 export const colourList = Object.keys(colour).filter((value) => isNaN(Number(value)));
+
+export type GuestColours = "tshirtColour" | "trousersColour" | "hatColour" | "balloonColour" | "umbrellaColour";

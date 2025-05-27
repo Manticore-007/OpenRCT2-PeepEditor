@@ -2,7 +2,7 @@
     "name": "openrct2-peep-editor",
     "author": "Manticore-007",
     "license": "MIT",
-    "version": "25.03.15",
+    "version": "2025.05.26",
     "description": "",
     "main": "app.js",
     "scripts": {

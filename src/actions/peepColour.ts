@@ -1,3 +1,4 @@
+import { GuestColours } from "../helpers/colours";
 import { debug } from "../helpers/logger";
 
 export interface PeepColourArgs {
@@ -25,5 +26,3 @@ export function colourPeepExecute(args: PeepColourArgs): GameActionResult {
 export function colourPeepExecuteArgs(id: number | null, colour: number, property?: GuestColours): PeepColourArgs{
     return {"id": id, "colour": colour, "property": property};
 }
-
-type GuestColours = "tshirtColour" | "trousersColour" | "hatColour" | "balloonColour" | "umbrellaColour";
