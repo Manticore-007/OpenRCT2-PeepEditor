@@ -1,7 +1,8 @@
 import { getPeepById } from "../objects/peep";
 import { sideWindow } from "../ui/sideWindow";
 
-export function togglePeepPicker(isPressed: boolean, onPick: (peep: Guest | Staff) => void, onCancel: () => void): void {
+export function togglePeepPicker(isPressed: boolean, onPick: (peep: Guest | Staff) => void, onCancel: () => void): void
+{
     if (!isPressed)
     {
         ui.tool?.cancel();
@@ -15,26 +16,20 @@ export function togglePeepPicker(isPressed: boolean, onPick: (peep: Guest | Staf
         {
             let peepToSelect: Guest | Staff | undefined;
             const entityId = args.entityId;
-            if (entityId !== undefined)
+            if (entityId === undefined)
             {
-                const entity = getPeepById(entityId);
-                if (entity !== undefined)
-                {
-                    peepToSelect = entity;
-                    sideWindow.open();
-                    ui.tool?.cancel();
-                }
-                else
-                {
-                    console.log("[PeepPicker] Invalid entity id selected:", entityId);
-                }
+                return;
             }
-
-            if (peepToSelect)
+            const entity = getPeepById(entityId);
+            if (entity === undefined)
             {
-                onPick(peepToSelect);
-                ui.tool?.cancel();
+                console.log("[PeepPicker] Invalid entity id selected:", entityId);
+                return;
             }
+            peepToSelect = entity;
+            onPick(peepToSelect);
+            sideWindow.open();
+            ui.tool?.cancel();
         },
         onFinish: onCancel
     });
