@@ -1,6 +1,5 @@
 import { compute, store, WritableStore } from "openrct2-flexui";
 import { guestFlagsExecuteArgs } from "../actions/guestFlags";
-import { guestItemTypeList } from "../helpers/guestItemTypes";
 import { namePeepExecuteArgs } from "../actions/peepNamer";
 import { debug } from "../helpers/logger";
 import { getAllRides, ParkRide } from "../objects/parkRides";
@@ -294,13 +293,6 @@ export class PeepViewModel
         this._getPhotoRideName(guest, "photo2");
         this._getPhotoRideName(guest, "photo3");
         this._getPhotoRideName(guest, "photo4");
-        
-        let hasItemArray: boolean[] = [];
-        guestItemTypeList.forEach(item =>
-        {
-            hasItemArray.push(guest.hasItem({ type: item }));
-        });
-        this._hasItem.set(hasItemArray);
     }
 
     private _updateStaffInfo(staff: Staff): void

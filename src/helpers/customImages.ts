@@ -1,3 +1,6 @@
+import { Colour } from "openrct2-flexui";
+import { model } from "../viewmodel/peepViewModel";
+
 enum ImageMoniker {
     "trousers",
 }
@@ -47,3 +50,33 @@ export const initCustomSprites = (): void => {
  export const customImageFor = (image: ImageStringNames): number => {
     return imageMap[ImageMoniker[image]];
 };
+
+export function drawImage(g: GraphicsContext, image: number, property?: keyof Guest): void
+{
+    const img = g.getImage(image);
+    const guest = <Guest>model._selectedPeep.get();
+	if (model._allGuestsSelected.get())
+	{
+		if (img)
+		{
+			g.paletteId = Colour.Yellow;
+			g.tertiaryColour = Colour.Yellow;
+			g.image(img.id, 0, 0);
+		}
+	}
+    else if (property === "tshirtColour" || property === "trousersColour" || (property === "hatColour" && guest.hasItem({type: "hat"})) || (property === "umbrellaColour" && guest.hasItem({type: "umbrella"})) || (property === "balloonColour" && guest.hasItem({type: "balloon"})))
+    {
+        const colour = guest[property];
+        if (img)
+		{
+            g.paletteId = colour;
+            g.image(img.id, 0, 0);
+        }
+    }
+    else if (img)
+	{
+        g.paletteId = Colour.Void;
+		g.tertiaryColour = Colour.Yellow;
+        g.image(img.id, 0, 0);
+    }
+}
