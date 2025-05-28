@@ -4,7 +4,7 @@
 import { button, horizontal, label, tab, tabwindow, vertical,
 		twoway, compute, Colour, window, groupbox, spinner, dropdown,
 		textbox, colourPicker, graphics, checkbox, store, WidgetCreator,
-		FlexiblePosition, Parsed, Bindable, ElementVisibility, Padding,
+		FlexiblePosition, Bindable, ElementVisibility, Padding,
 		Store, WritableStore } from "openrct2-flexui";
 import { model } from "../viewmodel/peepViewModel";
 import { movePeepExecuteArgs } from "../actions/peepMover";
@@ -18,7 +18,7 @@ import { animationPeepExecuteArgs } from "../actions/peepAnimation";
 import { animationFramePeepExecuteArgs } from "../actions/peepAnimationFrame";
 import { guestFlagsExecuteArgs } from "../actions/guestFlags";
 import { percentage, progressBar, ProgressBarColour } from "../helpers/progressBar";
-import { guestItemTypeList } from "../helpers/guestItemTypes";
+import { guestItemTypeList, itemImage, itemName } from "../helpers/guestItems";
 import { guestItemRemoveExecuteArgs } from "../actions/guestItemRemove";
 import { peepRotateExecuteArgs } from "../actions/peepRotater";
 import { getWindow } from "../helpers/getWindow";
@@ -670,7 +670,7 @@ function openWindowRemoveItem(item: GuestItemType): void
 			label({
 				width: 200,
 				alignment: "centred",
-				text: `Are you sure you want to remove\n${itemName(item)}\nfrom this guest?`,
+				text: `Are you sure you want to remove\n${itemName[guestItemTypeList.indexOf(item)]}\nfrom this guest?`,
 				padding: [25, 0, 17, 0]
 			}),
 			horizontal([
@@ -749,155 +749,46 @@ function createFlagCheckboxWidget(flag: PeepFlags, padding?: Padding | undefined
 	});
 }
 
-function createItemWidget(item: GuestItemType): WidgetCreator<FlexiblePosition, Parsed<FlexiblePosition>>
-{
-	const visibleWhenGuestHasItem = compute(model._selectedPeep, model._hasItem, (p, h) => p && h[guestItemTypeList.indexOf(item)] ? "visible" : "none");
-		return(
-			horizontal([
-				graphics({
-					height: 16,
-					width: 16,
-					padding: {top: -2, bottom: -2},
-					visibility: visibleWhenGuestHasItem,
-					onDraw: function (g) { itemImage(item, g); },
-				}),
-				label({
-					text: `{BLACK}${itemName(item)}`,
-					padding: {top: -2, bottom: -2},
-					visibility: visibleWhenGuestHasItem,
-				}),
-				button({
-					text: `{RED}x`,
-					height: 10,
-					width: 10,
-					border: true,
-					padding: {top: 0, bottom: -2},
-					visibility: visibleWhenGuestHasItem,
-					onClick: () => openWindowRemoveItem(item)
-				})
-			])
-		)
-}
-
-function itemImage(item: GuestItemType, g: GraphicsContext): void {
-	switch (item) {
-		case "balloon": return drawImage(g, 5061, "balloonColour");
-		case "beef_noodles": return drawImage(g, 5097);
-		case "burger": return drawImage(g, 5067);
-		case "candyfloss": return drawImage(g, 5070);
-		case "chicken": return drawImage(g, 5085);
-		case "chips": return drawImage(g, 5068);
-		case "chocolate": return drawImage(g, 5093);
-		case "coffee": return drawImage(g, 5083);
-		case "cookie": return drawImage(g, 5105);
-		case "doughnut": return drawImage(g, 5082);
-		case "drink": return drawImage(g, 5066);
-		case "empty_bottle": return drawImage(g, 5088);
-		case "empty_bowl_blue": return drawImage(g, 5110);
-		case "empty_bowl_red": return drawImage(g, 5106);
-		case "empty_box": return drawImage(g, 5087);
-		case "empty_drink_carton": return drawImage(g, 5107);
-		case "empty_burger_box": return drawImage(g, 5073);
-		case "empty_can": return drawImage(g, 5071);
-		case "empty_cup": return drawImage(g, 5084);
-		case "empty_juice_cup": return drawImage(g, 5108);
-		case "fried_rice_noodles": return drawImage(g, 5098);
-		case "fruit_juice": return drawImage(g, 5101);
-		case "funnel_cake": return drawImage(g, 5095);
-		case "hat": return drawImage(g, 5079, "hatColour");
-		case "hot_dog": return drawImage(g, 5077);
-		case "ice_cream": return drawImage(g, 5069);
-		case "iced_tea": return drawImage(g, 5094);
-		case "lemonade": return drawImage(g, 5086);
-		case "map": return drawImage(g, 5063);
-		case "meatball_soup": return drawImage(g, 5100);
-		case "photo1": return drawImage(g, 5064);
-		case "photo2": return drawImage(g, 5089);
-		case "photo3": return drawImage(g, 5090);
-		case "photo4": return drawImage(g, 5091);
-		case "pizza": return drawImage(g, 5074);
-		case "popcorn": return drawImage(g, 5076);
-		case "pretzel": return drawImage(g, 5092);
-		case "roast_sausage": return drawImage(g, 5109);
-		case "rubbish": return drawImage(g, 5072);
-		case "soybean_milk": return drawImage(g, 5102);
-		case "sub_sandwich": return drawImage(g, 5104);
-		case "sujeonggwa": return drawImage(g, 5103);
-		case "sunglasses": return drawImage(g, 5096);
-		case "tentacle": return drawImage(g, 5078);
-		case "toffee_apple": return drawImage(g, 5080);
-		case "toy": return drawImage(g, 5062);
-		case "tshirt": return drawImage(g, 5081, "tshirtColour");
-		case "umbrella": return drawImage(g, 5065, "umbrellaColour");
-		case "voucher": return drawImage(g, 5075);
-		case "wonton_soup": return drawImage(g, 5099);
-	}
-}
-
-function itemName(item: GuestItemType): string {
-	switch (item) {
-		case "balloon": return `“${park.name}” Balloon`;
-		case "beef_noodles": return `Beef Noodles`;
-		case "burger": return `Burger`;
-		case "candyfloss": return `Candyfloss`;
-		case "chicken": return `Fried Chicken`;
-		case "chips": return `Chips`;
-		case "chocolate": return `Hot Chocolate`;
-		case "coffee": return `Coffee`;
-		case "cookie": return `Cookie`;
-		case "doughnut": return `Doughnut`;
-		case "drink": return `Drink`;
-		case "empty_bottle": return `Empty Bottle`;
-		case "empty_bowl_blue": return `Empty Bowl`;
-		case "empty_bowl_red": return `Empty Bowl`;
-		case "empty_box": return `Empty Box`;
-		case "empty_drink_carton": return `Empty Drink Carton`;
-		case "empty_burger_box": return `Empty Burger Box`;
-		case "empty_can": return `Empty Can`;
-		case "empty_cup": return `Empty Cup`;
-		case "empty_juice_cup": return `Empty Juice Cup`;
-		case "fried_rice_noodles": return `Fried Rice Noodles`;
-		case "fruit_juice": return `Fruit Juice`;
-		case "funnel_cake": return `Funnel Cake`;
-		case "hat": return `“${park.name}” Hat`;
-		case "hot_dog": return `Hot Dog`;
-		case "ice_cream": return `Ice Cream`;
-		case "iced_tea": return `Iced Tea`;
-		case "lemonade": return `Lemonade`;
-		case "map": return `Map of ${park.name}`;
-		case "meatball_soup": return `Meatball Soup`;
-		case "photo1": return `On-ride Photo 1 of ${model._photo1RideName.get()}`;
-		case "photo2": return `On-ride Photo 2 of ${model._photo2RideName.get()}`;
-		case "photo3": return `On-ride Photo 3 of ${model._photo3RideName.get()}`;
-		case "photo4": return `On-ride Photo 4 of ${model._photo4RideName.get()}`;
-		case "pizza": return `Pizza`;
-		case "popcorn": return `Popcorn`;
-		case "pretzel": return `Pretzel`;
-		case "roast_sausage": return `Roast Sausage`;
-		case "rubbish": return `Rubbish`;
-		case "soybean_milk": return `Soy Bean Milk`;
-		case "sub_sandwich": return `Sub Sandwich`;
-		case "sujeonggwa": return `Sujeonggwa`;
-		case "sunglasses": return `Sunglasses`;
-		case "tentacle": return `Tentacle`;
-		case "toffee_apple": return `Toffee Apple`;
-		case "toy": return `“${park.name}” Cuddly Toy`;
-		case "tshirt": return `“${park.name}” T-shirt`;
-		case "umbrella": return `“${park.name}” Umbrella`;
-		case "voucher": return `Voucher`;
-		case "wonton_soup": return `Wonton Soup`;
-	}
-}
-
 function carryingItems(): WidgetCreator<FlexiblePosition>[] {
 	const widgetArray: WidgetCreator<FlexiblePosition>[] = [];
-	guestItemTypeList.forEach(item => widgetArray.push(createItemWidget(item)));
+	guestItemTypeList.forEach(item =>
+		{
+			const visibleWhenGuestHasItem = compute(model._selectedGuest, g => g && g.hasItem({type: item}) ? "visible" : "none");
+			const text = compute(model._selectedGuest, model._photo2RideName, (g, p) => g && item === "photo2" ? `{BLACK}${itemName[guestItemTypeList.indexOf(item)]}${p}` : `{BLACK}${itemName[guestItemTypeList.indexOf(item)]}`)
+				
+			widgetArray.push(
+				horizontal([
+					graphics({
+						height: 16,
+						width: 16,
+						padding: {top: -2, bottom: -2},
+						visibility: visibleWhenGuestHasItem,
+						onDraw: function (g) { itemImage(item, g); },
+					}),
+					label({
+						text: text,
+						padding: {top: -2, bottom: -2},
+						visibility: visibleWhenGuestHasItem,
+					}),
+					button({
+						text: `{RED}x`,
+						height: 10,
+						width: 10,
+						border: true,
+						padding: {top: 0, bottom: -2},
+						visibility: visibleWhenGuestHasItem,
+						onClick: () => openWindowRemoveItem(item)
+					})
+				])
+			)
+		}
+	);
 	return widgetArray;
 }
 
 function itemList(): string[] {
 	const itemNameArray: string[] = [];
-	guestItemTypeList.forEach(item => itemNameArray.push(itemName(item)));
+	guestItemTypeList.forEach(item => itemNameArray.push(itemName[guestItemTypeList.indexOf(item)]));
 	return itemNameArray;
 }
 

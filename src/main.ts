@@ -4,6 +4,7 @@ import { isUiAvailable } from "./helpers/environment";
 import { debug } from "./helpers/logger";
 import { mainWindow } from "./ui/mainWindow";
 import { initSettings, menuLabel } from "./helpers/settings";
+import { initRideList } from "./helpers/initRideList";
 
 /**
  * Entry point of the plugin.
@@ -19,5 +20,6 @@ export function main(): void
 	initActions();
 	initSettings();
 	initCustomSprites();
+	initRideList();
 	ui.registerMenuItem(menuLabel.get(), () => mainWindow.open());
 }

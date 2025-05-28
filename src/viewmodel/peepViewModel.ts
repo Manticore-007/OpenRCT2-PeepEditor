@@ -1,9 +1,8 @@
 import { compute, store, WritableStore } from "openrct2-flexui";
 import { guestFlagsExecuteArgs } from "../actions/guestFlags";
-import { guestItemTypeList } from "../helpers/guestItemTypes";
 import { namePeepExecuteArgs } from "../actions/peepNamer";
 import { debug } from "../helpers/logger";
-import { getAllRides, ParkRide } from "../objects/parkRides";
+import { ParkRide } from "../objects/parkRides";
 import { GuestKey, guestKeysExecuteArgs } from "../actions/guestKeys";
 import { getWindow } from "../helpers/getWindow";
 import { GuestColours } from "../helpers/colours";
@@ -58,7 +57,6 @@ export class PeepViewModel
     readonly _toilet = store<number>(0);
     readonly _mass = store<number>(0);
     readonly _items = store<GuestItem[]>([]);
-    readonly _hasItem = store<boolean[]>([]);;
     readonly _availableGuestAnimations = store<GuestAnimation[]>([]);
     readonly _photo1RideName = store<string>("");
     readonly _photo2RideName = store<string>("");
@@ -120,17 +118,6 @@ export class PeepViewModel
     _open(): void
     {
         this._onGameTick = context.subscribe("interval.tick", () => this._onGameTickExecuted());
-        this._rideList.subscribe(r => {
-            let selection: [ParkRide, number] | null = null;
-            if (r.length > 0)
-            {
-                const previous = this._selectedRide.get();
-                const selectedIdx = (previous && previous[1] < r.length) ? previous[1] : 0;
-                selection = [ r[selectedIdx], selectedIdx ];
-            }
-            this._selectedRide.set(selection);
-        });        
-        this._rideList.set(getAllRides());
     }
 
     _close(): void
@@ -290,17 +277,7 @@ export class PeepViewModel
         this._umbrellaColour.set(guest.umbrellaColour);
         this._items.set(guest.items);
         this._availableGuestAnimations.set(guest.availableAnimations);
-        this._getPhotoRideName(guest, "photo1");
-        this._getPhotoRideName(guest, "photo2");
-        this._getPhotoRideName(guest, "photo3");
-        this._getPhotoRideName(guest, "photo4");
-        
-        let hasItemArray: boolean[] = [];
-        guestItemTypeList.forEach(item =>
-        {
-            hasItemArray.push(guest.hasItem({ type: item }));
-        });
-        this._hasItem.set(hasItemArray);
+        this._getPhotoRideNames(guest);
     }
 
     private _updateStaffInfo(staff: Staff): void
@@ -338,7 +315,7 @@ export class PeepViewModel
             this._close();
             getWindow("Properties")?.close();
         }
-}
+    }
 
     _onGameTickExecuted(): void
     {
@@ -349,44 +326,39 @@ export class PeepViewModel
         }
     }
 
-    _getPhotoRideName(guest: Guest, photoNumber: GuestItemType): void
+    _getPhotoRideNames(guest: Guest): void
     {
-        let photoRideNameStore: WritableStore<string>;
-        
-        if (guest.hasItem({ type: photoNumber }))
+        guest.items.forEach((item, index) =>
         {
-            guest.items.forEach((item, index) =>
+            if (item.type === "photo1" || item.type === "photo2" || item.type === "photo3" || item.type === "photo4")
             {
-                if (item.type === photoNumber)
+                const photo = <GuestPhoto>guest.items[index];
+                let photoRideName = map.getRide(photo.rideId).name;
+                switch (item.type)
                 {
-                    const photo = <GuestPhoto>guest.items[index];
-                    switch (photoNumber)
+                    case "photo1":
                     {
-                        case "photo1":
-                        {
-                            photoRideNameStore = this._photo1RideName;
-                            break;
-                        }
-                        case "photo2":
-                        {
-                            photoRideNameStore = this._photo2RideName;
-                            break;
-                        }
-                        case "photo3":
-                        {
-                            photoRideNameStore = this._photo3RideName;
-                            break;
-                        }
-                        case "photo4":
-                        {
-                            photoRideNameStore = this._photo4RideName;
-                            break;
-                         }
+                        this._photo1RideName.set(photoRideName);
+                        break;
                     }
-                    photoRideNameStore.set(map.getRide(photo.rideId).name);
+                    case "photo2":
+                    {
+                        this._photo2RideName.set(photoRideName);
+                        break;
+                    }
+                    case "photo3":
+                    {
+                        this._photo3RideName.set(photoRideName);
+                        break;
+                    }
+                    case "photo4":
+                    {
+                        this._photo4RideName.set(photoRideName);
+                        break;
+                    }
                 }
-            });
-        }
+            }
+        });
     }
 }
 
