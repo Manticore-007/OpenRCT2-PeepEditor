@@ -32,7 +32,7 @@ export function openWindowRemovePeep(peep: Staff | Guest): void {
 							context.executeAction("pe-removepeep", removePeepExecuteArgs(peep.id));
 						removePeepWindow.close();
                         sideWindow.close();
-						model._allGuests.set([]);
+						model._selectedPeep.set(null);
 					}
 				}),
 				button({
