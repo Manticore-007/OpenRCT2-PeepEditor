@@ -11,7 +11,7 @@ import { initRideList } from "./helpers/initRideList";
  */
 export function main(): void
 {
-	debug("\x1b[1;33m" + "Peep Editor initialized" + "\x1b[0m");
+	debug("Plugin started.");
 
 	if (!isUiAvailable)
 	{
