@@ -1,4 +1,3 @@
-import { model } from "../viewmodel/peepViewModel";
 import { drawImage } from "./customImages";
 
 export const guestItemTypeList: GuestItemType[] = [
@@ -140,10 +139,10 @@ export const itemName: string[] = [
         `Lemonade`,
         `Map of ${park.name}`,
         `Meatball Soup`,
-        `On-ride Photo (1) of ${model._photo1RideName.get()}`,
-        `On-ride Photo (2) of ${model._photo2RideName.get()}`,
-        `On-ride Photo (3) of ${model._photo3RideName.get()}`,
-        `On-ride Photo (4) of ${model._photo4RideName.get()}`,
+        `On-ride Photo (1) of`,
+        `On-ride Photo (2) of`,
+        `On-ride Photo (3) of`,
+        `On-ride Photo (4) of`,
         `Pizza`,
         `Popcorn`,
         `Pretzel`,

@@ -1,5 +1,6 @@
 import { Colour } from "openrct2-flexui";
 import { model } from "../viewmodel/peepViewModel";
+import { getColour } from "./settings";
 
 enum ImageMoniker {
     "trousers",
@@ -59,8 +60,7 @@ export function drawImage(g: GraphicsContext, image: number, property?: keyof Gu
 	{
 		if (img)
 		{
-			g.paletteId = Colour.Yellow;
-			g.tertiaryColour = Colour.Yellow;
+			g.paletteId = getColour("pe.side.secondary", Colour.LightBrown);
 			g.image(img.id, 0, 0);
 		}
 	}
@@ -76,7 +76,6 @@ export function drawImage(g: GraphicsContext, image: number, property?: keyof Gu
     else if (img)
 	{
         g.paletteId = Colour.Void;
-		g.tertiaryColour = Colour.Yellow;
         g.image(img.id, 0, 0);
     }
 }

@@ -1,4 +1,4 @@
-import { compute, store, WritableStore } from "openrct2-flexui";
+import { Colour, compute, store, WritableStore } from "openrct2-flexui";
 import { guestFlagsExecuteArgs } from "../actions/guestFlags";
 import { namePeepExecuteArgs } from "../actions/peepNamer";
 import { debug } from "../helpers/logger";
@@ -9,10 +9,12 @@ import { GuestColours } from "../helpers/colours";
 import { colourPeepExecuteArgs } from "../actions/peepColour";
 import { animationList } from "../helpers/animations";
 import { staffOrdersExecuteArgs } from "../actions/staffSetOrders";
+import { getColour } from "../helpers/settings";
 
 type PeepMotion = "frozen" | "static" | "moving";
 
 const windowTitle = "Peep Editor";
+const defaultColour = getColour("pe.side.secondary", Colour.LightBrown);
 
 export class PeepViewModel
 {
@@ -45,11 +47,11 @@ export class PeepViewModel
     //guest
 
     readonly _selectedGuest = compute(this._selectedPeep, p => <Guest>p);
-    readonly _tshirtColour = store<number>(19);
-    readonly _trousersColour = store<number>(19);
-    readonly _balloonColour = store<number>(19);
-    readonly _hatColour = store<number>(19);
-    readonly _umbrellaColour = store<number>(19);
+    readonly _tshirtColour = store<number>(defaultColour);
+    readonly _trousersColour = store<number>(defaultColour);
+    readonly _balloonColour = store<number>(defaultColour);
+    readonly _hatColour = store<number>(defaultColour);
+    readonly _umbrellaColour = store<number>(defaultColour);
     readonly _happiness = store<number>(0);
     readonly _nausea = store<number>(0);
     readonly _hunger = store<number>(255);
@@ -59,12 +61,16 @@ export class PeepViewModel
     readonly _items = store<GuestItem[]>([{type: "balloon"}]);
     readonly _hasItem = store<boolean[]>([]);
     readonly _availableGuestAnimations = store<GuestAnimation[]>([]);
+    readonly _rideId = store<number>(0);
     readonly _photo1RideName = store<string>("");
     readonly _photo2RideName = store<string>("");
     readonly _photo3RideName = store<string>("");
     readonly _photo4RideName = store<string>("");
+    readonly _photo1 = store<GuestPhoto>({type: "photo1", rideId: this._rideId.get()})
+    readonly _photo2 = store<GuestPhoto>({type: "photo2", rideId: this._rideId.get()})
+    readonly _photo3 = store<GuestPhoto>({type: "photo3", rideId: this._rideId.get()})
+    readonly _photo4 = store<GuestPhoto>({type: "photo4", rideId: this._rideId.get()})
     readonly _item = store<GuestItemType>("balloon");
-    readonly _rideId = store<number>(0);
     readonly _voucher = store<Voucher>(<Voucher>{type: "voucher", voucherType: "entry_free"});
     readonly _voucherItem = store<GuestItemType>("balloon");
     readonly _voucherType = store<VoucherType>("entry_free");
@@ -91,6 +97,7 @@ export class PeepViewModel
     readonly _visibleWhenHandyman = compute(this._isHandyman, this._isGuest, (h, g) => h && !g ? "visible" : "none");
     readonly _visibleWhenMechanic = compute(this._isMechanic, this._isGuest, (m, g) => m && !g ? "visible" : "none");
     readonly _visibleWhenNoPeepSelected = compute(this._isPeepSelected, this._allGuestsSelected, (p, a) => !p && !a ? "visible" : "none");
+    readonly _visibleRideDropdown = compute(this._item, this._voucherType, (i, v) => (i === "photo1" || i === "photo2" || i === "photo3" || i === "photo4" || (i === "voucher" && v === "ride_free")) ? "visible" : "none")
     readonly _disabledWhenNoSinglePeepSelected = compute(this._isPeepSelected, this._allGuestsSelected, (p, a) => !p || a);
     readonly _disabledWhenNoPeepSelected = compute(this._isPeepSelected, this._allGuestsSelected, (p, a) => !p && !a);
     readonly _animationItems = compute(this._availableAnimations, a => a.map(animationList));
@@ -170,11 +177,11 @@ export class PeepViewModel
         }
         this._isGuest.set(false);
         this._allGuestsSelected.set(pressed);
-        this._tshirtColour.set(19);
-        this._trousersColour.set(19);
-        this._hatColour.set(19);
-        this._balloonColour.set(19);
-        this._umbrellaColour.set(19);
+        this._tshirtColour.set(defaultColour);
+        this._trousersColour.set(defaultColour);
+        this._hatColour.set(defaultColour);
+        this._balloonColour.set(defaultColour);
+        this._umbrellaColour.set(defaultColour);
     }
     
     _locate(): void

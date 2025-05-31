@@ -14,4 +14,5 @@ export function initRides(): void
         model._selectedRide.set(selection);
     });        
     model._rideList.set(getAllRides());
+    model._rideId.set(model._rideList.get()[0]._id);
 }

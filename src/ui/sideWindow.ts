@@ -5,7 +5,7 @@ import { button, horizontal, label, tab, tabwindow, vertical,
 		twoway, compute, Colour, window, groupbox, spinner, dropdown,
 		textbox, colourPicker, graphics, checkbox, store, WidgetCreator,
 		FlexiblePosition, Bindable, ElementVisibility, Padding,
-		Store, WritableStore, 
+		WritableStore, 
 		Parsed} from "openrct2-flexui";
 import { model } from "../viewmodel/peepViewModel";
 import { movePeepExecuteArgs } from "../actions/peepMover";
@@ -576,7 +576,7 @@ export const sideWindow = tabwindow({
 						text: "Ride:",
 						height: 13,
 						padding: {bottom: 4},
-						visibility: compute(model._item, model._voucherType, (i, v) => (i === "photo1" || i === "photo2" || i === "photo3" || i === "photo4" || (i === "voucher" && v === "ride_free")) ? "visible" : "none"),
+						visibility: model._visibleRideDropdown,
 					}),
 					dropdown({
 						items: compute(model._rideList, c => c.map(r => r._ride().name)),
@@ -586,12 +586,13 @@ export const sideWindow = tabwindow({
 						height: 13,
 						padding: {bottom: 4},
 						width: "75%",
-						visibility: compute(model._item, model._voucherType, (i, v) => (i === "photo1" || i === "photo2" || i === "photo3" || i === "photo4" || (i === "voucher" && v === "ride_free")) ? "visible" : "none"),
+						visibility: model._visibleRideDropdown,
 						onChange: (idx) =>
 						{
 							const rideId = compute(model._rideList, c => c.map(r => r._ride().id));
 							model._rideId.set(rideId.get()[idx]);
 							model._voucher.set(<RideVoucher>{type: "voucher", voucherType: "ride_free", rideId: model._rideId.get()});
+							
 						}
 					})
 				]),
@@ -623,7 +624,7 @@ export const sideWindow = tabwindow({
 						visibility: model._visibleWhenSingleGuest,
 					}),
 					button({
-						text: `Add item`,
+						text: `Give item`,
 						visibility: model._visibleWhenSingleGuest,
 						height: 13,
 						width: "25%",
@@ -645,10 +646,10 @@ export const sideWindow = tabwindow({
 							switch (model._item.get())
 							{
 								case "voucher": guest.giveItem(model._voucher.get()); break;
-								case "photo1": guest.giveItem(<GuestPhoto>{type: "photo1", rideId: model._rideId.get()}); break;
-								case "photo2": guest.giveItem(<GuestPhoto>{type: "photo2", rideId: model._rideId.get()}); break;
-								case "photo3": guest.giveItem(<GuestPhoto>{type: "photo3", rideId: model._rideId.get()}); break;
-								case "photo4": guest.giveItem(<GuestPhoto>{type: "photo4", rideId: model._rideId.get()}); break;
+								case "photo1": guest.giveItem(<GuestPhoto>{type: "photo1", rideId: model._rideId.get()}); model._photo1RideName.set(map.getRide(model._rideId.get()).name); break;
+								case "photo2": guest.giveItem(<GuestPhoto>{type: "photo2", rideId: model._rideId.get()}); model._photo2RideName.set(map.getRide(model._rideId.get()).name); break;
+								case "photo3": guest.giveItem(<GuestPhoto>{type: "photo3", rideId: model._rideId.get()}); model._photo3RideName.set(map.getRide(model._rideId.get()).name); break;
+								case "photo4": guest.giveItem(<GuestPhoto>{type: "photo4", rideId: model._rideId.get()}); model._photo4RideName.set(map.getRide(model._rideId.get()).name); break;
 								default: guest.giveItem({type: item});
 							}
 						}
@@ -737,19 +738,19 @@ function createItemWidget(): WidgetCreator<FlexiblePosition, Parsed<FlexiblePosi
 			{
 				case "photo1":
 				{
-					return `${name}${p1}`
+					return `${name} ${p1}`
 				}
 				case "photo2":
 				{
-					return `${name}${p2}`
+					return `${name} ${p2}`
 				}
 				case "photo3":
 				{
-					return `${name}${p3}`
+					return `${name} ${p3}`
 				}
 				case "photo4":
 				{
-					return `${name}${p4}`
+					return `${name} ${p4}`
 				}
 				default:
 				{
@@ -810,7 +811,7 @@ function isSideWindowSticky(): void
 
 function createColourPickerWidget(callback: (g: GraphicsContext) => void, key: GuestColours): WidgetCreator<FlexiblePosition>
 {
-	let colour: Store<number>;
+	let colour = store<number>(getColour("pe.side.secondary", Colour.LightBrown));
 	switch (key)
 	{
 		case "tshirtColour":
@@ -854,7 +855,7 @@ function createColourPickerWidget(callback: (g: GraphicsContext) => void, key: G
 				onDraw: (g) => callback(g),
 			}),
 			colourPicker({
-				colour: colour,
+				colour: compute(colour, c => c),
 				visibility: model._visibleWhenNotStaff,
 				onChange: (colour) =>
 				{
