@@ -5,7 +5,8 @@ import { button, horizontal, label, tab, tabwindow, vertical,
 		twoway, compute, Colour, window, groupbox, spinner, dropdown,
 		textbox, colourPicker, graphics, checkbox, store, WidgetCreator,
 		FlexiblePosition, Bindable, ElementVisibility, Padding,
-		Store, WritableStore } from "openrct2-flexui";
+		Store, WritableStore, 
+		Parsed} from "openrct2-flexui";
 import { model } from "../viewmodel/peepViewModel";
 import { movePeepExecuteArgs } from "../actions/peepMover";
 import { colourPeepExecuteArgs } from "../actions/peepColour";
@@ -441,7 +442,7 @@ export const sideWindow = tabwindow({
 				horizontal([
 					groupbox({
 						text: "Physiology",
-						visibility: compute(model._isGuest, model._allGuestsSelected, (g, a) => !g && !a ? "visible" : "none"),
+						visibility: model._visibleWhenStaff,
 						content: [
 							label({
 								text: "All staff members are very happy,",
@@ -523,7 +524,8 @@ export const sideWindow = tabwindow({
 					padding: {bottom: 4},
 					spacing: 0,
 					visibility: compute(model._isGuest, model._isPeepSelected, (g, p) => g && p ? "visible" : "none"),
-					content: carryingItems()
+					content: []
+					
 				}),
 				horizontal([
 					label({
@@ -627,7 +629,7 @@ export const sideWindow = tabwindow({
 						width: "25%",
 						onClick: () =>
 						{
-							const guest = <Guest>model._selectedPeep.get();
+							const guest = model._selectedGuest.get();
 							const item = model._item.get();
 							const rideId = model._rideId.get();
 							if (guest.hasItem({type: item}) && item !== "voucher" && item !== "photo1" && item !== "photo2" && item !== "photo3" && item !== "photo4")
@@ -719,26 +721,53 @@ function createFlagCheckboxWidget(flag: PeepFlags, padding?: Padding | undefined
 	});
 }
 
-function carryingItems(): WidgetCreator<FlexiblePosition>[] {
-	const widgetArray: WidgetCreator<FlexiblePosition>[] = [];
-	guestItemTypeList.forEach(item =>
+function createItemWidget(item: GuestItem): WidgetCreator<FlexiblePosition, Parsed<FlexiblePosition>>
 	{
-		const visibleWhenGuestHasItem = compute(model._selectedGuest, g => g && g.hasItem({type: item}) ? "visible" : "none");
-		const text = compute(model._selectedGuest, model._photo2RideName, (g, p) => g && item === "photo2" ? `{BLACK}${itemName[guestItemTypeList.indexOf(item)]}${p}` : `{BLACK}${itemName[guestItemTypeList.indexOf(item)]}`)
-				
-		widgetArray.push(
+		//const visibleWhenGuestHasItem = compute(model._selectedGuest, model._items, g => g && g.hasItem({type: item}) ? "visible" : "none");
+		const name = `{BLACK}${itemName[guestItemTypeList.indexOf(item.type)]}`;
+		const text = compute(model._selectedGuest, model._photo1RideName, model._photo2RideName, model._photo3RideName, model._photo4RideName, (g, p1, p2, p3, p4) =>
+		{
+			if (g && item.type === "photo1" || g && item.type === "photo2" || g && item.type === "photo3" || g && item.type === "photo4")
+			{
+				switch (item.type)
+				{
+					case "photo1":
+					{
+						return `${name}${p1}`
+					}
+					case "photo2":
+					{
+						return `${name}${p2}`
+					}
+					case "photo3":
+					{
+						return `${name}${p3}`
+					}
+					case "photo4":
+					{
+						return `${name}${p4}`
+					}
+					default:
+					{
+						return name;
+					}
+				}
+			}
+			return name;
+		});
+		return(
 			horizontal([
 				graphics({
 					height: 16,
 					width: 16,
 					padding: {top: -2, bottom: -2},
-					visibility: visibleWhenGuestHasItem,
-					onDraw: function (g) { itemImage(item, g); },
+					//visibility: visibility,
+					onDraw: function (g) { itemImage(item.type, g); },
 				}),
 				label({
 					text: text,
 					padding: {top: -2, bottom: -2},
-					visibility: visibleWhenGuestHasItem,
+					//visibility: visibility,
 				}),
 				button({
 					text: `{RED}x`,
@@ -746,13 +775,11 @@ function carryingItems(): WidgetCreator<FlexiblePosition>[] {
 					width: 10,
 					border: true,
 					padding: {top: 0, bottom: -2},
-					visibility: visibleWhenGuestHasItem,
-					onClick: () => openWindowRemoveItem(item)
+					//visibility: visibility,
+					onClick: () => openWindowRemoveItem(item.type)
 				})
 			])
 		)
-	});	
-	return widgetArray;
 }
 
 function itemList(): string[] {

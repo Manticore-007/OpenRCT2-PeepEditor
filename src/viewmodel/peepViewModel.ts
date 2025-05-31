@@ -2,7 +2,7 @@ import { compute, store, WritableStore } from "openrct2-flexui";
 import { guestFlagsExecuteArgs } from "../actions/guestFlags";
 import { namePeepExecuteArgs } from "../actions/peepNamer";
 import { debug } from "../helpers/logger";
-import { getAllRides, ParkRide } from "../objects/parkRides";
+import { ParkRide } from "../objects/parkRides";
 import { GuestKey, guestKeysExecuteArgs } from "../actions/guestKeys";
 import { getWindow } from "../helpers/getWindow";
 import { GuestColours } from "../helpers/colours";
@@ -119,17 +119,6 @@ export class PeepViewModel
     _open(): void
     {
         this._onGameTick = context.subscribe("interval.tick", () => this._onGameTickExecuted());
-        this._rideList.subscribe(r => {
-            let selection: [ParkRide, number] | null = null;
-            if (r.length > 0)
-            {
-                const previous = this._selectedRide.get();
-                const selectedIdx = (previous && previous[1] < r.length) ? previous[1] : 0;
-                selection = [ r[selectedIdx], selectedIdx ];
-            }
-            this._selectedRide.set(selection);
-        });        
-        this._rideList.set(getAllRides());
     }
 
     _close(): void
@@ -282,22 +271,19 @@ export class PeepViewModel
 
     private _updateGuestInfo(guest: Guest): void
     {
+        if (guest) this._isGuest.set(true);
         this._tshirtColour.set(guest.tshirtColour);
         this._trousersColour.set(guest.trousersColour);
         this._hatColour.set(guest.hatColour);
         this._balloonColour.set(guest.balloonColour);
         this._umbrellaColour.set(guest.umbrellaColour);
-        this._items.set(guest.items);
         this._availableGuestAnimations.set(guest.availableAnimations);
-        this._getPhotoRideName(guest, "photo1");
-        this._getPhotoRideName(guest, "photo2");
-        this._getPhotoRideName(guest, "photo3");
-        this._getPhotoRideName(guest, "photo4");
+        this._getPhotoRideName(guest);
     }
 
     private _updateStaffInfo(staff: Staff): void
     {
-        this._isGuest.set(false);
+        if (staff) this._isGuest.set(false);
         this._colour.set(staff.colour);
         this._costume.set(<StaffCostume>staff.costume);
         this._orders.set(staff.orders);
@@ -312,18 +298,22 @@ export class PeepViewModel
 
     private _updateDynamicDataFromPeep(peep: Guest | Staff): void
     {
-        this._isGuest.set(true);
+        if (peep.type === "guest")
+        {
         const guest = <Guest>peep;
-        this._x.set(peep.x);
-        this._y.set(peep.y);
-        this._z.set(peep.z);
-        this._energy.set(peep.energy);
         this._happiness.set(guest.happiness);
         this._hunger.set(guest.hunger);
         this._thirst.set(guest.thirst);
         this._nausea.set(guest.nausea);
         this._toilet.set(guest.toilet);
         this._mass.set(guest.mass);
+        this._items.set(guest.items);
+        }
+        this._x.set(peep.x);
+        this._y.set(peep.y);
+        this._z.set(peep.z);
+        this._energy.set(peep.energy);
+        
         if (peep.peepType !== "guest" && peep.peepType !== "staff")
         {
             ui.showError("Peep no longer", "available");
@@ -341,41 +331,35 @@ export class PeepViewModel
         }
     }
 
-    _getPhotoRideName(guest: Guest, photoNumber: GuestItemType): void
+    _getPhotoRideName(guest: Guest): void
     {
-        let photoRideNameStore: WritableStore<string>;
-        
-        if (guest.hasItem({ type: photoNumber }))
+        if (guest.hasItem({ type: "photo1" }) || guest.hasItem({ type: "photo2" }) ||guest.hasItem({ type: "photo3" }) || guest.hasItem({ type: "photo4" }))
         {
             guest.items.forEach((item, index) =>
             {
-                if (item.type === photoNumber)
+                const photo = <GuestPhoto>guest.items[index];
+                switch (item.type)
                 {
-                    const photo = <GuestPhoto>guest.items[index];
-                    switch (photoNumber)
+                    case "photo1":
                     {
-                        case "photo1":
-                        {
-                            photoRideNameStore = this._photo1RideName;
-                            break;
-                        }
-                        case "photo2":
-                        {
-                            photoRideNameStore = this._photo2RideName;
-                            break;
-                        }
-                        case "photo3":
-                        {
-                            photoRideNameStore = this._photo3RideName;
-                            break;
-                        }
-                        case "photo4":
-                        {
-                            photoRideNameStore = this._photo4RideName;
-                            break;
-                         }
+                        this._photo1RideName.set(map.getRide(photo.rideId).name);
+                        break;
                     }
-                    photoRideNameStore.set(map.getRide(photo.rideId).name);
+                    case "photo2":
+                    {
+                        this._photo2RideName.set(map.getRide(photo.rideId).name);
+                        break;
+                    }
+                    case "photo3":
+                    {
+                        this._photo3RideName.set(map.getRide(photo.rideId).name);
+                        break;
+                    }
+                    case "photo4":
+                    {
+                        this._photo4RideName.set(map.getRide(photo.rideId).name);
+                        break;
+                        }
                 }
             });
         }
