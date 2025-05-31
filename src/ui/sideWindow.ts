@@ -524,7 +524,7 @@ export const sideWindow = tabwindow({
 					padding: {bottom: 4},
 					spacing: 0,
 					visibility: compute(model._isGuest, model._isPeepSelected, (g, p) => g && p ? "visible" : "none"),
-					content: []
+					content: createItemWidget()
 					
 				}),
 				horizontal([
@@ -703,7 +703,8 @@ function openWindowRemoveItem(item: GuestItemType): void
 	removeItemWindow.open();
 }
 
-function createFlagCheckboxWidget(flag: PeepFlags, padding?: Padding | undefined): WidgetCreator<FlexiblePosition> {
+function createFlagCheckboxWidget(flag: PeepFlags, padding?: Padding | undefined): WidgetCreator<FlexiblePosition>
+{
 	const capitalizedFlag = flag.charAt(0).toUpperCase() + flag.slice(1);
 	const splitFlag = capitalizedFlag.replace(/([A-Z])/g, ' $1');
 	return checkbox({
@@ -721,53 +722,56 @@ function createFlagCheckboxWidget(flag: PeepFlags, padding?: Padding | undefined
 	});
 }
 
-function createItemWidget(item: GuestItem): WidgetCreator<FlexiblePosition, Parsed<FlexiblePosition>>
+function createItemWidget(): WidgetCreator<FlexiblePosition, Parsed<FlexiblePosition>>[]
+{
+	const array: WidgetCreator<FlexiblePosition, Parsed<FlexiblePosition>>[] = []
+	guestItemTypeList.forEach(item =>
 	{
-		//const visibleWhenGuestHasItem = compute(model._selectedGuest, model._items, g => g && g.hasItem({type: item}) ? "visible" : "none");
-		const name = `{BLACK}${itemName[guestItemTypeList.indexOf(item.type)]}`;
-		const text = compute(model._selectedGuest, model._photo1RideName, model._photo2RideName, model._photo3RideName, model._photo4RideName, (g, p1, p2, p3, p4) =>
+	const visibility = compute(model._items, i => i.some(el => el.type === item) ? "visible" : "none");
+	const name = `{BLACK}${itemName[guestItemTypeList.indexOf(item)]}`;
+	const text = compute(model._photo1RideName, model._photo2RideName, model._photo3RideName, model._photo4RideName, (p1, p2, p3, p4) =>
+	{
+		if (item === "photo1" || item === "photo2" || item === "photo3" || item === "photo4")
 		{
-			if (g && item.type === "photo1" || g && item.type === "photo2" || g && item.type === "photo3" || g && item.type === "photo4")
+			switch (item)
 			{
-				switch (item.type)
+				case "photo1":
 				{
-					case "photo1":
-					{
-						return `${name}${p1}`
-					}
-					case "photo2":
-					{
-						return `${name}${p2}`
-					}
-					case "photo3":
-					{
-						return `${name}${p3}`
-					}
-					case "photo4":
-					{
-						return `${name}${p4}`
-					}
-					default:
-					{
-						return name;
-					}
+					return `${name}${p1}`
+				}
+				case "photo2":
+				{
+					return `${name}${p2}`
+				}
+				case "photo3":
+				{
+					return `${name}${p3}`
+				}
+				case "photo4":
+				{
+					return `${name}${p4}`
+				}
+				default:
+				{
+					return name;
 				}
 			}
-			return name;
-		});
-		return(
+		}
+		return name;
+	});
+		array.push(
 			horizontal([
 				graphics({
 					height: 16,
 					width: 16,
 					padding: {top: -2, bottom: -2},
-					//visibility: visibility,
-					onDraw: function (g) { itemImage(item.type, g); },
+					visibility: visibility,
+					onDraw: function (g) { itemImage(item, g); },
 				}),
 				label({
 					text: text,
 					padding: {top: -2, bottom: -2},
-					//visibility: visibility,
+					visibility: visibility,
 				}),
 				button({
 					text: `{RED}x`,
@@ -775,20 +779,24 @@ function createItemWidget(item: GuestItem): WidgetCreator<FlexiblePosition, Pars
 					width: 10,
 					border: true,
 					padding: {top: 0, bottom: -2},
-					//visibility: visibility,
-					onClick: () => openWindowRemoveItem(item.type)
+					visibility: visibility,
+					onClick: () => openWindowRemoveItem(item)
 				})
 			])
 		)
+	})
+	return array;
 }
 
-function itemList(): string[] {
+function itemList(): string[]
+{
 	const itemNameArray: string[] = [];
 	guestItemTypeList.forEach(item => itemNameArray.push(itemName[guestItemTypeList.indexOf(item)]));
 	return itemNameArray;
 }
 
-function isSideWindowSticky(): void {
+function isSideWindowSticky(): void
+{
 	if (context.sharedStorage.get("pe.sticky"))
 	{
 		if (main && side)

@@ -56,8 +56,8 @@ export class PeepViewModel
     readonly _thirst = store<number>(255);
     readonly _toilet = store<number>(0);
     readonly _mass = store<number>(0);
-    readonly _items = store<GuestItem[]>([]);
-    readonly _hasItem = store<boolean[]>([]);;
+    readonly _items = store<GuestItem[]>([{type: "balloon"}]);
+    readonly _hasItem = store<boolean[]>([]);
     readonly _availableGuestAnimations = store<GuestAnimation[]>([]);
     readonly _photo1RideName = store<string>("");
     readonly _photo2RideName = store<string>("");
@@ -127,6 +127,7 @@ export class PeepViewModel
         this._name.set(windowTitle);
         this._allGuestsSelected.set(false);
         this._multiplierIndex.set(0);
+        this._dispose();
     }
 
     _dispose(): void
@@ -278,7 +279,7 @@ export class PeepViewModel
         this._balloonColour.set(guest.balloonColour);
         this._umbrellaColour.set(guest.umbrellaColour);
         this._availableGuestAnimations.set(guest.availableAnimations);
-        this._getPhotoRideName(guest);
+        this._getPhotoRideName();
     }
 
     private _updateStaffInfo(staff: Staff): void
@@ -331,8 +332,9 @@ export class PeepViewModel
         }
     }
 
-    _getPhotoRideName(guest: Guest): void
+    _getPhotoRideName(): void
     {
+        const guest = model._selectedGuest.get();
         if (guest.hasItem({ type: "photo1" }) || guest.hasItem({ type: "photo2" }) ||guest.hasItem({ type: "photo3" }) || guest.hasItem({ type: "photo4" }))
         {
             guest.items.forEach((item, index) =>
