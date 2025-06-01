@@ -64,12 +64,11 @@ export const sideWindow = tabwindow({
 	{
 		main = getWindow(model._name.get());
 		side = getWindow("Properties");
-		model._open();
 	},
 	onClose: () =>
 	{
 		ui.tool?.cancel();
-		model._close();
+        model._close();
 	},
 	tabs: [
 		tab({	//location

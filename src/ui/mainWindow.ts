@@ -1,4 +1,4 @@
-import { button, checkbox, Colour, colourPicker, compute, dropdown, FlexiblePosition, groupbox, horizontal, label, store, tab, tabwindow, toggle, twoway, vertical, viewport, WidgetCreator } from "openrct2-flexui";
+import { button, checkbox, Colour, colourPicker, compute, dropdown, FlexiblePosition, groupbox, horizontal, label, listview, store, tab, tabwindow, toggle, twoway, vertical, viewport, WidgetCreator } from "openrct2-flexui";
 import { model } from "../viewmodel/peepViewModel";
 import { sideWindow, sideWindowColour } from "./sideWindow";
 import { togglePeepPicker } from "../services/peepPicker";
@@ -13,8 +13,9 @@ let main: Window | undefined;
 //button properties
 const buttonSize = 24;
 const lensIcon: ImageAnimation = { frameBase: context.getIcon("search"), frameCount: 1, frameDuration: 4, offset: { x: 4, y: 1 } };
-const infoIcon: ImageAnimation = { frameBase: 5367, frameCount: 8, frameDuration: 4, };
-const gearIcon: ImageAnimation = { frameBase: 5201, frameCount: 4, frameDuration: 4, };
+const guestsIcon: ImageAnimation = { frameBase: 5568, frameCount: 8, frameDuration: 4 };
+const infoIcon: ImageAnimation = { frameBase: 5367, frameCount: 8, frameDuration: 4 };
+const gearIcon: ImageAnimation = { frameBase: 5201, frameCount: 4, frameDuration: 4 };
 
 //setting values
 const stickySideWindow = store<boolean>(context.sharedStorage.get("pe.sticky", true));
@@ -32,7 +33,10 @@ export const mainWindow = tabwindow({
     width: 260,
     height: 230,
     colours: [mainWindowColour.primary.get(), mainWindowColour.secondary.get(), mainWindowColour.tertiary.get()],
-    onOpen: () => main = getWindow("Peep Editor"),
+    onOpen: () =>{
+        main = getWindow("Peep Editor");
+        model._open();
+    },
     onClose: () =>
     {
         ui.tool?.cancel();
@@ -111,6 +115,25 @@ export const mainWindow = tabwindow({
                     height: 0,
                     padding: [-5, 0, 10, 0],
                     alignment: "centred"
+                })
+            ]
+        }),
+        tab({
+            image: guestsIcon,
+            height: "inherit",
+            content: [
+                listview({
+                    items: compute(model._allGuestEntities, a => a.map(guest => [guest.name, guest.animation])),
+
+                    onClick: (index) =>
+                        {
+                            model._select(model._allGuestEntities.get()[index]);
+                            if (main)
+                            {
+                            main.tabIndex = 0;
+                            }
+                            sideWindow.open()
+                        }
                 })
             ]
         }),

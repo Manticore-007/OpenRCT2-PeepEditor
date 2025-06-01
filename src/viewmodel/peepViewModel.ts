@@ -21,6 +21,7 @@ export class PeepViewModel
     //general
 
     readonly _allGuests = store<Guest[]|Staff[]>([]);
+    readonly _allGuestEntities = store<Guest[]>([])
     readonly _selectedPeep = compute(this._allGuests, a => a[0]);
     readonly _name = store<string>(windowTitle);
     readonly _energy = store<number>(0);
@@ -136,7 +137,6 @@ export class PeepViewModel
         this._name.set(windowTitle);
         this._allGuestsSelected.set(false);
         this._multiplierIndex.set(0);
-        this._dispose();
     }
 
     _dispose(): void
@@ -335,6 +335,7 @@ export class PeepViewModel
 
     _onGameTickExecuted(): void
     {
+        this._allGuestEntities.set(map.getAllEntities("guest"));
         const peep = this._selectedPeep.get();
         if (peep)
         {
