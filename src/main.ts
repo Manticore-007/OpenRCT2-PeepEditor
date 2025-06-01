@@ -5,6 +5,7 @@ import { debug } from "./helpers/logger";
 import { mainWindow } from "./ui/mainWindow";
 import { initSettings, menuLabel } from "./helpers/settings";
 import { initRides } from "./helpers/initRides";
+import { initShortcuts } from "./helpers/initShortcutKeys";
 
 /**
  * Entry point of the plugin.
@@ -21,5 +22,6 @@ export function main(): void
 	initSettings();
 	initRides();
 	initCustomSprites();
+	initShortcuts();
 	ui.registerMenuItem(menuLabel.get(), () => mainWindow.open());
 }

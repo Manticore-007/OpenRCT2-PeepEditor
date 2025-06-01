@@ -416,9 +416,9 @@ function buttonStyle(): WidgetCreator<FlexiblePosition>[] {
                     visibility: compute(theme, t => t === "rct2" ? "visible" : "none"),
                     onClick: () =>
                     {
-                        if (!model._isFrozen.get() && !model._isStatic.get()) model._setMotion("frozen");
-                        if (model._isFrozen.get() && model._isStatic.get()) model._setMotion("static");
-                        if (!model._isFrozen.get() && model._isStatic.get()) model._setMotion("moving");
+                        if (!model._isFrozen.get() && !model._isStatic.get()) {model._setMotion("frozen"); return;}
+                        if (model._isFrozen.get() && model._isStatic.get()) {model._setMotion("static"); return;}
+                        if (!model._isFrozen.get() && model._isStatic.get()) {model._setMotion("moving"); return;};
                     }
                 }),
             ];
