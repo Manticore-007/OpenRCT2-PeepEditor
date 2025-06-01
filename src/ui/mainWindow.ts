@@ -21,6 +21,9 @@ const gearIcon: ImageAnimation = { frameBase: 5201, frameCount: 4, frameDuration
 const stickySideWindow = store<boolean>(context.sharedStorage.get("pe.sticky", true));
 const pinToTop = store<boolean>(context.sharedStorage.get("pe.favourite", false));
 const theme = store<Theme>(context.sharedStorage.get("pe.theme", "rct1"));
+const peepSelection = store<EntityType>("guest");
+const visibilityListviewWhenGuest = compute(peepSelection, p => p === "guest" ? "visible" : "none");
+const visibilityListviewWhenStaff = compute(peepSelection, p => p === "staff" ? "visible" : "none");
 
 const mainWindowColour = {
     primary: store<Colour>(getColour("pe.main.primary", Colour.DarkYellow)),
@@ -39,8 +42,10 @@ export const mainWindow = tabwindow({
     },
     onClose: () =>
     {
+        peepSelection.set("guest");
         ui.tool?.cancel();
         sideWindow.close();
+        model._dispose();
     },
     onUpdate: () =>
     {
@@ -73,7 +78,7 @@ export const mainWindow = tabwindow({
                                 tooltip: "Give the selected peep a new name, even a longer name than usual",
                                 disabled: model._disabledWhenNoSinglePeepSelected,
                                 padding: { top: -2, left: -2, bottom: -2, right: -2 },
-                                onClick: () => model._rename()
+                                onClick: () => model._rename(model._selectedPeep.get())
                             }),
                             button({	//locator
                                 height: buttonSize, width: buttonSize,
@@ -81,7 +86,7 @@ export const mainWindow = tabwindow({
                                 tooltip: "Focus the main viewport on the selected peep",
                                 disabled: model._disabledWhenNoSinglePeepSelected,
                                 padding: { top: -2, left: -2, bottom: -2, right: -2 },
-                                onClick: () => model._locate()
+                                onClick: () => model._locate(model._selectedPeep.get())
                             }),
                             button({	//trashcan
                                 height: buttonSize, width: buttonSize,
@@ -122,18 +127,69 @@ export const mainWindow = tabwindow({
             image: guestsIcon,
             height: "inherit",
             content: [
-                listview({
-                    items: compute(model._allGuestEntities, a => a.map(guest => [guest.name, guest.animation])),
+                groupbox({
+                    text: "Frozen peeps",
+                    content: [
+                        horizontal([
+                            label({
+                                text: "Filter",
+                                width: "30%"
+                            }),
+                            dropdown({
+                                items: ["Guests", "Staff"],
+                                onChange: (idx) =>
+                                    {
+                                        switch(idx)
+                                        {
+                                            case 0: peepSelection.set("guest"); break;
+                                            case 1: peepSelection.set("staff"); break;
+                                        }
+                                    }
+                            })
+                        ]),
+                    listview({
+                        items: model._allGuestsSorted,
+                        visibility: visibilityListviewWhenGuest,
+                        canSelect: true,
+                        onHighlight: (index) =>
+                            {
+                                const allGuests = model._allGuestEntities.get();
+                                model._locate(allGuests[allGuests.map( e => {return e.name}).indexOf(model._allGuestsSorted.get()[index])])
+                            },
 
-                    onClick: (index) =>
+                        onClick: (index) =>
                         {
-                            model._select(model._allGuestEntities.get()[index]);
+                                const allGuests = model._allGuestEntities.get();
+                                model._select(allGuests[allGuests.map( e => {return e.name}).indexOf(model._allGuestsSorted.get()[index])])
                             if (main)
                             {
                             main.tabIndex = 0;
                             }
                             sideWindow.open()
                         }
+                    }),
+                    listview({
+                        items: model._allStaffSorted,
+                        visibility: visibilityListviewWhenStaff,
+                        canSelect: true,
+                        onHighlight: (index) =>
+                            {
+                                const allStaff = model._allStaffEntities.get();
+                                model._locate(allStaff[allStaff.map( e => {return e.name}).indexOf(model._allStaffSorted.get()[index])])
+                            },
+
+                        onClick: (index) =>
+                        {
+                                const allStaff = model._allStaffEntities.get();
+                                model._select(allStaff[allStaff.map( e => {return e.name}).indexOf(model._allStaffSorted.get()[index])])
+                            if (main)
+                            {
+                            main.tabIndex = 0;
+                            }
+                            sideWindow.open()
+                        }
+                    })
+                    ]
                 })
             ]
         }),

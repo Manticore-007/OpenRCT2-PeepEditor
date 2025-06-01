@@ -22,6 +22,33 @@ export class PeepViewModel
 
     readonly _allGuests = store<Guest[]|Staff[]>([]);
     readonly _allGuestEntities = store<Guest[]>([])
+    readonly _allStaffEntities = store<Staff[]>([]);
+    readonly _allStaffSorted = compute(this._allStaffEntities, a =>
+    {
+        const arr: Staff[] = [];
+        a.forEach(staff =>
+        {
+            if (staff.getFlag("positionFrozen") || staff.getFlag("animationFrozen"))
+            {
+                arr.push(staff);
+            }
+            return arr;
+        });
+        return arr.map(staff => staff.name).sort()
+    });
+    readonly _allGuestsSorted = compute(this._allGuestEntities, a =>
+    {
+        const arr: Guest[] = [];
+        a.forEach(guest =>
+        {
+            if (guest.getFlag("positionFrozen") || guest.getFlag("animationFrozen"))
+            {
+                arr.push(guest);
+            }
+            return arr;
+        });
+        return arr.map(guest => guest.name).sort()
+    });
     readonly _selectedPeep = compute(this._allGuests, a => a[0]);
     readonly _name = store<string>(windowTitle);
     readonly _energy = store<number>(0);
@@ -186,18 +213,16 @@ export class PeepViewModel
         this._umbrellaColour.set(defaultColour);
     }
     
-    _locate(): void
+    _locate(peep: Guest | Staff): void
     {
-        const peep = this._selectedPeep.get();
         if (peep)
         {
             ui.mainViewport.scrollTo({ x: peep.x, y: peep.y, z: peep.z });
         }
     }
 
-    _rename(): void
+    _rename(peep: Guest | Staff): void
     {
-        const peep = this._selectedPeep.get();
         if (peep)
         {
             ui.showTextInput({
@@ -336,6 +361,7 @@ export class PeepViewModel
     _onGameTickExecuted(): void
     {
         this._allGuestEntities.set(map.getAllEntities("guest"));
+        this._allStaffEntities.set(map.getAllEntities("staff"));
         const peep = this._selectedPeep.get();
         if (peep)
         {
