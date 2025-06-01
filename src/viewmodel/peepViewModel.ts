@@ -94,8 +94,10 @@ export class PeepViewModel
     readonly _visibleWhenStaff = compute(this._isGuest, this._allGuestsSelected, (g, a) => !g && !a ? "visible" : "none");
     readonly _visibleWhenSingleGuest = compute(this._isGuest, g => g ? "visible" : "none");
     readonly _visibleWhenNotStaff = compute(this._isGuest, this._allGuestsSelected, (g, a) => g || a ? "visible" : "none");
-    readonly _visibleWhenHandyman = compute(this._isHandyman, this._isGuest, (h, g) => h && !g ? "visible" : "none");
-    readonly _visibleWhenMechanic = compute(this._isMechanic, this._isGuest, (m, g) => m && !g ? "visible" : "none");
+    readonly _visibleWhenHandyman = compute(this._isHandyman, this._isGuest, this._allGuestsSelected, (h, g, a) => h && !g && !a? "visible" : "none");
+    readonly _visibleWhenMechanic = compute(this._isMechanic, this._isGuest, this._allGuestsSelected, (m, g, a) => m && !g && !a ? "visible" : "none");
+    readonly _visibleWhenSecurity = compute(this._isSecurity, this._isGuest, this._allGuestsSelected, (s, g, a) => s && !g && !a ? "visible" : "none");
+    readonly _visibleWhenEntertainer = compute(this._isGuest, this._allGuestsSelected, this._isEntertainer, (g, a, e) => !g && !a && e ? "visible" : "none");
     readonly _visibleWhenNoPeepSelected = compute(this._isPeepSelected, this._allGuestsSelected, (p, a) => !p && !a ? "visible" : "none");
     readonly _visibleRideDropdown = compute(this._item, this._voucherType, (i, v) => (i === "photo1" || i === "photo2" || i === "photo3" || i === "photo4" || (i === "voucher" && v === "ride_free")) ? "visible" : "none")
     readonly _disabledWhenNoSinglePeepSelected = compute(this._isPeepSelected, this._allGuestsSelected, (p, a) => !p || a);
@@ -298,6 +300,7 @@ export class PeepViewModel
         this._staffType.set(staff.staffType);
         this._availableCostumes.set(staff.availableCostumes);
         this._availableStaffAnimations.set(staff.availableAnimations);
+        this._items.set([]);
         staff.staffType === "handyman" ? this._isHandyman.set(true) : this._isHandyman.set(false);
         staff.staffType === "mechanic" ? this._isMechanic.set(true) : this._isMechanic.set(false);
         staff.staffType === "security" ? this._isSecurity.set(true) : this._isSecurity.set(false);

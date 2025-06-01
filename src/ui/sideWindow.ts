@@ -216,13 +216,13 @@ export const sideWindow = tabwindow({
 									label({
 										text: "Costume:",
 										height: 13,
-										visibility: compute(model._isEntertainer, model._isGuest, (e, g) => e && !g ? "visible" : "none"),
+										visibility: model._visibleWhenEntertainer,
 										padding: { left: 10 },
 									}),
 									dropdown({
 										height: 13,
 										width: "55%",
-										visibility: compute(model._isEntertainer, model._isGuest, (e, g) => e && !g ? "visible" : "none"),
+										visibility: model._visibleWhenEntertainer,
 										disabledMessage: "Not available",
 										padding: { right: 10 },
 										items: costumeList,
@@ -369,7 +369,7 @@ export const sideWindow = tabwindow({
 							createStaffOrdersWidget(StaffOrderLabel.FixRides, model._visibleWhenMechanic, StaffOrders.FixRides),
 							checkbox({
 								text: "{INLINE_SPRITE}{253}{19}{0}{0} Surveilling park",
-								visibility: compute(model._isSecurity, model._isGuest, (sc, g) => sc && !g ? "visible" : "none"),
+								visibility: model._visibleWhenSecurity,
 								padding: {left: 10},
 								isChecked: twoway(securityOrders),
 								onChange: (checked) =>
@@ -383,7 +383,7 @@ export const sideWindow = tabwindow({
 							}),
 							checkbox({
 								text: "{INLINE_SPRITE}{116}{21}{0}{0} Keep guests happy",
-								visibility: compute(model._isEntertainer, model._isGuest, (e, g) => e && !g ? "visible" : "none"),
+								visibility: model._visibleWhenEntertainer,
 								padding: {left: 10},
 								isChecked: twoway(entertainerOrders),
 								onChange: (checked) =>
@@ -406,26 +406,15 @@ export const sideWindow = tabwindow({
 									createFlagCheckboxWidget("leavingPark", {bottom: -3, left: 10 }),
 									createFlagCheckboxWidget("slowWalk", {top: -2, bottom: -3, left: 10 }),
 									createFlagCheckboxWidget("tracking", {top: -2, bottom: -3, left: 10 }),
-									createFlagCheckboxWidget("waving", {top: -2, bottom: -3, left: 10 }),
-									createFlagCheckboxWidget("photo", {top: -2, bottom: -3, left: 10 }),
-									createFlagCheckboxWidget("painting", {top: -2, bottom: -3, left: 10 }),
 									createFlagCheckboxWidget("wow", {top: -2, bottom: -3, left: 10 }),
 									createFlagCheckboxWidget("litter", {top: -2, bottom: -3, left: 10 }),
 									createFlagCheckboxWidget("lost", {top: -2, bottom: -3, left: 10 }),
-									createFlagCheckboxWidget("hunger", {top: -2, bottom: -3, left: 10 }),
-									createFlagCheckboxWidget("toilet", {top: -2, bottom: 5, left: 10 }),
 								]),
 								vertical([
 									createFlagCheckboxWidget("crowded", {bottom: -3}),
-									createFlagCheckboxWidget("happiness", {top: -2, bottom: -3}),
-									createFlagCheckboxWidget("nausea", {top: -2, bottom: -3}),
-									createFlagCheckboxWidget("purple", {top: -2, bottom: -3}),
-									createFlagCheckboxWidget("pizza", {top: -2, bottom: -3}),
 									createFlagCheckboxWidget("explode", {top: -2, bottom: -3}),
 									createFlagCheckboxWidget("contagious", {top: -2, bottom: -3}),
 									createFlagCheckboxWidget("joy", {top: -2, bottom: -3}),
-									createFlagCheckboxWidget("angry", {top: -2, bottom: -3}),
-									createFlagCheckboxWidget("iceCream", {top: -2, bottom: -3}),
 									createFlagCheckboxWidget("hereWeAre", {top: -2, bottom: 5}),
 								])
 							])
@@ -499,17 +488,6 @@ export const sideWindow = tabwindow({
 			content: [
 				groupbox({
 					text: "Items",
-					visibility: model._visibleWhenNoPeepSelected,
-					content: [
-						label({
-							text: "Organise a guest's inventory",
-							alignment: "centred",
-							visibility: model._visibleWhenNoPeepSelected,
-						})
-					]
-				}),
-				groupbox({
-					text: "Items",
 					visibility: compute(model._isGuest, model._allGuestsSelected, (g, a) => !g || a ? "visible" : "none"),
 					content: [
 						label({
@@ -523,7 +501,7 @@ export const sideWindow = tabwindow({
 					text: "Carrying",
 					padding: {bottom: 4},
 					spacing: 0,
-					visibility: compute(model._isGuest, model._isPeepSelected, (g, p) => g && p ? "visible" : "none"),
+					visibility: model._visibleWhenSingleGuest,
 					content: createItemWidget()
 					
 				}),
