@@ -7,21 +7,24 @@ export const shortcutId =
 {
     open: store<string>("pe-shortcut-open"),
     select: store<string>("pe-shortcut-select"),
-    freeze: store<string>("pe-shortcut-freeze")
+    freeze: store<string>("pe-shortcut-freeze"),
+    multiplier: store<string>("pe-shortcut-multiplier")
 }
 
 export const shortcutNames =
 {
     open: store<string>("[PE] Open Peep-Editor"),
     select: store<string>("[PE] Select a peep"),
-    freeze: store<string>("[PE] Cycle through freeze states")
+    freeze: store<string>("[PE] Cycle through freeze states"),
+    multiplier: store<string>("[PE] Cycle through multiplier values")
 }
 
 export const shortcutBindings =
 {
     open: store<string[]>(["CTRL+SHIFT+P"]),
     select: store<string[]>(["CTRL+SHIFT+D"]),
-    freeze: store<string[]>(["CTRL+SHIFT+F"])
+    freeze: store<string[]>(["CTRL+SHIFT+F"]),
+    multiplier: store<string[]>(["CTRL+SHIFT+X"])
 }
 
 export const shortcutRegister =
@@ -53,6 +56,19 @@ export const shortcutRegister =
             if (!model._isFrozen.get() && model._isStatic.get()) {model._setMotion("moving"); return;}
             console.log(model._isFrozen.get(), model._isStatic.get())
         }
+    }),
+    multiplier: ui.registerShortcut({
+        id: shortcutId.multiplier.get(),
+        text: shortcutNames.multiplier.get(),
+        bindings: shortcutBindings.multiplier.get(),
+        callback: () =>
+            {
+                model._multiplierIndex.set(model._multiplierIndex.get() + 1);
+                if (model._multiplierIndex.get() === 3)
+                {
+                    model._multiplierIndex.set(0);
+                }
+            }
     })
 };
 
@@ -60,7 +76,8 @@ export function initShortcuts():void
 {
     shortcutRegister.open,
     shortcutRegister.select,
-    shortcutRegister.freeze
+    shortcutRegister.freeze,
+    shortcutRegister.multiplier
 }
 
 export function setShortcut(id: string, bindings: ShortcutDesc): void
