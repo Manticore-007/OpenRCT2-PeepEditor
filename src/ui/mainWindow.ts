@@ -124,6 +124,11 @@ export const mainWindow = tabwindow({
             ]
         }),
         tab({
+            onOpen: () =>
+            {
+                model._allGuestEntities.set(map.getAllEntities("guest"));
+                model._allStaffEntities.set(map.getAllEntities("staff"));
+            },
             image: guestsIcon,
             height: "inherit",
             content: [

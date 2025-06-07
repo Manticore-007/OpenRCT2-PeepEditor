@@ -360,8 +360,6 @@ export class PeepViewModel
 
     _onGameTickExecuted(): void
     {
-        this._allGuestEntities.set(map.getAllEntities("guest"));
-        this._allStaffEntities.set(map.getAllEntities("staff"));
         const peep = this._selectedPeep.get();
         if (peep)
         {
