@@ -156,6 +156,11 @@ export class PeepViewModel
     _open(): void
     {
         this._onGameTick = context.subscribe("interval.tick", () => this._onGameTickExecuted());
+        const allStaff = map.getAllEntities("staff");
+        allStaff.forEach(staff =>
+            {
+                this._conversionCheck(staff);
+            })
     }
 
     _close(): void
