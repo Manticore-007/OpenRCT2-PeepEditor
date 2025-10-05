@@ -49,7 +49,7 @@ export class PeepViewModel
         });
         return arr.map(guest => guest.name).sort()
     });
-    readonly _selectedPeep = compute(this._allGuests, a => a[0]);
+    readonly _selectedPeep = store<Guest|Staff|null>(null);
     readonly _name = store<string>(windowTitle);
     readonly _energy = store<number>(0);
     readonly _x = store<number>(0);
@@ -167,6 +167,7 @@ export class PeepViewModel
     _close(): void
     {
         this._allGuests.set([]);
+        this._selectedPeep.set(null);
         this._name.set(windowTitle);
         this._allGuestsSelected.set(false);
         this._multiplierIndex.set(0);
@@ -183,19 +184,19 @@ export class PeepViewModel
 
     _select(peep: Guest | Staff): void
     {
-        const pickedGuest: Guest[] | Staff[] = [];
-        pickedGuest[0] = peep;
-        this._allGuests.set(pickedGuest);
+        let array: Guest[] = []
+        this._selectedPeep.set(peep);
+        array[0] = <Guest>peep;
+        this._allGuests.set(array);
         this._animation.set(peep.animation);
         this._availableAnimations.set(peep.availableAnimations);
-        this._conversionCheck(peep);
     }
     
     _getAllGuests(): void
     {
         this._allGuests.set(map.getAllEntities("guest"));
-        this._availableAnimations.set(this._selectedGuest.get().availableAnimations);
-        this._animationLength.set(this._selectedGuest.get().animationLength);
+        this._availableAnimations.set(this._allGuests.get()[0].availableAnimations);
+        this._animationLength.set(this._allGuests.get()[0].animationLength);
     }
 
     _toggleAllGuests(pressed: boolean): void
@@ -203,6 +204,7 @@ export class PeepViewModel
         if (pressed) {
             this._getAllGuests();
             this._isPicking.set(false);
+            this._selectedPeep.set(null);
             this._name.set(`{GREEN}All guests selected`);
             ui.tool?.cancel();
         }
@@ -219,23 +221,23 @@ export class PeepViewModel
         this._umbrellaColour.set(defaultColour);
     }
     
-    _locate(peep: Guest | Staff): void
+    _locate(peep: Guest|Staff|null): void
     {
-        if (peep)
+        if (peep !== null)
         {
             ui.mainViewport.scrollTo({ x: peep.x, y: peep.y, z: peep.z });
         }
     }
 
-    _rename(peep: Guest | Staff): void
+    _rename(peep: Guest|Staff|null): void
     {
-        if (peep)
+        if (peep !== null)
         {
             ui.showTextInput({
                 title: textInputTitle(peep),
                 description: peepTypeQuery(peep),
                 initialValue: `${peep.name}`,
-                callback: text => context.executeAction("pe-namepeep", namePeepExecuteArgs(peep.id, text))
+                callback: text => {context.executeAction("pe-namepeep", namePeepExecuteArgs(peep.id, text)); this._name.set(text)}
             });
         }
     }
