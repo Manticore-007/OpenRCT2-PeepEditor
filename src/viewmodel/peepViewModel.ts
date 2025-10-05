@@ -67,6 +67,7 @@ export class PeepViewModel
     readonly _staffType = store<StaffType>("handyman");
     readonly _colour = store<number>(100);
     readonly _availableCostumes = store<StaffCostume[]>([]);
+    readonly _availableCostumeStrings = store<string[]>([]);
     readonly _costume = store<StaffCostume>("none");
     readonly _orders = store<number>(0);
     readonly _availableStaffAnimations = store<StaffAnimation[]>([]);
@@ -329,6 +330,7 @@ export class PeepViewModel
         this._orders.set(staff.orders);
         this._staffType.set(staff.staffType);
         this._availableCostumes.set(staff.availableCostumes);
+        this._availableCostumeStrings.set(staff.getCostumeStrings());
         this._availableStaffAnimations.set(staff.availableAnimations);
         this._items.set([]);
         staff.staffType === "handyman" ? this._isHandyman.set(true) : this._isHandyman.set(false);

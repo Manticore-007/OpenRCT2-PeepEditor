@@ -12,7 +12,6 @@ import { movePeepExecuteArgs } from "../actions/peepMover";
 import { colourPeepExecuteArgs } from "../actions/peepColour";
 import { colourList, GuestColours } from "../helpers/colours";
 import { staffType, staffTypeList } from "../helpers/staffTypes";
-import { costumeList } from "../helpers/costumes";
 import { staffTypeExecuteArgs } from "../actions/staffSetType";
 import { staffCostumeExecuteArgs } from "../actions/staffSetCostume";
 import { animationPeepExecuteArgs } from "../actions/peepAnimation";
@@ -224,7 +223,7 @@ export const sideWindow = tabwindow({
 										visibility: model._visibleWhenEntertainer,
 										disabledMessage: "Not available",
 										padding: { right: 10 },
-										items: costumeList,
+										items: model._availableCostumeStrings,
 										selectedIndex: compute(model._costume, c => model._availableCostumes.get().indexOf(c)),
 										onChange: (index) =>
 										{
