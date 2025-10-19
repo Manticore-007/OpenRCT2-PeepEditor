@@ -11,7 +11,7 @@ export function staffOrdersExecute(args: StaffOrdersArgs): GameActionResult
     if (args.id === null) return {};
     const entity = map.getEntity(args.id);
     if (entity === null) return {};
-    const staff = <Staff>entity;
+    const staff = <BaseStaff>entity;
     args.checked ? staff.orders += args.staffOrders : staff.orders -= args.staffOrders;
     debug(`Staff orders set to "${staff.orders}"`);
     return {};

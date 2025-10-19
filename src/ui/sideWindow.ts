@@ -7,7 +7,7 @@ import { button, horizontal, label, tab, tabwindow, vertical,
 		FlexiblePosition, Bindable, ElementVisibility, Padding,
 		WritableStore, 
 		Parsed} from "openrct2-flexui";
-import { model } from "../viewmodel/peepViewModel";
+import { model } from "../viewmodel/PeepViewModel";
 import { movePeepExecuteArgs } from "../actions/peepMover";
 import { colourPeepExecuteArgs } from "../actions/peepColour";
 import { colourList, GuestColours } from "../helpers/colours";
@@ -27,51 +27,18 @@ import { GuestKey, guestKeysExecuteArgs } from "../actions/guestKeys";
 import { customImageFor, drawImage } from "../helpers/customImages";
 import { StaffOrderLabel, StaffOrders } from "../helpers/staffOrders";
 import { multiplier } from "./UtilityControls";
+import { img } from "./windowConsts";
 
-let main: Window | undefined;
-let side: Window | undefined;
-
-const pointingFingerIcon: ImageAnimation = { frameBase: 5318, frameCount: 8, frameDuration: 2, };
-const mapIcon: ImageAnimation = { frameBase: context.getIcon("map"), frameCount: 1, frameDuration: 4, offset: { x: 4, y: 1 }};
-const eyeIcon: ImageAnimation = { frameBase: context.getIcon("view"), frameCount: 1, frameDuration: 4, offset: { x: 1, y: -1 }};
-
-const itemsIcon: number = 5326;
-const moodIcon: number = 5288;
-
-const securityOrders = store<boolean>(true);
-const entertainerOrders = store<boolean>(true);
-
-export const sideWindowColour = {
-    primary: store<Colour>(getColour("pe.side.primary", Colour.DarkYellow)),
-    secondary: store<Colour>(getColour("pe.side.secondary", Colour.DarkYellow)),
-    tertiary: store<Colour>(Colour.DarkYellow),
-};
 
 export const sideWindow = tabwindow({
 	title: "Properties",
 	width: 260,
 	height: 230,
-	colours: [sideWindowColour.primary.get(), sideWindowColour.secondary.get(), sideWindowColour.tertiary.get()],
+	colours: [model._sideWindowColour.primary.get(), model._sideWindowColour.secondary.get(), model._sideWindowColour.tertiary.get()],
 	padding: 5,
-	onTabChange: () => ui.tool?.cancel(),
-	onUpdate: () =>
-	{
-		isSideWindowSticky();
-		if (side) side.colours = [sideWindowColour.primary.get(), sideWindowColour.secondary.get(), sideWindowColour.tertiary.get()];
-	},
-	onOpen: () =>
-	{
-		main = getWindow(model._name.get());
-		side = getWindow("Properties");
-	},
-	onClose: () =>
-	{
-		ui.tool?.cancel();
-        model._close();
-	},
 	tabs: [
 		tab({	//location
-			image: mapIcon,
+			image: img.map,
 			height: "inherit",
 			spacing: 0,
 			content: [
@@ -140,7 +107,7 @@ export const sideWindow = tabwindow({
 									height: 13,
 									padding: {top: 10, bottom: 5, left: 10},
 									disabled: model._isStatic,
-									visibility: model._visibleWhenStaff,
+									visibility: model._isVisibleWhen(model._isGuest, "inverted"),
 								}),
 								spinner({
 									minimum: 32,
@@ -151,7 +118,7 @@ export const sideWindow = tabwindow({
 									width: "55%",
 									padding: {top: 10, right: 10, bottom: 5},
 									disabled: model._isStatic,
-									visibility: model._visibleWhenStaff,
+									visibility: model._isVisibleWhen(model._isGuest, "inverted"),
 									disabledMessage: "Peep not moving",
 									onChange: (_, adjustment: number) =>
 									{
@@ -177,7 +144,7 @@ export const sideWindow = tabwindow({
 			]
 		}),
 		tab({ //appearance
-			image: eyeIcon,
+			image: img.eye,
 			height: "inherit",
 			content: [
 				horizontal([
@@ -186,27 +153,27 @@ export const sideWindow = tabwindow({
 							text: "Staff member appearance",
 							spacing: 2,
 							gap: {top: 16, bottom: 16},
-							visibility: model._visibleWhenStaff,
+							visibility: model._isVisibleWhen(model._isGuest, "inverted"),
 							content: [
 								horizontal([
 									label({
 										text: "Staff type:",
 										height: 13,
-										visibility: model._visibleWhenStaff,
+										visibility: model._isVisibleWhen(model._isGuest, "inverted"),
 										padding: { left: 10 },
 									}),
 									dropdown({
 										height: 13,
 										width: "55%",
-										visibility: model._visibleWhenStaff,
+										visibility: model._isVisibleWhen(model._isGuest, "inverted"),
 										disabledMessage: "Not available",
 										padding: { right: 10 },
 										items: staffTypeList,
-										selectedIndex: compute(model._staffType, t => staffType.indexOf(t)),
+										selectedIndex: twoway(model._staffTypeIndex),
 										onChange: (index) =>
 										{
-											const staff = <Staff>model._selectedPeep.get();
-											if (staff !== undefined) context.executeAction("pe-stafftype", staffTypeExecuteArgs(staff.id, staffType[index]));
+											const staff = <BaseStaff>model._selectedPeep.get();
+											if (staff !== null) context.executeAction("pe-stafftype", staffTypeExecuteArgs(staff.id, staffType[index]));
 										}
 									})
 								]),
@@ -214,21 +181,21 @@ export const sideWindow = tabwindow({
 									label({
 										text: "Costume:",
 										height: 13,
-										visibility: model._visibleWhenEntertainer,
+										visibility: model._isVisibleWhen(model._isEntertainer),
 										padding: { left: 10 },
 									}),
 									dropdown({
 										height: 13,
 										width: "55%",
-										visibility: model._visibleWhenEntertainer,
+										visibility: model._isVisibleWhen(model._isEntertainer),
 										disabledMessage: "Not available",
 										padding: { right: 10 },
 										items: model._availableCostumeStrings,
-										selectedIndex: compute(model._costume, c => model._availableCostumes.get().indexOf(c)),
+										selectedIndex: twoway(model._costumeIndex),
 										onChange: (index) =>
 										{
-											const staff = <Staff>model._selectedPeep.get();
-											if (staff !== undefined) context.executeAction("pe-staffcostume", staffCostumeExecuteArgs(staff.id, model._availableCostumes.get()[index]));
+											const staff = <BaseStaff>model._selectedPeep.get();
+											if (staff !== null) context.executeAction("pe-staffcostume", staffCostumeExecuteArgs(staff.id, model._availableCostumes.get()[index]));
 										}
 									})
 								]),
@@ -236,24 +203,24 @@ export const sideWindow = tabwindow({
 									label({
 										text: "Uniform colour:",
 										height: 13,
-										visibility: model._visibleWhenStaff,
+										visibility: model._isVisibleWhen(model._isEntertainer, "inverted"),
 										padding: { left: 10 },
 									}),
 									textbox({
 										text: compute(model._colour, c => colourList[c] || ""),
 										width: "51%",
 										height: 13,
-										visibility: model._visibleWhenStaff,
+										visibility: model._isVisibleWhen(model._isEntertainer, "inverted"),
 										disabled: true,
 									}),
 									colourPicker({
-										colour: compute(model._colour, c => (c) || 0),
-										visibility: model._visibleWhenStaff,
+										colour: twoway(model._colour),
+										visibility: model._isVisibleWhen(model._isEntertainer, "inverted"),
 										padding: { right: 10 },
 										onChange: (colour) =>
 										{
 											const peep = model._selectedPeep.get();
-											if (peep) context.executeAction("pe-colourpeep", colourPeepExecuteArgs(peep.id, colour));
+											if (peep !== null) context.executeAction("pe-colourpeep", colourPeepExecuteArgs(peep.id, colour));
 										}
 									})
 								]),
@@ -262,7 +229,7 @@ export const sideWindow = tabwindow({
 						groupbox({
 							text: "Guest appearance",
 							spacing: 1,
-							visibility: model._visibleWhenNotStaff,
+							visibility: model._isVisibleWhen(model._isGuest),
 							content: [
 								horizontal([
 									createColourPickerWidget(g => drawImage(g, 5081, "tshirtColour"), "tshirtColour"),
@@ -286,9 +253,9 @@ export const sideWindow = tabwindow({
 										height: 13,
 										width: "55%",
 										padding: { right: 10, },
-										visibility: model._visibleWhenNotStaff,
+										visibility: model._isVisibleWhen(model._isGuest),
 										items: model._animationItems,
-										selectedIndex: compute(model._animation, a => model._availableGuestAnimations.get().indexOf(<GuestAnimation>a)),
+										selectedIndex: twoway(model._animationIndex),
 										onChange: (index) =>
 										{
 											const allGuests = model._allGuests.get();
@@ -302,13 +269,13 @@ export const sideWindow = tabwindow({
 										height: 13,
 										width: "55%",
 										padding: { right: 10, },
-										visibility: model._visibleWhenStaff,
+										visibility: model._isVisibleWhen(model._isGuest, "inverted"),
 										items: model._animationItems,
-										selectedIndex: compute(model._animation, a => model._availableStaffAnimations.get().indexOf(<StaffAnimation>a)),
+										selectedIndex: twoway(model._animationIndex),
 										onChange: (index) =>
 										{
 											const peep = model._selectedPeep.get();
-											if (peep)
+											if (peep !== null)
 											{
 												context.executeAction("pe-animationpeep", animationPeepExecuteArgs(peep.id, model._availableAnimations.get()[index]));
 											}
@@ -334,7 +301,7 @@ export const sideWindow = tabwindow({
 										onChange: (value, adjustment) =>
 										{
 											const peep = model._selectedPeep.get();
-											if (peep)
+											if (peep !== null)
 											{
 												context.executeAction("pe-animationframepeep", animationFramePeepExecuteArgs(peep.id, value, adjustment));
 											}
@@ -348,7 +315,7 @@ export const sideWindow = tabwindow({
 			]
 		}),
 		tab({
-			image: pointingFingerIcon,
+			image: img.pointingFinger,
 			height: "inherit",
 			spacing: 0,
 			content: [
@@ -357,38 +324,38 @@ export const sideWindow = tabwindow({
 						text: "Staff orders",
 						spacing: 2,
 						gap: {top: 16, bottom: 16},
-						visibility: model._visibleWhenStaff,
+						visibility: model._isVisibleWhen(model._isGuest, "inverted"),
 						content: [
-							createStaffOrdersWidget(StaffOrderLabel.SweepFootpaths, model._visibleWhenHandyman, StaffOrders.SweepFootpaths),
-							createStaffOrdersWidget(StaffOrderLabel.WaterGardens, model._visibleWhenHandyman, StaffOrders.WaterGardens),
-							createStaffOrdersWidget(StaffOrderLabel.EmptyLitterBins, model._visibleWhenHandyman, StaffOrders.EmptyLitterBins),
-							createStaffOrdersWidget(StaffOrderLabel.MowGrass, model._visibleWhenHandyman, StaffOrders.MowGrass),
-							createStaffOrdersWidget(StaffOrderLabel.InspectRides, model._visibleWhenMechanic, StaffOrders.InspectRides),
-							createStaffOrdersWidget(StaffOrderLabel.FixRides, model._visibleWhenMechanic, StaffOrders.FixRides),
+							createStaffOrdersWidget(StaffOrderLabel.SweepFootpaths, model._isVisibleWhen(model._isHandyman), StaffOrders.SweepFootpaths),
+							createStaffOrdersWidget(StaffOrderLabel.WaterGardens, model._isVisibleWhen(model._isHandyman), StaffOrders.WaterGardens),
+							createStaffOrdersWidget(StaffOrderLabel.EmptyLitterBins, model._isVisibleWhen(model._isHandyman), StaffOrders.EmptyLitterBins),
+							createStaffOrdersWidget(StaffOrderLabel.MowGrass, model._isVisibleWhen(model._isHandyman), StaffOrders.MowGrass),
+							createStaffOrdersWidget(StaffOrderLabel.InspectRides, model._isVisibleWhen(model._isMechanic), StaffOrders.InspectRides),
+							createStaffOrdersWidget(StaffOrderLabel.FixRides, model._isVisibleWhen(model._isMechanic), StaffOrders.FixRides),
 							checkbox({
 								text: "{INLINE_SPRITE}{253}{19}{0}{0} Surveilling park",
-								visibility: model._visibleWhenSecurity,
+								visibility: model._isVisibleWhen(model._isSecurity),
 								padding: {left: 10},
-								isChecked: twoway(securityOrders),
+								isChecked: twoway(model._securityOrders),
 								onChange: (checked) =>
 								{
 									if (!checked)
 									{
-										securityOrders.set(true);
+										model._securityOrders.set(true);
 										ui.showError("Can't be turned off", "Security guards never take breaks");
 									}
 								}
 							}),
 							checkbox({
 								text: "{INLINE_SPRITE}{116}{21}{0}{0} Keep guests happy",
-								visibility: model._visibleWhenEntertainer,
+								visibility: model._isVisibleWhen(model._isEntertainer),
 								padding: {left: 10},
-								isChecked: twoway(entertainerOrders),
+								isChecked: twoway(model._entertainerOrders),
 								onChange: (checked) =>
 								{
 									if (!checked)
 									{
-										entertainerOrders.set(true);
+										model._entertainerOrders.set(true);
 										ui.showError("Can't be turned off", "Rule 7: have fun");
 									}
 								}
@@ -397,7 +364,7 @@ export const sideWindow = tabwindow({
 					}),
 					groupbox({
 						text: "Guest flags",
-						visibility: model._visibleWhenNotStaff,
+						visibility: model._isVisibleWhen(model._isGuest),
 						content: [
 							horizontal([
 								vertical([
@@ -422,32 +389,32 @@ export const sideWindow = tabwindow({
 			]
 		}),
 		tab({
-			image: moodIcon,
+			image: img.mood,
 			height: "inherit",
 			spacing: 0,
 			content: [
 				horizontal([
 					groupbox({
 						text: "Physiology",
-						visibility: model._visibleWhenStaff,
+						visibility: model._isVisibleWhen(model._isGuest, "inverted"),
 						content: [
 							label({
 								text: "All staff members are very happy,",
 								alignment: "centred",
 								padding: -2,
-								visibility: model._visibleWhenStaff,
+								visibility: model._isVisibleWhen(model._isGuest, "inverted"),
 							}),
 							label({
 								text: "well fed and hydrated,",
 								alignment: "centred",
 								padding: -2,
-								visibility: model._visibleWhenStaff,
+								visibility: model._isVisibleWhen(model._isGuest, "inverted"),
 							}),
 							label({
 								text: "and just had their toilet break.",
 								alignment: "centred",
 								padding: -2,
-								visibility: model._visibleWhenStaff,
+								visibility: model._isVisibleWhen(model._isGuest, "inverted"),
 							}),
 						]
 					}),
@@ -464,7 +431,7 @@ export const sideWindow = tabwindow({
 					}),
 					groupbox({
 						text: "Physiology",
-						visibility: model._visibleWhenSingleGuest,
+						visibility: model._isVisibleWhen(model._isGuest),
 						content: [
 							createGuestKeysWidget("happiness", 255, true, model._happiness),
 							createGuestKeysWidget("energy", 128, true, model._energy),
@@ -481,7 +448,7 @@ export const sideWindow = tabwindow({
 		}),		
 		tab({
 			height: "inherit",
-			image: itemsIcon,
+			image: img.items,
 			spacing: 0,
 			content: [
 				groupbox({
@@ -499,7 +466,7 @@ export const sideWindow = tabwindow({
 					text: "Carrying",
 					padding: {bottom: 4},
 					spacing: 0,
-					visibility: model._visibleWhenSingleGuest,
+					visibility: model._isVisibleWhen(model._isGuest),
 					content: createItemWidget()
 					
 				}),
@@ -507,7 +474,7 @@ export const sideWindow = tabwindow({
 					label({
 						text: "Item:",
 						height: 13,
-						visibility: model._visibleWhenSingleGuest,
+						visibility: model._isVisibleWhen(model._isGuest),
 						padding: {bottom: 4},
 					}),
 					dropdown({
@@ -515,7 +482,7 @@ export const sideWindow = tabwindow({
 						height: 13,
 						width: "75%",
 						padding: {bottom: 4},
-						visibility: model._visibleWhenSingleGuest,
+						visibility: model._isVisibleWhen(model._isGuest),
 						onChange: (idx) => 
 						{
 							const item = guestItemTypeList[idx];
@@ -597,17 +564,18 @@ export const sideWindow = tabwindow({
 					label({
 						text: "",
 						height: 13,
-						visibility: model._visibleWhenSingleGuest,
+						visibility: model._isVisibleWhen(model._isGuest),
 					}),
 					button({
 						text: `Give item`,
-						visibility: model._visibleWhenSingleGuest,
+						visibility: model._isVisibleWhen(model._isGuest),
 						height: 13,
 						width: "25%",
 						onClick: () =>
 						{
-							const guest = model._selectedGuest.get();
+							const guest = <Guest>model._selectedPeep.get();
 							const item = model._item.get();
+							const voucher = model._voucher.get();
 							const rideId = model._rideId.get();
 							if (guest.hasItem({type: item}) && item !== "voucher" && item !== "photo1" && item !== "photo2" && item !== "photo3" && item !== "photo4")
 							{
@@ -621,7 +589,7 @@ export const sideWindow = tabwindow({
 							}
 							switch (model._item.get())
 							{
-								case "voucher": guest.giveItem(model._voucher.get()); break;
+								case "voucher": guest.giveItem(voucher); break;
 								case "photo1": guest.giveItem(<GuestPhoto>{type: "photo1", rideId: model._rideId.get()}); model._photo1RideName.set(map.getRide(model._rideId.get()).name); break;
 								case "photo2": guest.giveItem(<GuestPhoto>{type: "photo2", rideId: model._rideId.get()}); model._photo2RideName.set(map.getRide(model._rideId.get()).name); break;
 								case "photo3": guest.giveItem(<GuestPhoto>{type: "photo3", rideId: model._rideId.get()}); model._photo3RideName.set(map.getRide(model._rideId.get()).name); break;
@@ -633,7 +601,24 @@ export const sideWindow = tabwindow({
 				])
 			]
 		})
-	]
+	],
+	onOpen: () =>
+	{
+		model._mainWindow.set(getWindow(model._name.get()));
+		model._sideWindow.set(getWindow("Properties"));
+	},
+	onClose: () =>
+	{
+		ui.tool?.cancel();
+        model._close();
+	},
+	onUpdate: () =>
+	{
+		const side = model._sideWindow.get();
+		isSideWindowSticky();
+		if (side) side.colours = [model._sideWindowColour.primary.get(), model._sideWindowColour.secondary.get(), model._sideWindowColour.tertiary.get()];
+	},
+	onTabChange: () => ui.tool?.cancel(),
 });
 
 function openWindowRemoveItem(item: GuestItemType): void
@@ -686,7 +671,7 @@ function createFlagCheckboxWidget(flag: PeepFlags, padding?: Padding | undefined
 	const splitFlag = capitalizedFlag.replace(/([A-Z])/g, ' $1');
 	return checkbox({
 		text: splitFlag,
-		visibility: model._visibleWhenNotStaff,
+		visibility: model._isVisibleWhen(model._isGuest),
 		padding: padding,
 		isChecked: compute(model._selectedPeep, p => (p?.getFlag(flag)) ? true : false),
 		onChange: (checked) =>
@@ -774,6 +759,8 @@ function itemList(): string[]
 
 function isSideWindowSticky(): void
 {
+	const main = model._mainWindow.get();
+	const side = model._sideWindow.get();
 	if (context.sharedStorage.get("pe.sticky"))
 	{
 		if (main && side)
@@ -817,7 +804,7 @@ function createColourPickerWidget(callback: (g: GraphicsContext) => void, key: G
 			}
 		default:
 			{
-				colour = sideWindowColour.secondary;
+				colour = model._sideWindowColour.secondary;
 				break;
 			}
 	}
@@ -827,12 +814,12 @@ function createColourPickerWidget(callback: (g: GraphicsContext) => void, key: G
 				height: 16,
 				width: 16,
 				padding: { left: 10 },
-				visibility: model._visibleWhenNotStaff,
+				visibility: model._isVisibleWhen(model._isGuest),
 				onDraw: (g) => callback(g),
 			}),
 			colourPicker({
 				colour: compute(colour, c => c),
-				visibility: model._visibleWhenNotStaff,
+				visibility: model._isVisibleWhen(model._isGuest),
 				onChange: (colour) =>
 				{
 					if (model._allGuestsSelected.get()) model._getAllGuests();
@@ -877,14 +864,14 @@ function createGuestKeysWidget(key: GuestKey, maximum: number, isPositive: boole
 				height: 13,
 				width: "30%",
 				padding: { top: 0, bottom: 0, left: 5 },
-				visibility: model._visibleWhenSingleGuest,
+				visibility: model._isVisibleWhen(model._isGuest),
 			}),
 			progressBar({
 				background: ProgressBarColour.background,
 				percentFilled: bar,
 				isPositive: isPositive,
 				foreground: bar,
-				visibility: model._visibleWhenSingleGuest,
+				visibility: model._isVisibleWhen(model._isGuest),
 			}),
 			spinner({
 				minimum: compute(energy, e => e === "energy" ? 32 : 0),
@@ -893,7 +880,7 @@ function createGuestKeysWidget(key: GuestKey, maximum: number, isPositive: boole
 				value: value,
 				height: 13,
 				width: "25%",
-				visibility: model._visibleWhenSingleGuest,
+				visibility: model._isVisibleWhen(model._isGuest),
 				onChange: (_, adjustment: number) => model._modifyGuestKey(adjustment, key)
 			})
 		])

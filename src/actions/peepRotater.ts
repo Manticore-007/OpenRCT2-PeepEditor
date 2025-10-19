@@ -1,4 +1,4 @@
-import { model } from "../viewmodel/peepViewModel";
+import { model } from "../viewmodel/PeepViewModel";
 
 export function peepRotateExecute(): GameActionResult
 {
@@ -8,7 +8,7 @@ export function peepRotateExecute(): GameActionResult
         const firstPeep = <Guest>allGuests[0];
         const direction = firstPeep.direction;
         allGuests.forEach(entity => {
-            const peep = <Guest|Staff>entity;
+            const peep = <Guest|BaseStaff>entity;
             if (peep.direction !== direction) peep.direction = direction;
             peep.direction = <Direction>((peep.direction + 1) % numDirections);
         });

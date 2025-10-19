@@ -1,7 +1,7 @@
 /**
  * Returns a peep entity by id, or null if the entity was not found or not a guest or staff.
  */
-export function getPeepById(id: number): Guest | Staff | undefined
+export function getPeepById(id: number): Guest | BaseStaff | undefined
 {
 	const entity = map.getEntity(id);
 	return (entity && isGuest(entity) || entity && isStaff(entity)) ? entity : undefined;
@@ -18,7 +18,7 @@ export function isGuest(entity: Entity): entity is Guest
 /**
  * Returns true if the entity is a staff, or false if not.
  */
-export function isStaff(entity: Entity): entity is Staff
+export function isStaff(entity: Entity): entity is BaseStaff
 {
 	return (entity.type === "staff");
 }

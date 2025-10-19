@@ -12,7 +12,7 @@ export function colourPeepExecute(args: PeepColourArgs): GameActionResult {
     const entity = map.getEntity(args.id);
     if (entity === null) return {};
     if (entity.type === "staff") {
-        const staff = <Staff>entity;
+        const staff = <BaseStaff>entity;
         staff.colour = args.colour;
         debug(`Peep coloured to "${args.colour}"`);
     }

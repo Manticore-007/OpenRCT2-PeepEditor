@@ -1,5 +1,5 @@
 import { getAllRides, ParkRide } from "../objects/parkRides";
-import { model } from "../viewmodel/peepViewModel";
+import { model } from "../viewmodel/PeepViewModel";
 
 export function initRides(): void
 {

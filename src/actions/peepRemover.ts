@@ -9,7 +9,7 @@ export function removePeepExecute(args: PeepRemoveArgs): GameActionResult
     if (args.id === null) return {};
     const entity = map.getEntity(args.id);
     if (entity === null) return {};
-    const peep = <Guest|Staff>entity;
+    const peep = <Guest|BaseStaff>entity;
     debug(`${peep.name} is removed`);
     peep.remove();
     return {};

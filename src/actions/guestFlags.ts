@@ -11,7 +11,7 @@ export function guestFlagsExecute(args: GuestFlagsArgs): GameActionResult
     const entity = map.getEntity(args.id);
     if (entity === null) return {};
     if (entity === null || entity.type !== "guest" && entity.type !== "staff" ) return {} ;
-    const peep = <Guest|Staff>entity;
+    const peep = <Guest|BaseStaff>entity;
     peep.setFlag(args.flag , args.checked);
     return {};
 }

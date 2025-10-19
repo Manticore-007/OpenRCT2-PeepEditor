@@ -1,5 +1,5 @@
 import { dropdown, FlexiblePosition, horizontal, label, twoway, WidgetCreator } from "openrct2-flexui";
-import { model } from "../viewmodel/peepViewModel";
+import { model } from "../viewmodel/PeepViewModel";
 
 export function multiplier(): WidgetCreator<FlexiblePosition>
 {

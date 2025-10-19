@@ -1,5 +1,3 @@
-import { debug } from "../helpers/logger";
-
 export interface StaffCostumeArgs {
     id: number | null;
     costume: StaffCostume;
@@ -10,9 +8,8 @@ export function staffCostumeExecute(args: StaffCostumeArgs): GameActionResult
     if (args.id === null) return {};
     const entity = map.getEntity(args.id);
     if (entity === null) return {};
-    const staff = <Staff>entity;
+    const staff = <BaseStaff>entity;
     staff.costume = args.costume;
-    debug(`Staff costume set to "${args.costume}"`);
     return {};
 }
 

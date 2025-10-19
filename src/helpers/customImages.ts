@@ -1,5 +1,5 @@
 import { Colour } from "openrct2-flexui";
-import { model } from "../viewmodel/peepViewModel";
+import { model } from "../viewmodel/PeepViewModel";
 import { getColour } from "./settings";
 
 enum ImageMoniker {

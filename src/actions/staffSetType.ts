@@ -1,5 +1,3 @@
-import { debug } from "../helpers/logger";
-
 export interface StaffTypeArgs {
     id: number | null;
     staffType: StaffType;
@@ -10,9 +8,8 @@ export function staffTypeExecute(args: StaffTypeArgs): GameActionResult
     if (args.id === null) return {};
     const entity = map.getEntity(args.id);
     if (entity === null) return {};
-    const staff = <Staff>entity;
+    const staff = <BaseStaff>entity;
     staff.staffType = args.staffType;
-    debug(`Staff type set to "${args.staffType}"`);
     return {};
 }
 

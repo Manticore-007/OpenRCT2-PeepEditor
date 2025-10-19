@@ -1,6 +1,6 @@
 import { store } from "openrct2-flexui";
 import { mainWindow } from "../ui/mainWindow"
-import { model } from "../viewmodel/peepViewModel";
+import { model } from "../viewmodel/PeepViewModel";
 import { togglePeepPicker } from "../services/peepPicker";
 
 export const shortcutId =

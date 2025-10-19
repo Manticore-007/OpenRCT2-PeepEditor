@@ -1,9 +1,9 @@
 import { button, Colour, horizontal, label, window } from "openrct2-flexui";
-import { model } from "../viewmodel/peepViewModel";
+import { model } from "../viewmodel/PeepViewModel";
 import { sideWindow } from "./sideWindow";
 import { removePeepExecuteArgs } from "../actions/peepRemover";
 
-export function openWindowRemovePeep(peep: Staff | Guest): void {
+export function openWindowRemovePeep(peep: BaseStaff | Guest): void {
 	const removePeepWindow = window({
 		onClose: () => {
 			ui.tool?.cancel();
@@ -51,7 +51,7 @@ export function openWindowRemovePeep(peep: Staff | Guest): void {
 	removePeepWindow.open();
 }
 
-function textRemovePeep(peep: Guest | Staff): string {
+function textRemovePeep(peep: Guest | BaseStaff): string {
 	if (peep.type === "guest") {
 		return `{WHITE}Are you sure you want to remove\n${peep.name}?`;
 	}
