@@ -3,73 +3,104 @@ import * as btn from "./buttonControl";
 import { debug } from "./logger";
 import { followPeep } from "./resetViewport";
 import { selectedPeep, setSelectedPeep } from "./selectedPeep";
-import { getColourStaff, getCoordinates, getCostume, getEnergy, getFreeze, getLblColourStaff, getStaffType } from "./staffGetters";
+import {
+    getColourStaff,
+    getCoordinates,
+    getCostume,
+    getEnergy,
+    getFreeze,
+    getLblColourStaff,
+    getStaffType,
+} from "./staffGetters";
 import { windowId } from "./windowProperties";
 
-export function peepSelect(): void
-{
-    if (ui.getWindow(windowId).findWidget<ButtonWidget>("button-all-guests").isPressed){
+export function peepSelect(): void {
+    if (
+        ui.getWindow(windowId).findWidget<ButtonWidget>("button-all-guests")
+            .isPressed
+    ) {
         btn.toggle("button-all-guests");
     }
-    if (!ui.getWindow(windowId).findWidget<ButtonWidget>("button-picker").isPressed) {
+    if (
+        !ui.getWindow(windowId).findWidget<ButtonWidget>("button-picker")
+            .isPressed
+    ) {
         ui.activateTool({
             id: "select-peep",
             cursor: "cross_hair",
-            onDown: e => {
+            onDown: (e) => {
                 const entityId = e.entityId;
-                if (entityId !== undefined)
-                {
-                    const entity = map.getEntity(entityId);
-                    if (!entity || entity.type === "car")
-                    {
-                        ui.showError("You need Basssiiie's", "Ride Vehicle Editor");
-                        return;
+                if (entityId !== undefined) {
+                    const result = selectPeepByEntityId(entityId);
+                    if (result) {
+                        btn.toggle("button-picker");
+                        ui.tool?.cancel();
                     }
-                    else if (!entity || (entity.type !== "guest" && entity.type !== "staff"))
-                    {
-                        debug(`Invalid entity type selected: ${entity.type}`);
-                        ui.showError("You must select a guest", "or staff member");
-                        return;
-                    }
-                    setSelectedPeep(<Guest|Staff>entity);
-                    getFreeze(<Staff>selectedPeep);
-                    followPeep(selectedPeep);
-                    setLabelPeepName();
-                    btn.toggle("button-picker");
-                    btn.enableAll();
-                    if (entity.type === "guest") {btn.disable("button-freeze"); openSideWindow("Guest properties"); getColourGuest(<Guest>selectedPeep);}
-                    else
-                    {
-                        openSideWindow("Staff member properties");
-                        getColourStaff(<Staff>selectedPeep);
-                        getLblColourStaff(<Staff>selectedPeep);
-                        getCostume(<Staff>selectedPeep);
-                        getStaffType(<Staff>selectedPeep);
-                        getCoordinates(<Staff>selectedPeep);
-                        getEnergy(<Staff>selectedPeep);
-                    }
-                    ui.tool?.cancel();
                 }
-            }
+            },
         });
-    }
-    else {
+    } else {
         ui.tool?.cancel();
     }
     btn.toggle("button-picker");
 }
 
-export function setLabelPeepName(): void
-{
+export function selectPeepByEntityId(entityId: number): boolean {
+    const entity = map.getEntity(entityId);
+    if (!entity) {
+        ui.showError("This entity no longer exists.", "Peep selection");
+        return false;
+    }
+
+    if (!entity || entity.type === "car") {
+        ui.showError("You need Basssiiie's", "Ride Vehicle Editor");
+        return false;
+    } else if (
+        !entity ||
+        (entity.type !== "guest" && entity.type !== "staff")
+    ) {
+        debug(`Invalid entity type selected: ${entity.type}`);
+        ui.showError("You must select a guest", "or staff member");
+        return false;
+    }
+
+    setSelectedPeep(<Guest | Staff>entity);
+    getFreeze(<Staff>selectedPeep);
+    followPeep(selectedPeep);
+    setLabelPeepName();
+
+    btn.enableAll();
+    if (entity.type === "guest") {
+        btn.disable("button-freeze");
+        openSideWindow("Guest properties");
+        getColourGuest(<Guest>selectedPeep);
+    } else {
+        openSideWindow("Staff member properties");
+        getColourStaff(<Staff>selectedPeep);
+        getLblColourStaff(<Staff>selectedPeep);
+        getCostume(<Staff>selectedPeep);
+        getStaffType(<Staff>selectedPeep);
+        getCoordinates(<Staff>selectedPeep);
+        getEnergy(<Staff>selectedPeep);
+    }
+    return true;
+}
+export function setLabelPeepName(): void {
     const window = ui.getWindow(windowId);
-        window.findWidget<LabelWidget>("label-peep-name").text = `{WHITE}${selectedPeep.name}`;
+    window.findWidget<LabelWidget>("label-peep-name").text =
+        `{WHITE}${selectedPeep.name}`;
 }
 
-function getColourGuest(guest: Guest): void
-{
-	sideWindow.findWidget<ColourPickerWidget>("colourpicker-tshirt").colour = guest.tshirtColour;
-	sideWindow.findWidget<ColourPickerWidget>("colourpicker-trousers").colour = guest.trousersColour;
-	sideWindow.findWidget<ColourPickerWidget>("colourpicker-balloon").colour = guest.balloonColour;
-	sideWindow.findWidget<ColourPickerWidget>("colourpicker-hat").colour = guest.hatColour;
-	sideWindow.findWidget<ColourPickerWidget>("colourpicker-umbrella").colour = guest.umbrellaColour;
+function getColourGuest(guest: Guest): void {
+    sideWindow.findWidget<ColourPickerWidget>("colourpicker-tshirt").colour =
+        guest.tshirtColour;
+    sideWindow.findWidget<ColourPickerWidget>("colourpicker-trousers").colour =
+        guest.trousersColour;
+    sideWindow.findWidget<ColourPickerWidget>("colourpicker-balloon").colour =
+        guest.balloonColour;
+    sideWindow.findWidget<ColourPickerWidget>("colourpicker-hat").colour =
+        guest.hatColour;
+    sideWindow.findWidget<ColourPickerWidget>("colourpicker-umbrella").colour =
+        guest.umbrellaColour;
 }
+
