@@ -20,23 +20,13 @@ import * as button from "../helpers/buttonControl";
 import { getEnergy } from "../helpers/staffGetters";
 import guestSelectWindow from "./guestSelectWindow";
 
-const groupboxName: GroupBoxDesc = {
-    type: "groupbox",
-    name: "groupbox-name",
-    text: "Name",
-    x: margin,
-    y: toolbarHeight + widgetLineHeight / 2,
-    height: widgetLineHeight * 2.5,
-    width: windowWidth - margin * 2,
-};
-
 const btnPeepList: ButtonDesc = {
     type: "button",
     name: "button-peep-list",
     x: margin,
-    y: groupboxName.y + groupboxName.height / 2.5,
-    height: btnSize * 0.6,
-    width: btnSize * 0.6,
+    y: toolbarHeight + btnSize / 2 + margin / 2,
+    height: btnSize,
+    width: btnSize,
     image: 5193, //group of guests
     border: false,
     tooltip: "Select from list of all guests and staff",
@@ -44,10 +34,21 @@ const btnPeepList: ButtonDesc = {
         guestSelectWindow.open();
     },
 };
+
+const groupboxName: GroupBoxDesc = {
+    type: "groupbox",
+    name: "groupbox-name",
+    text: "Name",
+    x: btnPeepList.x + btnPeepList.width + margin,
+    y: toolbarHeight + widgetLineHeight / 2,
+    height: widgetLineHeight * 2.5,
+    width: windowWidth - margin * 3 - btnPeepList.width,
+};
+
 const labelPeepName: LabelDesc = {
     type: "label",
     name: "label-peep-name",
-    x: groupboxName.x + margin + btnPeepList.width + margin,
+    x: groupboxName.x + margin,
     y: groupboxName.y + groupboxName.height / 2.5,
     height: widgetLineHeight,
     width: groupboxName.width - margin * 2 - widgetLineHeight,
@@ -219,8 +220,8 @@ export class PeepEditorWindow {
                 height: windowHeight,
                 colours: [windowColour, windowColour],
                 widgets: [
-                    groupboxName,
                     btnPeepList,
+                    groupboxName,
                     labelPeepName,
                     viewportPeep,
                     btnPicker,
