@@ -21,29 +21,11 @@ const peepListColumns: ListViewDesc["columns"] = [
         // Crashes the game due to our use of separators.
         canSort: false,
     },
-    {
-        header: "Type",
-        // Crashes the game due to our use of separators.
-        canSort: false,
-    },
 ];
 
 function peepListItem(peep: Guest | Staff): ListViewItem {
     const idStr = String(peep.id ?? -1);
-    if (isStaff(peep)) {
-        return [idStr, peep.name ?? "<none>", peep.staffType ?? "<none>"];
-    } else if (isGuest(peep)) {
-        return [idStr, peep.name ?? "<none>"];
-    } else {
-        return [idStr];
-    }
-}
-
-function isStaff(peep: Guest | Staff): peep is Staff {
-    return peep.type === "staff";
-}
-function isGuest(peep: Guest | Staff): peep is Guest {
-    return peep.type === "guest";
+    return [idStr, peep.name ?? "<none>"];
 }
 
 class GuestSelectWindow {
