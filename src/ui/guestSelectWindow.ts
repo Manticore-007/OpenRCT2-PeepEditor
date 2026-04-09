@@ -9,21 +9,22 @@ const windowWidth = 300;
 const windowHeight = 500;
 const windowColour = colour["Saturated red"];
 
+// TODO: Use tabs instead of separators so we can sort.
 const peepListColumns: ListViewDesc["columns"] = [
     {
         header: "ID",
-        // FIXME: Crashes the game?
-        // canSort: true,
+        // Crashes the game due to our use of separators.
+        canSort: false,
     },
     {
         header: "Name",
-        // FIXME: Crashes the game?
-        // canSort: true,
+        // Crashes the game due to our use of separators.
+        canSort: false,
     },
     {
         header: "Type",
-        // FIXME: Crashes the game?
-        // canSort: true,
+        // Crashes the game due to our use of separators.
+        canSort: false,
     },
 ];
 
