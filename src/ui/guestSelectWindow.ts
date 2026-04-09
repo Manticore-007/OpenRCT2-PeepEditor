@@ -81,11 +81,10 @@ class GuestSelectWindow {
             }
 
             if (selectedIndex !== -1) {
-                // FIXME: OpenRCT does not properly invalidate the window when this is called.
-                // peepList.selectedCell = {
-                //     column: 0,
-                //     row: selectedIndex,
-                // };
+                peepList.selectedCell = {
+                    column: 0,
+                    row: selectedIndex,
+                };
             }
         });
     }
