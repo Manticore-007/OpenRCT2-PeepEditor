@@ -20,16 +20,29 @@ import * as button from "../helpers/buttonControl";
 import { getEnergy } from "../helpers/staffGetters";
 import guestSelectWindow from "./guestSelectWindow";
 
+const btnPicker: ButtonDesc = {
+    type: "button",
+    name: "button-picker",
+    x: windowWidth - margin - btnSize,
+    y: toolbarHeight + btnSize / 2 + margin / 2,
+    height: btnSize,
+    width: btnSize,
+    image: context.getIcon("eyedropper"),
+    isPressed: false,
+    tooltip: "Select a peep to modify",
+    onClick: () => peepSelect(),
+};
+
 const btnPeepList: ButtonDesc = {
     type: "button",
     name: "button-peep-list",
-    x: margin,
+    x: btnPicker.x - btnSize - margin,
     y: toolbarHeight + btnSize / 2 + margin / 2,
     height: btnSize,
     width: btnSize,
     image: 5193, //group of guests
     border: false,
-    tooltip: "Select from list of all guests and staff",
+    tooltip: "Select from a list of all guests and staff",
     onClick: () => {
         guestSelectWindow.open();
     },
@@ -39,10 +52,10 @@ const groupboxName: GroupBoxDesc = {
     type: "groupbox",
     name: "groupbox-name",
     text: "Name",
-    x: btnPeepList.x + btnPeepList.width + margin,
+    x: margin,
     y: toolbarHeight + widgetLineHeight / 2,
     height: widgetLineHeight * 2.5,
-    width: windowWidth - margin * 3 - btnPeepList.width,
+    width: windowWidth - (windowWidth - btnPeepList.x) - margin * 2,
 };
 
 const labelPeepName: LabelDesc = {
@@ -65,24 +78,11 @@ const viewportPeep: ViewportDesc = {
     width: windowWidth - btnSize - margin * 2,
 };
 
-const btnPicker: ButtonDesc = {
-    type: "button",
-    name: "button-picker",
-    x: viewportPeep.x + viewportPeep.width,
-    y: viewportPeep.y,
-    height: btnSize,
-    width: btnSize,
-    image: context.getIcon("eyedropper"),
-    isPressed: false,
-    tooltip: "Select a peep to modify",
-    onClick: () => peepSelect(),
-};
-
 const btnFreeze: ButtonDesc = {
     type: "button",
     name: "button-freeze",
-    x: btnPicker.x,
-    y: btnPicker.y + btnPicker.height,
+    x: viewportPeep.x + viewportPeep.width,
+    y: viewportPeep.y,
     height: btnSize,
     width: btnSize,
     image: 5182, //red-green flag
@@ -106,7 +106,7 @@ const btnFreeze: ButtonDesc = {
 const btnName: ButtonDesc = {
     type: "button",
     name: "button-peep-name",
-    x: btnPicker.x,
+    x: btnFreeze.x,
     y: btnFreeze.y + btnFreeze.height,
     height: btnSize,
     width: btnSize,
@@ -135,7 +135,7 @@ const btnName: ButtonDesc = {
 const btnLocate: ButtonDesc = {
     type: "button",
     name: "button-locate",
-    x: btnPicker.x,
+    x: btnFreeze.x,
     y: btnName.y + btnName.height,
     height: btnSize,
     width: btnSize,
@@ -149,7 +149,7 @@ const btnLocate: ButtonDesc = {
 const btnDelete: ButtonDesc = {
     type: "button",
     name: "button-delete",
-    x: btnPicker.x,
+    x: btnFreeze.x,
     y: btnLocate.y + btnLocate.height,
     height: btnSize,
     width: btnSize,
@@ -163,7 +163,7 @@ const btnDelete: ButtonDesc = {
 const btnAllGuests: ButtonDesc = {
     type: "button",
     name: "button-all-guests",
-    x: btnPicker.x,
+    x: btnFreeze.x,
     y: btnDelete.y + btnDelete.height,
     height: btnSize,
     width: btnSize,

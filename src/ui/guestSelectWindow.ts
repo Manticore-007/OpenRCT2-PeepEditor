@@ -1,13 +1,15 @@
-import { colour } from "../enums/colours";
 import { selectPeepByEntityId } from "../helpers/peepSelection";
 import { onPeepSelect } from "../helpers/selectedPeep";
-import { margin, toolbarHeight } from "../helpers/windowProperties";
+import {
+    margin,
+    toolbarHeight,
+    windowColour,
+} from "../helpers/windowProperties";
 
 const guestSelectWindowId = "peep-editor-guest-select-window";
 
 const windowWidth = 300;
 const windowHeight = 500;
-const windowColour = colour["Saturated red"];
 
 // TODO: Use tabs instead of separators so we can sort.
 const peepListColumns: ListViewDesc["columns"] = [
@@ -124,7 +126,7 @@ class GuestSelectWindow {
         if (!window) {
             window = ui.openWindow({
                 classification: guestSelectWindowId,
-                title: "Select a guest",
+                title: "Peep Editor - Select a peep",
                 x: ui.width - windowWidth / 8 - windowWidth,
                 y: ui.height / 8 - windowHeight / 8,
                 width: windowWidth,
