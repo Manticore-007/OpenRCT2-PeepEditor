@@ -2,10 +2,10 @@ import { initActions } from "./actions/initActions";
 import { initCustomSprites } from "./helpers/customImages";
 import { isUiAvailable } from "./helpers/environment";
 import { debug } from "./helpers/logger";
-import { mainWindow } from "./ui/mainWindow";
 import { initSettings, menuLabel } from "./helpers/settings";
-import { initRides } from "./helpers/initRides";
 import { initShortcuts } from "./helpers/initShortcutKeys";
+import { openWindowMain } from "./ui/mainWindow";
+import { initRides } from "./helpers/rides";
 
 /**
  * Entry point of the plugin.
@@ -23,5 +23,5 @@ export function main(): void
 	initRides();
 	initCustomSprites();
 	initShortcuts();
-	ui.registerMenuItem(menuLabel.get(), () => mainWindow.open());
+	ui.registerMenuItem(menuLabel.get(), () => openWindowMain());
 }

@@ -1,7 +1,7 @@
 import { dropdown, FlexiblePosition, horizontal, label, twoway, WidgetCreator } from "openrct2-flexui";
-import { model } from "../viewmodel/PeepViewModel";
+import { multiplierIndex } from "./windowConsts";
 
-export function multiplier(): WidgetCreator<FlexiblePosition>
+export function widgetMultiplier(): WidgetCreator<FlexiblePosition>
 {
 	return horizontal([
 		label({
@@ -14,7 +14,7 @@ export function multiplier(): WidgetCreator<FlexiblePosition>
 			width: "20%",
 			height: 13,
 			items: ["1x", "10x", "100x"],
-			selectedIndex: twoway(model._multiplierIndex)
+			selectedIndex: twoway(multiplierIndex)
 		})
 	])
 }

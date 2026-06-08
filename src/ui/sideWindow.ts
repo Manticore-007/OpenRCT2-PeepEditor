@@ -1,4 +1,3 @@
-
 /// <reference path="../../lib/openrct2.d.ts" />
 
 import { button, horizontal, label, tab, tabwindow, vertical,
@@ -26,15 +25,22 @@ import { getColour } from "../helpers/settings";
 import { GuestKey, guestKeysExecuteArgs } from "../actions/guestKeys";
 import { customImageFor, drawImage } from "../helpers/customImages";
 import { StaffOrderLabel, StaffOrders } from "../helpers/staffOrders";
-import { multiplier } from "./UtilityControls";
-import { img } from "./windowConsts";
+import { img, multiplier, windowMain, windowSide } from "./windowConsts";
+import { widgetMultiplier } from "./UtilityControls";
+import { photo1RideName, photo2RideName, photo3RideName, photo4RideName, rideId, rideList, selectedRide } from "../helpers/rides";
 
+export const colourWindow =
+{
+	primary: store<Colour>(getColour("pe.side.primary", Colour.DarkYellow)),
+	secondary: store<Colour>(getColour("pe.side.secondary", Colour.DarkYellow)),
+	tertiary: store<Colour>(Colour.DarkYellow),
+};
 
-export const sideWindow = tabwindow({
+export const templateWindowSide = tabwindow({
 	title: "Properties",
 	width: 260,
 	height: 230,
-	colours: [model._sideWindowColour.primary.get(), model._sideWindowColour.secondary.get(), model._sideWindowColour.tertiary.get()],
+	colours: [colourWindow.primary.get(), colourWindow.secondary.get(), colourWindow.tertiary.get()],
 	padding: 5,
 	tabs: [
 		tab({	//location
@@ -62,7 +68,7 @@ export const sideWindow = tabwindow({
 									padding: {top: 1, right: 10,  bottom: 1},
 									disabled: model._isPositionDisabled,
 									disabledMessage: "Peep not static",
-									onChange: (_, adjustment: number) => model._allGuests.get().forEach(guest => context.executeAction("pe-movepeep",movePeepExecuteArgs(guest.id, "x", (adjustment * model._multiplier.get()))))
+									onChange: (_, adjustment: number) => model._allGuests.get().forEach(guest => context.executeAction("pe-movepeep",movePeepExecuteArgs(guest.id, "x", (adjustment * multiplier.get()))))
 								})
 							]),
 							horizontal([
@@ -80,7 +86,7 @@ export const sideWindow = tabwindow({
 									padding: {top: 1, right: 10,  bottom: 1},
 									disabled: model._isPositionDisabled,
 									disabledMessage: "Peep not static",
-									onChange: (_, adjustment: number) => model._allGuests.get().forEach(guest => context.executeAction("pe-movepeep", movePeepExecuteArgs(guest.id, "y", (adjustment * model._multiplier.get()))))
+									onChange: (_, adjustment: number) => model._allGuests.get().forEach(guest => context.executeAction("pe-movepeep", movePeepExecuteArgs(guest.id, "y", (adjustment * multiplier.get()))))
 								})
 							]),
 							horizontal([
@@ -98,7 +104,7 @@ export const sideWindow = tabwindow({
 									padding: {top: 1, right: 10,  bottom: 1},
 									disabled: model._isPositionDisabled,
 									disabledMessage: "Peep not static",
-									onChange: (_, adjustment: number) => model._allGuests.get().forEach(guest => context.executeAction("pe-movepeep", movePeepExecuteArgs(guest.id, "z", (adjustment * model._multiplier.get()))))
+									onChange: (_, adjustment: number) => model._allGuests.get().forEach(guest => context.executeAction("pe-movepeep", movePeepExecuteArgs(guest.id, "z", (adjustment * multiplier.get()))))
 								})
 							]),
 							horizontal([
@@ -123,7 +129,7 @@ export const sideWindow = tabwindow({
 									onChange: (_, adjustment: number) =>
 									{
 										const peep = model._selectedPeep.get();
-										if (peep) context.executeAction("pe-guestkeys", guestKeysExecuteArgs(peep.id, (adjustment * model._multiplier.get()), "energy"));
+										if (peep) context.executeAction("pe-guestkeys", guestKeysExecuteArgs(peep.id, (adjustment * multiplier.get()), "energy"));
 									}
 								})
 							]),
@@ -140,7 +146,7 @@ export const sideWindow = tabwindow({
 						]
 					})
 				]),
-				multiplier()
+				widgetMultiplier()
 			]
 		}),
 		tab({ //appearance
@@ -443,7 +449,7 @@ export const sideWindow = tabwindow({
 						]
 					})
 			]),
-			multiplier()
+			widgetMultiplier()
 			]
 		}),		
 		tab({
@@ -509,7 +515,7 @@ export const sideWindow = tabwindow({
 								case 0: model._voucher.set(<Voucher>{type: "voucher", voucherType: "entry_free"});model._voucherType.set("entry_free"); break;
 								case 1: model._voucher.set(<Voucher>{type: "voucher", voucherType: "entry_half_price"});model._voucherType.set("entry_half_price"); break;
 								case 2: model._voucherType.set("food_drink_free"); model._voucher.set(<FoodDrinkVoucher>{type: "voucher", voucherType: model._voucherType.get(), item: model._voucherItem.get()}); break;
-								case 3: model._voucher.set(<RideVoucher>{type: "voucher", voucherType: "ride_free", rideId: model._rideId.get()});model._voucherType.set("ride_free"); break;
+								case 3: model._voucher.set(<RideVoucher>{type: "voucher", voucherType: "ride_free", rideId: rideId.get()});model._voucherType.set("ride_free"); break;
 							}
 						}
 					})
@@ -522,8 +528,8 @@ export const sideWindow = tabwindow({
 						visibility: model._visibleRideDropdown,
 					}),
 					dropdown({
-						items: compute(model._rideList, c => c.map(r => r._ride().name)),
-						selectedIndex: compute(model._selectedRide, r => r ? r[1] : 0),
+						items: compute(rideList, c => c.map(r => r._ride().name)),
+						selectedIndex: compute(selectedRide, r => r ? r[1] : 0),
 						disabledMessage: "No rides in this park",
 						autoDisable: "empty",
 						height: 13,
@@ -532,10 +538,9 @@ export const sideWindow = tabwindow({
 						visibility: model._visibleRideDropdown,
 						onChange: (idx) =>
 						{
-							const rideId = compute(model._rideList, c => c.map(r => r._ride().id));
-							model._rideId.set(rideId.get()[idx]);
-							model._voucher.set(<RideVoucher>{type: "voucher", voucherType: "ride_free", rideId: model._rideId.get()});
-							
+							const id = compute(rideList, c => c.map(r => r._ride().id));
+							rideId.set(id.get()[idx]);
+							model._voucher.set(<RideVoucher>{type: "voucher", voucherType: "ride_free", rideId: rideId.get()});							
 						}
 					})
 				]),
@@ -576,13 +581,13 @@ export const sideWindow = tabwindow({
 							const guest = <Guest>model._selectedPeep.get();
 							const item = model._item.get();
 							const voucher = model._voucher.get();
-							const rideId = model._rideId.get();
+							const id = rideId.get();
 							if (guest.hasItem({type: item}) && item !== "voucher" && item !== "photo1" && item !== "photo2" && item !== "photo3" && item !== "photo4")
 							{
 								ui.showError("Guest already", "has this item");
 								return;
 							}
-							if (map.getRide(rideId) === null && (item === "photo1" || item === "photo2" || item === "photo3" || item === "photo4" || model._voucherType.get() === "ride_free"))
+							if (map.getRide(id) === null && (item === "photo1" || item === "photo2" || item === "photo3" || item === "photo4" || model._voucherType.get() === "ride_free"))
 							{
 								ui.showError("There are no rides", "in your park!");
 								return;
@@ -590,10 +595,10 @@ export const sideWindow = tabwindow({
 							switch (model._item.get())
 							{
 								case "voucher": guest.giveItem(voucher); break;
-								case "photo1": guest.giveItem(<GuestPhoto>{type: "photo1", rideId: model._rideId.get()}); model._photo1RideName.set(map.getRide(model._rideId.get()).name); break;
-								case "photo2": guest.giveItem(<GuestPhoto>{type: "photo2", rideId: model._rideId.get()}); model._photo2RideName.set(map.getRide(model._rideId.get()).name); break;
-								case "photo3": guest.giveItem(<GuestPhoto>{type: "photo3", rideId: model._rideId.get()}); model._photo3RideName.set(map.getRide(model._rideId.get()).name); break;
-								case "photo4": guest.giveItem(<GuestPhoto>{type: "photo4", rideId: model._rideId.get()}); model._photo4RideName.set(map.getRide(model._rideId.get()).name); break;
+								case "photo1": guest.giveItem(<GuestPhoto>{type: "photo1", rideId: rideId.get()}); photo1RideName.set(map.getRide(rideId.get()).name); break;
+								case "photo2": guest.giveItem(<GuestPhoto>{type: "photo2", rideId: rideId.get()}); photo2RideName.set(map.getRide(rideId.get()).name); break;
+								case "photo3": guest.giveItem(<GuestPhoto>{type: "photo3", rideId: rideId.get()}); photo3RideName.set(map.getRide(rideId.get()).name); break;
+								case "photo4": guest.giveItem(<GuestPhoto>{type: "photo4", rideId: rideId.get()}); photo4RideName.set(map.getRide(rideId.get()).name); break;
 								default: guest.giveItem({type: item});
 							}
 						}
@@ -604,8 +609,8 @@ export const sideWindow = tabwindow({
 	],
 	onOpen: () =>
 	{
-		model._mainWindow.set(getWindow(model._name.get()));
-		model._sideWindow.set(getWindow("Properties"));
+		windowMain.set(getWindow(model._name.get()));
+		windowSide.set(getWindow("Properties"));
 	},
 	onClose: () =>
 	{
@@ -614,12 +619,21 @@ export const sideWindow = tabwindow({
 	},
 	onUpdate: () =>
 	{
-		const side = model._sideWindow.get();
+		const side = windowSide.get();
 		isSideWindowSticky();
-		if (side) side.colours = [model._sideWindowColour.primary.get(), model._sideWindowColour.secondary.get(), model._sideWindowColour.tertiary.get()];
+		if (side) side.colours = [colourWindow.primary.get(), colourWindow.secondary.get(), colourWindow.tertiary.get()];
 	},
 	onTabChange: () => ui.tool?.cancel(),
 });
+
+export function openSideWindow(): void
+{
+	templateWindowSide.open();
+}
+export function closeSideWindow(): void
+{
+	templateWindowSide.close();
+}
 
 function openWindowRemoveItem(item: GuestItemType): void
 {
@@ -691,7 +705,7 @@ function createItemWidget(): WidgetCreator<FlexiblePosition, Parsed<FlexiblePosi
 	{
 	const visibility = compute(model._items, i => i.some(el => el.type === item) ? "visible" : "none");
 	const name = `{BLACK}${itemName[guestItemTypeList.indexOf(item)]}`;
-	const text = compute(model._photo1RideName, model._photo2RideName, model._photo3RideName, model._photo4RideName, (p1, p2, p3, p4) =>
+	const text = compute(photo1RideName, photo2RideName, photo3RideName, photo4RideName, (p1, p2, p3, p4) =>
 	{
 		if (item === "photo1" || item === "photo2" || item === "photo3" || item === "photo4")
 		{
@@ -759,8 +773,8 @@ function itemList(): string[]
 
 function isSideWindowSticky(): void
 {
-	const main = model._mainWindow.get();
-	const side = model._sideWindow.get();
+	const main = windowMain.get();
+	const side = windowSide.get();
 	if (context.sharedStorage.get("pe.sticky"))
 	{
 		if (main && side)
@@ -804,7 +818,7 @@ function createColourPickerWidget(callback: (g: GraphicsContext) => void, key: G
 			}
 		default:
 			{
-				colour = model._sideWindowColour.secondary;
+				colour = colourWindow.secondary;
 				break;
 			}
 	}

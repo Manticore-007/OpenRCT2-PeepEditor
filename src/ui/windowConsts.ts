@@ -1,4 +1,10 @@
+import { compute, store } from "openrct2-flexui";
 
+export const windowMain = store<Window|null>(null);
+export const windowSide = store<Window|null>(null);
+export const multiplierIndex = store<number>(0);
+export const multiplier = compute(multiplierIndex, idx => (10 ** idx));
+export const windowTitle = "Peep Editor";
 
 //button properties
 export const buttonSize = 24;
