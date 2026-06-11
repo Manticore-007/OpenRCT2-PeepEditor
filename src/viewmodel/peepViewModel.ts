@@ -1,4 +1,4 @@
-import { Bindable, Colour, compute, ElementVisibility, store, WritableStore } from "openrct2-flexui";
+import { Colour, compute, store, WritableStore } from "openrct2-flexui";
 import { guestFlagsExecuteArgs } from "../actions/guestFlags";
 import { debug } from "../helpers/logger";
 import { GuestKey, guestKeysExecuteArgs } from "../actions/guestKeys";
@@ -27,68 +27,59 @@ export class PeepViewModel
     readonly _selectedPeep = store<Guest|BaseStaff|null>(null);
     
     //general
-    readonly _name = store<string>(windowTitle);
-    readonly _energy = store<number>(0);
-    readonly _x = store<number>(0);
-    readonly _y = store<number>(0);
-    readonly _z = store<number>(0);
-    readonly _availableAnimations = store<GuestAnimation[]|StaffAnimation[]>([]);
+    readonly _name = this._computePeepProperty<Guest|BaseStaff, string>(peep => peep.name, windowTitle);
+    readonly _energy = this._computePeepProperty<Guest|BaseStaff, number>(peep => peep.energy, 0);
+    readonly _x = this._computePeepProperty<Guest|BaseStaff, number>(peep => peep.x, 0);
+    readonly _y = this._computePeepProperty<Guest|BaseStaff, number>(peep => peep.y, 0);
+    readonly _z = this._computePeepProperty<Guest|BaseStaff, number>(peep => peep.z, 0);
+    readonly _availableAnimations = this._computePeepProperty<Guest|BaseStaff, GuestAnimation[]|StaffAnimation[]>(peep => peep.availableAnimations, []);
     readonly _animationIndex = store<number>(0);
-    readonly _animation = store<GuestAnimation|StaffAnimation>("walking");
-    readonly _animationFrame = store<number>(0);
-    readonly _animationLength = store<number>(1);
+    readonly _animation = this._computePeepProperty<Guest|BaseStaff, GuestAnimation|StaffAnimation>(peep => peep.animation, "walking");
+    readonly _animationFrame = this._computePeepProperty<Guest|BaseStaff, number>(peep => peep.animationOffset, 0);
+    readonly _animationLength = this._computePeepProperty<Guest|BaseStaff, number>(peep => peep.animationLength, 0);
     readonly _animationItems = compute(this._availableAnimations, a => a.map(animationList));
     
-    //staff    
-    readonly _staffTypeIndex = store<number>(0);
-    readonly _staffType = compute(this._staffTypeIndex, i => staffType[i]);
-    readonly _availableCostumes = compute(this._selectedPeep, p => {
-        const staff = <BaseStaff>p
-        return staff?.peepType === "staff" ? staff.availableCostumes : []
-    });
-    readonly _availableCostumeStrings = compute(this._selectedPeep, p => {
-        const staff = <BaseStaff>p
-        return staff?.peepType === "staff" ? staff.getCostumeStrings() : []
-    });
-    readonly _costumeIndex = store<number>(0);
+    //staff
+    readonly _staffTypeIndex = this._computePeepProperty<BaseStaff, number>(staff  => staffType.indexOf(staff.staffType), 0, "staff");
+    readonly _staffType = this._computePeepProperty<BaseStaff, StaffType | undefined>(staff => staff.staffType, undefined, "staff");
+    readonly _availableCostumes = this._computePeepProperty<BaseStaff, StaffCostume[]>(staff => staff.availableCostumes, [], "staff");
+    readonly _availableCostumeStrings = this._computePeepProperty<BaseStaff, string[]>(staff => staff.getCostumeStrings(), [], "staff");
+    readonly _costumeIndex = this._computePeepProperty<BaseStaff, number>(staff => this._availableCostumes.get().indexOf(<StaffCostume>staff.costume), 0, "staff");
     readonly _costume = compute(this._costumeIndex, i => this._availableCostumes.get()[i]);
-    readonly _colour = compute(this._selectedPeep, p => {
-        const staff = <BaseStaff>p;
-        return staff?.colour || 0
-    });
-    readonly _orders = store<number>(0);
+    readonly _colour = this._computePeepProperty<BaseStaff, number>(staff => staff.colour, 0, "staff");
+    readonly _orders = this._computePeepProperty<BaseStaff, number>(staff => staff.orders, 0, "staff");
     readonly _availableStaffAnimations = store<StaffAnimation[]>([]);
     readonly _securityOrders = store<boolean>(true);
     readonly _entertainerOrders = store<boolean>(true);
 
     //guest
-    readonly _tshirtColour = store<number>(defaultColour);
-    readonly _trousersColour = store<number>(defaultColour);
-    readonly _balloonColour = store<number>(defaultColour);
-    readonly _hatColour = store<number>(defaultColour);
-    readonly _umbrellaColour = store<number>(defaultColour);
-    readonly _happiness = store<number>(0);
-    readonly _nausea = store<number>(0);
-    readonly _hunger = store<number>(255);
-    readonly _thirst = store<number>(255);
-    readonly _toilet = store<number>(0);
-    readonly _mass = store<number>(0);
-    readonly _items = store<GuestItem[]>([]);
+    readonly _tshirtColour = this._computePeepProperty<Guest, number>(guest  => guest.tshirtColour, defaultColour, "guest");
+    readonly _trousersColour = this._computePeepProperty<Guest, number>(guest  => guest.trousersColour, defaultColour, "guest");
+    readonly _balloonColour = this._computePeepProperty<Guest, number>(guest  => guest.balloonColour, defaultColour, "guest");
+    readonly _hatColour = this._computePeepProperty<Guest, number>(guest  => guest.hatColour, defaultColour, "guest");
+    readonly _umbrellaColour = this._computePeepProperty<Guest, number>(guest  => guest.umbrellaColour, defaultColour, "guest");
+    readonly _happiness = this._computePeepProperty<Guest, number>(guest  => guest.happiness, 0, "guest");
+    readonly _nausea = this._computePeepProperty<Guest, number>(guest  => guest.nausea, 0, "guest");
+    readonly _hunger = this._computePeepProperty<Guest, number>(guest  => guest.hunger, 255, "guest");
+    readonly _thirst = this._computePeepProperty<Guest, number>(guest  => guest.thirst, 255, "guest");
+    readonly _toilet = this._computePeepProperty<Guest, number>(guest  => guest.toilet, 0, "guest");
+    readonly _mass = this._computePeepProperty<Guest, number>(guest  => guest.mass, 0, "guest");
+    readonly _items = this._computePeepProperty<Guest, GuestItem[]>(guest  => guest.items, [], "guest");
     readonly _item = store<GuestItemType>("balloon");
     readonly _voucher = store<Voucher>({type: "voucher", voucherType: "entry_free"});
     readonly _voucherItem = store<GuestItemType|null>(null);
     readonly _voucherType = store<VoucherType|null>(null);
-    readonly _availableGuestAnimations = store<GuestAnimation[]>([]);
+    readonly _availableGuestAnimations = this._computePeepProperty<Guest, GuestAnimation[]>(guest  => guest.availableAnimations, [], "guest");
 
     //window
     readonly _selectPeepType = store<EntityType>("guest");
 
     //custom
-    readonly _isGuest = compute(this._selectedPeep, peep => (peep?.peepType === "guest" || false));
-    readonly _isHandyman = compute(this._staffType, t => t === "handyman");
-    readonly _isMechanic = compute(this._staffType, t => t === "mechanic");
-    readonly _isSecurity = compute(this._staffType, t => t === "security");
-    readonly _isEntertainer = compute(this._staffType, t => t === "entertainer");
+    readonly _isGuest = compute(this._selectedPeep, peep => (peep?.peepType === "guest"));
+    readonly _isHandyman = compute(this._selectedPeep, this._staffType, (p, t) => (p as BaseStaff) && t === "handyman");
+    readonly _isMechanic = compute(this._selectedPeep, this._staffType, (p, t) => (p as BaseStaff) && t === "mechanic");
+    readonly _isSecurity = compute(this._selectedPeep, this._staffType, (p, t) => (p as BaseStaff) && t === "security");
+    readonly _isEntertainer = compute(this._selectedPeep, this._staffType, (p, t) => (p as BaseStaff) && t === "entertainer");
     readonly _isPicking = store<boolean>(false);
     readonly _isFrozen = store<boolean>(false);
     readonly _isStatic = store<boolean>(false);
@@ -109,16 +100,7 @@ export class PeepViewModel
 
     constructor()
     {
-        this._selectedPeep.subscribe(peep =>
-        {
-            if (peep === null) return;
-            this._updatePeepInfo(peep);
-            if (peep.peepType === "guest")
-            {
-                this._updateGuestInfo(<Guest>peep);
-            }
-            else this._updateStaffInfo(<BaseStaff>peep);
-        })
+        this._selectedPeep.subscribe(peep => this._updateDynamicDataFromPeep(peep));
     }
 
     _open(): void
@@ -131,7 +113,6 @@ export class PeepViewModel
     {
         this._allGuests.set([]);
         this._selectedPeep.set(null);
-        this._name.set(windowTitle);
         this._allGuestsSelected.set(false);
         multiplierIndex.set(0);
     }
@@ -222,12 +203,13 @@ export class PeepViewModel
         if (peep) context.executeAction("pe-guestkeys", guestKeysExecuteArgs(peep.id, (adjustment * multiplier.get()), key));
     }
 
-    _conversionCheck(): void
+    _isVisibleWhen = (check: WritableStore<boolean>, visibleOnTrue: boolean = true) => compute(check, c => (c === visibleOnTrue) ? "visible" : "none");
+
+    private _conversionCheck(): void
     {
         const allStaff = map.getAllEntities("staff");
         allStaff.forEach(staff =>
         {
-            this._availableCostumes.set(staff.availableCostumes);
             if (staff.energy === 0)
             {
                 context.executeAction("pe-guestkeys", guestKeysExecuteArgs(staff.id, 96, "energy"));
@@ -238,83 +220,57 @@ export class PeepViewModel
         });
     }
 
-    _isVisibleWhen(check: WritableStore<boolean>, inverted?: "inverted"): Bindable<ElementVisibility>
+    private _computePeepProperty<P, T>(extractor: (peep: P) => T, fallback: T, expectedType?: string): WritableStore<T>
     {
-        if (inverted !== undefined) return compute(check, c => c ? "none" : "visible");
-        else return compute(check, c => c ? "visible" : "none");
-    }
-
-    private _updatePeepInfo(peep: Guest | BaseStaff): void
-    {
-        this._name.set(peep.name);
-        this._animation.set(peep.animation);
-        this._animationLength.set(peep.animationLength);
-        peep.getFlag("animationFrozen") ? this._isFrozen.set(true) : this._isFrozen.set(false);
-        peep.getFlag("positionFrozen") ? this._isStatic.set(true) : this._isStatic.set(false);
-        this._updateDynamicDataFromPeep(peep);
-    }
-
-    private _updateGuestInfo(guest: Guest): void
-    {
-        this._tshirtColour.set(guest.tshirtColour);
-        this._trousersColour.set(guest.trousersColour);
-        this._hatColour.set(guest.hatColour);
-        this._balloonColour.set(guest.balloonColour);
-        this._umbrellaColour.set(guest.umbrellaColour);
-        this._availableGuestAnimations.set(guest.availableAnimations);
-        this._getPhotoRideName();
-    }
-
-    private _updateStaffInfo(staff: BaseStaff): void
-    {
-        this._colour.set(staff.colour);
-        this._orders.set(staff.orders);
-        this._staffType.set(staff.staffType);
-        this._staffTypeIndex.set(staffType.indexOf(staff.staffType));
-        this._items.set([]);
-        this._isHandyman.set(staff.staffType === "handyman");
-        this._isMechanic.set(staff.staffType === "mechanic");
-        this._isSecurity.set(staff.staffType === "security");
-        this._isEntertainer.set(staff.staffType === "entertainer");
-        this._costumeIndex.set(this._availableCostumes.get().indexOf(<StaffCostume>staff.costume));
-    }
-
-    private _updateDynamicDataFromPeep(peep: Guest | BaseStaff): void
-    {
-        if (peep.type === "guest")
+        return compute(this._selectedPeep, p =>
         {
-        const guest = <Guest>peep;
-        this._happiness.set(guest.happiness);
-        this._hunger.set(guest.hunger);
-        this._thirst.set(guest.thirst);
-        this._nausea.set(guest.nausea);
-        this._toilet.set(guest.toilet);
-        this._mass.set(guest.mass);
-        this._items.set(guest.items);
-        }
-        else
-        {
-        const staff = <BaseStaff>peep;
-        this._availableCostumeStrings.set(staff.getCostumeStrings());
-        this._availableCostumes.set(staff.availableCostumes);
-        this._availableStaffAnimations.set(staff.availableAnimations);
-        }
-        this._x.set(peep.x);
-        this._y.set(peep.y);
-        this._z.set(peep.z);
-        this._energy.set(peep.energy);
-        this._availableAnimations.set(peep.availableAnimations);
-        this._animationFrame.set(peep.animationOffset);
-        
-        if (peep.peepType !== "guest" && peep.peepType !== "staff")
-        {
-            ui.showError("Peep no longer", "available");
+            const isValid = p && (!expectedType || (p as any).peepType === expectedType);
+            return isValid ? extractor(p as unknown as P) : fallback;
+        });
+    }
+
+    private _updateDynamicDataFromPeep(peep: Guest | BaseStaff | null): void
+    {
+        if (peep ===null) return;
+        if (peep.peepType !== "guest" && peep.peepType !== "staff") {
             this._close();
             getWindow("Properties")?.close();
+            ui.showError("Peep no longer", "available");
+            return;
         }
-}
 
-    _onGameTickExecuted(): void
+        peep.getFlag("animationFrozen") ? this._isFrozen.set(true) : this._isFrozen.set(false);
+        peep.getFlag("positionFrozen") ? this._isStatic.set(true) : this._isStatic.set(false);
+
+        const { x, y, z, energy, availableAnimations, animationOffset } = peep;
+
+        this._x.set(x);
+        this._y.set(y);
+        this._z.set(z);
+        this._energy.set(energy);
+        this._availableAnimations.set(availableAnimations);
+        this._animationFrame.set(animationOffset);
+
+        if (peep.peepType === "guest") {
+            const { happiness, hunger, thirst, nausea, toilet, mass, items } = peep as Guest;
+
+            this._happiness.set(happiness);
+            this._hunger.set(hunger);
+            this._thirst.set(thirst);
+            this._nausea.set(nausea);
+            this._toilet.set(toilet);
+            this._mass.set(mass);
+            this._items.set(items);
+            this._getPhotoRideName(peep as Guest);
+        }
+        else {
+            const staff = peep as BaseStaff;
+            this._availableCostumeStrings.set(staff.getCostumeStrings());
+            this._availableStaffAnimations.set(staff.availableAnimations);
+        }
+    }
+
+    private _onGameTickExecuted(): void
     {
         const peep = this._selectedPeep.get();
         if (peep)
@@ -323,9 +279,8 @@ export class PeepViewModel
         }
     }
 
-    _getPhotoRideName(): void
+    private _getPhotoRideName(guest: Guest): void
     {
-        const guest = <Guest>model._selectedPeep.get();
         if (guest.hasItem({ type: "photo1" }) || guest.hasItem({ type: "photo2" }) ||guest.hasItem({ type: "photo3" }) || guest.hasItem({ type: "photo4" }))
         {
             guest.items.forEach((item, index) =>

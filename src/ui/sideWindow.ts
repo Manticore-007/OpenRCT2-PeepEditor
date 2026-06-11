@@ -25,8 +25,7 @@ import { getColour } from "../helpers/settings";
 import { GuestKey, guestKeysExecuteArgs } from "../actions/guestKeys";
 import { customImageFor, drawImage } from "../helpers/customImages";
 import { StaffOrderLabel, StaffOrders } from "../helpers/staffOrders";
-import { img, multiplier, windowMain, windowSide } from "./windowConsts";
-import { widgetMultiplier } from "./UtilityControls";
+import { img, multiplier, multiplierIndex, windowMain, windowSide } from "./windowConsts";
 import { photo1RideName, photo2RideName, photo3RideName, photo4RideName, rideId, rideList, selectedRide } from "../helpers/rides";
 
 export const colourWindow =
@@ -113,7 +112,7 @@ export const templateWindowSide = tabwindow({
 									height: 13,
 									padding: {top: 10, bottom: 5, left: 10},
 									disabled: model._isStatic,
-									visibility: model._isVisibleWhen(model._isGuest, "inverted"),
+									visibility: model._isVisibleWhen(model._isGuest, false),
 								}),
 								spinner({
 									minimum: 32,
@@ -124,7 +123,7 @@ export const templateWindowSide = tabwindow({
 									width: "55%",
 									padding: {top: 10, right: 10, bottom: 5},
 									disabled: model._isStatic,
-									visibility: model._isVisibleWhen(model._isGuest, "inverted"),
+									visibility: model._isVisibleWhen(model._isGuest, false),
 									disabledMessage: "Peep not moving",
 									onChange: (_, adjustment: number) =>
 									{
@@ -159,19 +158,19 @@ export const templateWindowSide = tabwindow({
 							text: "Staff member appearance",
 							spacing: 2,
 							gap: {top: 16, bottom: 16},
-							visibility: model._isVisibleWhen(model._isGuest, "inverted"),
+							visibility: model._isVisibleWhen(model._isGuest, false),
 							content: [
 								horizontal([
 									label({
 										text: "Staff type:",
 										height: 13,
-										visibility: model._isVisibleWhen(model._isGuest, "inverted"),
+										visibility: model._isVisibleWhen(model._isGuest, false),
 										padding: { left: 10 },
 									}),
 									dropdown({
 										height: 13,
 										width: "55%",
-										visibility: model._isVisibleWhen(model._isGuest, "inverted"),
+										visibility: model._isVisibleWhen(model._isGuest, false),
 										disabledMessage: "Not available",
 										padding: { right: 10 },
 										items: staffTypeList,
@@ -209,19 +208,19 @@ export const templateWindowSide = tabwindow({
 									label({
 										text: "Uniform colour:",
 										height: 13,
-										visibility: model._isVisibleWhen(model._isEntertainer, "inverted"),
+										visibility: model._isVisibleWhen(model._isHandyman) || model._isVisibleWhen(model._isMechanic) || model._isVisibleWhen(model._isSecurity),
 										padding: { left: 10 },
 									}),
 									textbox({
 										text: compute(model._colour, c => colourList[c] || ""),
 										width: "51%",
 										height: 13,
-										visibility: model._isVisibleWhen(model._isEntertainer, "inverted"),
+										visibility: model._isVisibleWhen(model._isHandyman) || model._isVisibleWhen(model._isMechanic) || model._isVisibleWhen(model._isSecurity),
 										disabled: true,
 									}),
 									colourPicker({
 										colour: twoway(model._colour),
-										visibility: model._isVisibleWhen(model._isEntertainer, "inverted"),
+										visibility: model._isVisibleWhen(model._isHandyman) || model._isVisibleWhen(model._isMechanic) || model._isVisibleWhen(model._isSecurity),
 										padding: { right: 10 },
 										onChange: (colour) =>
 										{
@@ -275,7 +274,7 @@ export const templateWindowSide = tabwindow({
 										height: 13,
 										width: "55%",
 										padding: { right: 10, },
-										visibility: model._isVisibleWhen(model._isGuest, "inverted"),
+										visibility: model._isVisibleWhen(model._isGuest, false),
 										items: model._animationItems,
 										selectedIndex: twoway(model._animationIndex),
 										onChange: (index) =>
@@ -330,7 +329,7 @@ export const templateWindowSide = tabwindow({
 						text: "Staff orders",
 						spacing: 2,
 						gap: {top: 16, bottom: 16},
-						visibility: model._isVisibleWhen(model._isGuest, "inverted"),
+						visibility: model._isVisibleWhen(model._isGuest, false),
 						content: [
 							createStaffOrdersWidget(StaffOrderLabel.SweepFootpaths, model._isVisibleWhen(model._isHandyman), StaffOrders.SweepFootpaths),
 							createStaffOrdersWidget(StaffOrderLabel.WaterGardens, model._isVisibleWhen(model._isHandyman), StaffOrders.WaterGardens),
@@ -402,25 +401,25 @@ export const templateWindowSide = tabwindow({
 				horizontal([
 					groupbox({
 						text: "Physiology",
-						visibility: model._isVisibleWhen(model._isGuest, "inverted"),
+						visibility: model._isVisibleWhen(model._isGuest, false),
 						content: [
 							label({
 								text: "All staff members are very happy,",
 								alignment: "centred",
 								padding: -2,
-								visibility: model._isVisibleWhen(model._isGuest, "inverted"),
+								visibility: model._isVisibleWhen(model._isGuest, false),
 							}),
 							label({
 								text: "well fed and hydrated,",
 								alignment: "centred",
 								padding: -2,
-								visibility: model._isVisibleWhen(model._isGuest, "inverted"),
+								visibility: model._isVisibleWhen(model._isGuest, false),
 							}),
 							label({
 								text: "and just had their toilet break.",
 								alignment: "centred",
 								padding: -2,
-								visibility: model._isVisibleWhen(model._isGuest, "inverted"),
+								visibility: model._isVisibleWhen(model._isGuest, false),
 							}),
 						]
 					}),
@@ -842,6 +841,24 @@ function createColourPickerWidget(callback: (g: GraphicsContext) => void, key: G
 			})
 		])
 	)
+}
+
+function widgetMultiplier(): WidgetCreator<FlexiblePosition>
+{
+	return horizontal([
+		label({
+			text: "Multiplier:",
+			height: 13,
+			padding: ["1w", -20, 7, "1w"],
+		}),
+		dropdown({
+			padding: ["1w", 15, 7, -20],
+			width: "20%",
+			height: 13,
+			items: ["1x", "10x", "100x"],
+			selectedIndex: twoway(multiplierIndex)
+		})
+	])
 }
 
 function createStaffOrdersWidget(text: string, visibility: Bindable<ElementVisibility>, orders: number): WidgetCreator<FlexiblePosition>
