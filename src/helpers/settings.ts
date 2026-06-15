@@ -4,7 +4,6 @@ const title = store<string>("Peep Editor");
 
 export const isSticky = store<boolean>(context.sharedStorage.get("pe.sticky", true));
 export const isPinned = store<boolean>(context.sharedStorage.get("pe.favourite", false));
-//export const isPinned = store<boolean>(context.sharedStorage.get("pe.favourite", false));
 export const theme = store<Theme>(context.sharedStorage.get("pe.theme", "rct1"));
 export const menuLabel = compute(isPinned, f => (f) ? `- ${title.get()}` : title.get())
 

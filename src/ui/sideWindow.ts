@@ -21,11 +21,11 @@ import { guestItemTypeList, itemImage, itemName } from "../helpers/guestItemType
 import { guestItemRemoveExecuteArgs } from "../actions/guestItemRemove";
 import { peepRotateExecuteArgs } from "../actions/peepRotater";
 import { getWindow } from "../helpers/getWindow";
-import { getColour } from "../helpers/settings";
+import { getColour, theme } from "../helpers/settings";
 import { GuestKey, guestKeysExecuteArgs } from "../actions/guestKeys";
 import { customImageFor, drawImage } from "../helpers/customImages";
 import { StaffOrderLabel, StaffOrders } from "../helpers/staffOrders";
-import { img, multiplier, multiplierIndex, windowMain, windowSide } from "./windowConsts";
+import { buttonSize, img, multiplier, multiplierIndex, windowMain, windowSide, windowTitle } from "./windowConsts";
 import { photo1RideName, photo2RideName, photo3RideName, photo4RideName, rideId, rideList, selectedRide } from "../helpers/rides";
 
 export const colourWindow =
@@ -143,7 +143,11 @@ export const templateWindowSide = tabwindow({
 								onClick: () => context.executeAction("pe-peeprotate", peepRotateExecuteArgs())
 							}),
 						]
-					})
+					}),
+					vertical({
+						padding: {top: 5, right: 6},
+						content: buttonStyle()
+					}),
 				]),
 				widgetMultiplier()
 			]
@@ -233,6 +237,7 @@ export const templateWindowSide = tabwindow({
 						}),
 						groupbox({
 							text: "Guest appearance",
+							width: "1w",
 							spacing: 1,
 							visibility: model._isVisibleWhen(model._isGuest),
 							content: [
@@ -375,18 +380,10 @@ export const templateWindowSide = tabwindow({
 								vertical([
 									createFlagCheckboxWidget("leavingPark", {bottom: -3, left: 10 }),
 									createFlagCheckboxWidget("slowWalk", {top: -2, bottom: -3, left: 10 }),
-									createFlagCheckboxWidget("tracking", {top: -2, bottom: -3, left: 10 }),
-									createFlagCheckboxWidget("wow", {top: -2, bottom: -3, left: 10 }),
 									createFlagCheckboxWidget("litter", {top: -2, bottom: -3, left: 10 }),
-									createFlagCheckboxWidget("lost", {top: -2, bottom: -3, left: 10 }),
+									createFlagCheckboxWidget("explode", {top: -2, bottom: -3, left: 10 }),
+									createFlagCheckboxWidget("contagious", {top: -2, bottom: -3, left: 10 }),
 								]),
-								vertical([
-									createFlagCheckboxWidget("crowded", {bottom: -3}),
-									createFlagCheckboxWidget("explode", {top: -2, bottom: -3}),
-									createFlagCheckboxWidget("contagious", {top: -2, bottom: -3}),
-									createFlagCheckboxWidget("joy", {top: -2, bottom: -3}),
-									createFlagCheckboxWidget("hereWeAre", {top: -2, bottom: 5}),
-								])
 							])
 						],
 					})
@@ -613,6 +610,7 @@ export const templateWindowSide = tabwindow({
 	},
 	onClose: () =>
 	{
+		model._name.set(windowTitle);
 		ui.tool?.cancel();
         model._close();
 	},
@@ -916,4 +914,66 @@ function createGuestKeysWidget(key: GuestKey, maximum: number, isPositive: boole
 			})
 		])
 	)
+}
+
+function buttonStyle(): WidgetCreator<FlexiblePosition>[]
+{
+	const buttonSizeSmall = 14;
+	return [
+		button({	//red traffic light
+			width: buttonSizeSmall,
+			height: buttonSizeSmall,
+			image: compute(model._isFrozen, model._isStatic, (f, s) => f && s ? "rct1_close_on" : "rct1_close_off"),
+			tooltip: "Completely stop a peep from moving",
+			padding: { top: 0, right: -2, bottom: -2, left: 2 },
+			border: true,
+			disabled: model._disabledWhenNoPeepSelected,
+			visibility: compute(theme, t => t === "rct1" ? "visible" : "none"),
+			onClick: () => model._setMotion("frozen")
+		}),
+		button({	//yellow traffic light
+			width: buttonSizeSmall,
+			height: buttonSizeSmall,
+			image: compute(model._isFrozen, model._isStatic, (f, s) => !f && s ? "rct1_test_on" : "rct1_test_off"),
+			tooltip: "Stop a peep in place, animation still works",
+			padding: { top: -2, right: -2, bottom: -2, left: 2 },
+			border: true,
+			disabled: model._disabledWhenNoPeepSelected,
+			visibility: compute(theme, t => t === "rct1" ? "visible" : "none"),
+			onClick: () => model._setMotion("static")
+		}),
+		button({	//green traffic light
+			width: buttonSizeSmall,
+			height: buttonSizeSmall,
+			image: compute(model._isFrozen, model._isStatic, (f, s) => !f && !s ? "rct1_open_on" : "rct1_open_off"),
+			tooltip: "Let the peep roam freely around",
+			padding: { top: -2, right: -2, bottom: -2, left: 2 },
+			border: true,
+			disabled: model._disabledWhenNoPeepSelected,
+			visibility: compute(theme, t => t === "rct1" ? "visible" : "none"),
+			onClick: () => model._setMotion("moving")
+		}),
+		button({
+			image: compute(model._isFrozen, model._isStatic, (f, s) => flagButtonImage(f, s)),
+			width: buttonSize,
+			height: buttonSize,
+			padding: { top: 0, left: -2, bottom: -2, right: -2 },
+			disabled: model._disabledWhenNoPeepSelected,
+			visibility: compute(theme, t => t === "rct2" ? "visible" : "none"),
+			onClick: () =>
+			{
+				if (!model._isFrozen.get() && !model._isStatic.get()) {model._setMotion("frozen"); return;}
+				if (model._isFrozen.get() && model._isStatic.get()) {model._setMotion("static"); return;}
+				if (!model._isFrozen.get() && model._isStatic.get()) {model._setMotion("moving"); return;};
+			}
+		}),
+	];
+}
+
+function flagButtonImage(f: boolean, s: boolean): IconName
+{
+	if (f && s) return "closed";
+	if (!f && s) return "testing";
+	if (!f && !s) return "open";
+	return "closed";
 }

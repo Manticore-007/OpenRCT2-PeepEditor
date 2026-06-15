@@ -1,4 +1,4 @@
-import { button, checkbox, Colour, colourPicker, compute, dropdown, FlexiblePosition, groupbox, horizontal, label, listview, store, tab, tabwindow, toggle, twoway, vertical, viewport, WidgetCreator } from "openrct2-flexui";
+import { button, checkbox, Colour, colourPicker, compute, dropdown, groupbox, horizontal, label, listview, store, tab, tabwindow, toggle, twoway, vertical, viewport } from "openrct2-flexui";
 import { model } from "../viewmodel/PeepViewModel";
 import { togglePeepPicker } from "../services/peepPicker";
 import { isDevelopment, pluginVersion } from "../helpers/environment";
@@ -9,6 +9,7 @@ import { openWindowRemovePeep } from "./removePeepWindow";
 import { buttonSize, img, windowMain } from "./windowConsts";
 import { closeSideWindow, openSideWindow, colourWindow as colourSideWindow } from "./sideWindow";
 import { namePeepExecuteArgs } from "../actions/peepNamer";
+import { guestFlagsExecuteArgs } from "../actions/guestFlags";
 
 const colourWindow =
 {
@@ -29,8 +30,7 @@ export const templateWindowMain = tabwindow({
                 horizontal([
                     viewport({target: compute(model._selectedPeep, p => p ? p.id : null)}),
                     vertical({
-                        content: 
-                            buttonStyle().concat(
+                        content: [
                             toggle({	//picker
                                 width: buttonSize, height: buttonSize,
                                 image: "eyedropper",
@@ -68,19 +68,16 @@ export const templateWindowMain = tabwindow({
                                     if (peep) openWindowRemovePeep(peep);
                                 }
                             }),
-                            toggle({	//all guests
+                            toggle({	//tracking (blue i)
                                 height: buttonSize, width: buttonSize,
-                                image: "guests",
-                                tooltip: "Select all guests on the map",
+                                image: 5188,
+                                tooltip: "Turn on/off tracking information for this guest - (If tracking is on, guest’s movements will be reported in the message area)",
+                                disabled: compute(model._disabledWhenNoSinglePeepSelected, model._isGuest, (s, g) => (s || !g)),
                                 padding: { top: -2, left: -2, bottom: -2, right: -2 },
-                                isPressed: twoway(model._allGuestsSelected),
-                                onChange: (pressed) =>
-                                {
-                                    model._toggleAllGuests(pressed);
-                                    pressed ? openSideWindow() : closeSideWindow();
-                                }
+                                isPressed: twoway(model._isTracking),
+                                onChange: (pressed) => track(pressed)
                             })
-                        )
+                        ]
                     })
                 ]),
                 label({
@@ -95,6 +92,7 @@ export const templateWindowMain = tabwindow({
             image: img.guests,
             height: "inherit",
             content: [
+                horizontal([
                 groupbox({
                     text: "Frozen peeps",
                     content: [
@@ -116,6 +114,7 @@ export const templateWindowMain = tabwindow({
                             })
                         ]),
                     listview({
+                        columns: ["{WINDOW_COLOUR_2}Name"],
                         items: model._allGuestsSorted,
                         visibility: model._visibilityListviewWhenGuest,
                         canSelect: true,
@@ -124,17 +123,18 @@ export const templateWindowMain = tabwindow({
                             const allGuests = model._allGuestEntities.get();
                             locate(allGuests[allGuests.map( e => {return e.name}).indexOf(model._allGuestsSorted.get()[index])])
                         },
-
                         onClick: (index) =>
                         {
                         const main = windowMain.get();
                         const allGuests = model._allGuestEntities.get();
                         model._select(allGuests[allGuests.map( e => {return e.name}).indexOf(model._allGuestsSorted.get()[index])])
                         openSideWindow();
+                        model._allGuestsSelected.set(false);
                         if (main) main.tabIndex = 0;
                         }
                     }),
                     listview({
+                        columns: ["{WINDOW_COLOUR_2}Name"],
                         items: model._allStaffSorted,
                         visibility: model._visibilityListviewWhenStaff,
                         canSelect: true,
@@ -157,7 +157,21 @@ export const templateWindowMain = tabwindow({
                         }
                     })
                 ]
+                
+            }),
+            toggle({	//all guests
+                height: buttonSize, width: buttonSize,
+                image: "guests",
+                tooltip: "Select all guests on the map",
+                padding: { top: 2 },
+                isPressed: twoway(model._allGuestsSelected),
+                onChange: (pressed) =>
+                {
+                    model._toggleAllGuests(pressed);
+                    pressed ? openSideWindow() : closeSideWindow();
+                }
             })
+        ])
         ],
         onOpen: () =>
         {
@@ -299,27 +313,7 @@ export const templateWindowMain = tabwindow({
                             height: 14,
                             width: "60%",
                             padding: {top: 4, left: "1w"},
-                            onClick: () =>
-                            {
-                                const deepWater = Colour.AquaDark;
-                                const brown = Colour.LightBrown;
-                                colourWindow.primary.set(deepWater);
-                                colourWindow.secondary.set(brown);
-                                colourSideWindow.primary.set(deepWater);
-                                colourSideWindow.secondary.set(brown);
-                                ProgressBarColour.background.set(brown);
-                                ProgressBarColour.bar.danger.set(Colour.BrightRed);
-                                ProgressBarColour.bar.warning.set(Colour.Yellow);
-                                ProgressBarColour.bar.safe.set(Colour.BrightGreen);
-                                setColour("pe.main.primary", deepWater);
-                                setColour("pe.main.secondary", brown);
-                                setColour("pe.side.primary", deepWater);
-                                setColour("pe.side.secondary", brown);
-                                setColour("pe.bar.safe", Colour.BrightGreen);
-                                setColour("pe.bar.warning", Colour.Yellow);
-                                setColour("pe.bar.danger", Colour.BrightRed);
-                                setColour("pe.bar.background", brown);
-                            }
+                            onClick: resetColours
                         })
                     ]
                 }),
@@ -369,68 +363,6 @@ export function closeWindowMain(): void{
 function versionString(): string
 {
     return isDevelopment ? `{BLACK}${pluginVersion} {BABYBLUE}[BETA]`: `{BLACK}${pluginVersion}`;
-}
-
-function buttonStyle(): WidgetCreator<FlexiblePosition>[]
-{
-    const buttonSizeSmall = 14;
-    return [
-        button({	//red traffic light
-            width: buttonSizeSmall,
-            height: buttonSizeSmall,
-            image: compute(model._isFrozen, model._isStatic, (f, s) => f && s ? "rct1_close_on" : "rct1_close_off"),
-            tooltip: "Completely stop a peep from moving",
-            padding: { top: 0, right: -2, bottom: -2, left: 2 },
-            border: true,
-            disabled: model._disabledWhenNoPeepSelected,
-            visibility: compute(theme, t => t === "rct1" ? "visible" : "none"),
-            onClick: () => model._setMotion("frozen")
-        }),
-        button({	//yellow traffic light
-            width: buttonSizeSmall,
-            height: buttonSizeSmall,
-            image: compute(model._isFrozen, model._isStatic, (f, s) => !f && s ? "rct1_test_on" : "rct1_test_off"),
-            tooltip: "Stop a peep in place, animation still works",
-            padding: { top: -2, right: -2, bottom: -2, left: 2 },
-            border: true,
-            disabled: model._disabledWhenNoPeepSelected,
-            visibility: compute(theme, t => t === "rct1" ? "visible" : "none"),
-            onClick: () => model._setMotion("static")
-        }),
-        button({	//green traffic light
-            width: buttonSizeSmall,
-            height: buttonSizeSmall,
-            image: compute(model._isFrozen, model._isStatic, (f, s) => !f && !s ? "rct1_open_on" : "rct1_open_off"),
-            tooltip: "Let the peep roam freely around",
-            padding: { top: -2, right: -2, bottom: -2, left: 2 },
-            border: true,
-            disabled: model._disabledWhenNoPeepSelected,
-            visibility: compute(theme, t => t === "rct1" ? "visible" : "none"),
-            onClick: () => model._setMotion("moving")
-        }),
-        button({
-            image: compute(model._isFrozen, model._isStatic, (f, s) => flagButtonImage(f, s)),
-            width: buttonSize,
-            height: buttonSize,
-            padding: { top: 0, left: -2, bottom: -2, right: -2 },
-            disabled: model._disabledWhenNoPeepSelected,
-            visibility: compute(theme, t => t === "rct2" ? "visible" : "none"),
-            onClick: () =>
-            {
-                if (!model._isFrozen.get() && !model._isStatic.get()) {model._setMotion("frozen"); return;}
-                if (model._isFrozen.get() && model._isStatic.get()) {model._setMotion("static"); return;}
-                if (!model._isFrozen.get() && model._isStatic.get()) {model._setMotion("moving"); return;};
-            }
-        }),
-    ];
-}
-
-function flagButtonImage(f: boolean, s: boolean): IconName
-{
-    if (f && s) return "closed";
-    if (!f && s) return "testing";
-    if (!f && !s) return "open";
-    return "closed";
 }
 
 function alphabetize(allPeeps: (Guest | BaseStaff)[]): string[]
@@ -484,7 +416,35 @@ function textInputTitle(peep: Guest | BaseStaff): string {
 	else return "";
 }
     
-    function locate(peep: Guest|BaseStaff|null): void
-    {
-        if (peep !== null) ui.mainViewport.scrollTo({ x: peep.x, y: peep.y, z: peep.z });
-    }
+function locate(peep: Guest|BaseStaff|null): void
+{
+    if (peep !== null) ui.mainViewport.scrollTo({ x: peep.x, y: peep.y, z: peep.z });
+}
+    
+function track(pressed: boolean): void
+{
+    const guest = model._selectedPeep.get() as Guest
+    if (guest !== null) context.executeAction("pe-guestflags", guestFlagsExecuteArgs(guest.id, pressed, "tracking"));
+}
+
+function resetColours(): void
+{
+    const deepWater = Colour.AquaDark;
+    const brown = Colour.LightBrown;
+    colourWindow.primary.set(deepWater);
+    colourWindow.secondary.set(brown);
+    colourSideWindow.primary.set(deepWater);
+    colourSideWindow.secondary.set(brown);
+    ProgressBarColour.background.set(brown);
+    ProgressBarColour.bar.danger.set(Colour.BrightRed);
+    ProgressBarColour.bar.warning.set(Colour.Yellow);
+    ProgressBarColour.bar.safe.set(Colour.BrightGreen);
+    setColour("pe.main.primary", deepWater);
+    setColour("pe.main.secondary", brown);
+    setColour("pe.side.primary", deepWater);
+    setColour("pe.side.secondary", brown);
+    setColour("pe.bar.safe", Colour.BrightGreen);
+    setColour("pe.bar.warning", Colour.Yellow);
+    setColour("pe.bar.danger", Colour.BrightRed);
+    setColour("pe.bar.background", brown);
+}

@@ -83,6 +83,7 @@ export class PeepViewModel
     readonly _isPicking = store<boolean>(false);
     readonly _isFrozen = store<boolean>(false);
     readonly _isStatic = store<boolean>(false);
+    readonly _isTracking = store<boolean>(false);
     readonly _isPeepSelected = compute(this._selectedPeep, peep => (peep !== null));
     readonly _allGuestsSelected = store<boolean>(false);
 
@@ -100,7 +101,7 @@ export class PeepViewModel
 
     constructor()
     {
-        this._selectedPeep.subscribe(peep => this._updateDynamicDataFromPeep(peep));
+        this._selectedPeep.subscribe(peep => {});
     }
 
     _open(): void
@@ -147,6 +148,7 @@ export class PeepViewModel
             this._getAllGuests();
             this._isPicking.set(false);
             this._selectedPeep.set(null);
+            this._isGuest.set(true);
             this._name.set(`{GREEN}All guests selected`);
             ui.tool?.cancel();
         }
@@ -262,6 +264,7 @@ export class PeepViewModel
             this._mass.set(mass);
             this._items.set(items);
             this._getPhotoRideName(peep as Guest);
+            this._isTracking.set((peep.getFlag("tracking")));
         }
         else {
             const staff = peep as BaseStaff;
