@@ -4,7 +4,7 @@ import { isUiAvailable } from "./helpers/environment";
 import { debug } from "./helpers/logger";
 import { initSettings, menuLabel } from "./helpers/settings";
 import { initShortcuts } from "./helpers/initShortcutKeys";
-import { openWindowMain } from "./ui/mainWindow";
+import { openedMainWindow } from "./ui/mainWindow";
 import { initRides } from "./helpers/rides";
 
 /**
@@ -23,5 +23,5 @@ export function main(): void
 	initRides();
 	initCustomSprites();
 	initShortcuts();
-	ui.registerMenuItem(menuLabel.get(), () => openWindowMain());
+	ui.registerMenuItem(menuLabel.get(), () => openedMainWindow());
 }

@@ -1,13 +1,13 @@
 import { GuestColours } from "../helpers/colours";
 import { debug } from "../helpers/logger";
 
-export interface PeepColourArgs {
+export interface ColourArgs {
     id: number | null;
     colour: number;
     property?: GuestColours;
 }
 
-export function colourPeepExecute(args: PeepColourArgs): GameActionResult {
+export function colourExecute(args: ColourArgs): GameActionResult {
     if (args.id === null) return {};
     const entity = map.getEntity(args.id);
     if (entity === null) return {};
@@ -23,6 +23,6 @@ export function colourPeepExecute(args: PeepColourArgs): GameActionResult {
     return {};
 }
 
-export function colourPeepExecuteArgs(id: number | null, colour: number, property?: GuestColours): PeepColourArgs{
+export function colourExecuteArgs(id: number | null, colour: number, property?: GuestColours): ColourArgs{
     return {"id": id, "colour": colour, "property": property};
 }

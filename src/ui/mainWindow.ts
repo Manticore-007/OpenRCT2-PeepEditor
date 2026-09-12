@@ -1,15 +1,16 @@
-import { button, checkbox, Colour, colourPicker, compute, dropdown, graphics, groupbox, horizontal, label, listview, store, tab, tabwindow, toggle, twoway, vertical, viewport } from "openrct2-flexui";
+import { button, checkbox, Colour, colourPicker, compute, dropdown, graphics, groupbox, horizontal, label, listview, OpenWindow, store, tab, tabwindow, textbox, toggle, twoway, vertical, viewport, WritableStore } from "openrct2-flexui";
 import { model } from "../viewmodel/PeepViewModel";
-import { togglePeepPicker } from "../services/peepPicker";
+import { selectByTiles } from "../services/selector";
 import { isDevelopment, pluginVersion } from "../helpers/environment";
 import { getWindow } from "../helpers/getWindow";
 import { ProgressBarColour } from "../helpers/progressBar";
 import { getColour, isPinned, isSticky, setColour, setMenuItem, setSticky, setTheme, theme } from "../helpers/settings";
 import { openWindowRemovePeep } from "./removePeepWindow";
 import { buttonSize, img, windowMain } from "./windowConsts";
-import { closeSideWindow, openSideWindow, colourWindow as colourSideWindow } from "./sideWindow";
-import { namePeepExecuteArgs } from "../actions/peepNamer";
+import { closeSideWindow, colourWindow as colourSideWindow, openedSideWindow } from "./sideWindow";
+import { renameExecuteArgs } from "../actions/rename";
 import { guestFlagsExecuteArgs } from "../actions/guestFlags";
+import { togglePeepPicker } from "../services/peepPicker";
 
 const colourWindow =
 {
@@ -22,22 +23,22 @@ export const templateWindowMain = tabwindow({
     title: compute(model._name, n => n),
     width: 260,
     height: 230,
-    colours: [colourWindow.primary.get(), colourWindow.secondary.get(), colourWindow.tertiary.get()],
+    colours: [colourWindow.primary.get(), colourWindow.secondary.get()],
     tabs: [
         tab({ //main tab
             image: img.lens,
             content: [
                 horizontal([
                     viewport({
-                        visibility: compute(model._allGuestsSelected, a => a ? "none" : "visible"),
+                        visibility: compute(model._allGuests, a => a.length > 1 ? "none" : "visible"),
                         target: compute(model._selectedPeep, p => p ? p.id : null)
                     }),
                     graphics({
-                        visibility: compute(model._allGuestsSelected, a => a ? "visible" : "none"),
+                        visibility: compute(model._allGuests, a => a.length > 1 ? "visible" : "none"),
                         onDraw(g) {
                             g.colour = 55;
                             g.well(0, 0, 225, 165);
-                            g.text(`{WHITE}Guests selected: ${model.numGuests}`, 6, 6)
+                            g.text(`{WHITE}Guests selected: ${model._numGuests.get()}`, 6, 6)
                         },
                     }),
                     vertical({
@@ -49,7 +50,39 @@ export const templateWindowMain = tabwindow({
                                 isPressed: twoway(model._isPicking),
                                 disabled: model._allGuestsSelected,
                                 padding: { top: 0, left: -2, bottom: -2, right: -2 },
-                                onChange: pressed => togglePeepPicker(pressed, p => model._select(p), () => model._isPicking.set(false))
+                                onChange: (pressed) => togglePeepPicker(pressed, p => model._select(p), () => model._isPicking.set(false))
+                            }),
+                            toggle({
+                                height: buttonSize, width: buttonSize,
+                                image: img.tiles,
+                                tooltip: "Select guests on selected tiles",
+                                isPressed: twoway(model._isSelectingByTiles),
+                                onChange: (pressed) => {
+                                    model._toggleAllGuests(false);
+                                    selectByTiles("guest", pressed, guests => {
+                                        model._allGuests.set(guests);
+                                        model._numGuests.set(guests.length);
+                                        if (guests.length === 1) {
+                                            model._selectedPeep.set(guests[0]);
+                                        }
+                                    }, () => model._isSelectingByTiles.set(false))
+                                }
+                            }),
+                            toggle({	//all guests
+                                height: buttonSize, width: buttonSize,
+                                image: "guests",
+                                tooltip: "Select all guests on the map",
+                                padding: { top: 2 },
+                                isPressed: twoway(model._allGuestsSelected),
+                                onChange: (pressed) => {
+                                    if (!pressed) {
+                                        closeSideWindow();
+                                        return;
+                                    }
+                                    model._toggleAllGuests(pressed);
+                                    ui.showError("WARNING", "Take caution when you already have frozen peeps in your map");
+                                    openedSideWindow().focus;
+                                }
                             }),
                             button({	//nametag
                                 height: buttonSize, width: buttonSize,
@@ -73,8 +106,7 @@ export const templateWindowMain = tabwindow({
                                 tooltip: "Remove the selected peep from existence",
                                 disabled: model._disabledWhenNoSinglePeepSelected,
                                 padding: { top: -2, left: -2, bottom: -2, right: -2 },
-                                onClick: () =>
-                                {
+                                onClick: () => {
                                     const peep = model._selectedPeep.get();
                                     if (peep) openWindowRemovePeep(peep);
                                 }
@@ -83,7 +115,7 @@ export const templateWindowMain = tabwindow({
                                 height: buttonSize, width: buttonSize,
                                 image: 5188,
                                 tooltip: "Turn on/off tracking information for this guest - (If tracking is on, guest’s movements will be reported in the message area)",
-                                disabled: compute(model._disabledWhenNoSinglePeepSelected, model._isGuest, (s, g) => (s || !g)),
+                                disabled: compute(model._disabledWhenNoSinglePeepSelected, s => s),
                                 padding: { top: -2, left: -2, bottom: -2, right: -2 },
                                 isPressed: twoway(model._isTracking),
                                 onChange: (pressed) => track(pressed)
@@ -100,102 +132,81 @@ export const templateWindowMain = tabwindow({
             ]
         }),
         tab({
-            image: img.guests,
+            image: img.peeps,
             height: "inherit",
             content: [
                 horizontal([
-                groupbox({
-                    text: "Frozen peeps",
-                    content: [
-                        horizontal([
-                            label({
-                                text: "Filter",
-                                width: "30%"
-                            }),
-                            dropdown({
-                                items: ["Guests", "Staff"],
-                                onChange: (idx) =>
-                                    {
-                                        switch(idx)
-                                        {
+                    groupbox({
+                        text: "Frozen peeps",
+                        content: [
+                            horizontal([
+                                label({
+                                    text: "Filter",
+                                    width: "20%"
+                                }),
+                                dropdown({
+                                    items: ["Guests", "Staff"],
+                                    onChange: (idx) => {
+                                        switch (idx) {
                                             case 0: model._selectPeepType.set("guest"); break;
                                             case 1: model._selectPeepType.set("staff"); break;
                                         }
                                     }
-                            })
-                        ]),
-                    listview({
-                        columns: ["{WINDOW_COLOUR_2}Name"],
-                        items: model._allGuestsSorted,
-                        visibility: model._visibilityListviewWhenGuest,
-                        canSelect: true,
-                        onHighlight: (index) =>
-                        {
-                            const allGuests = model._allGuestEntities.get();
-                            locate(allGuests[allGuests.map( e => {return e.name}).indexOf(model._allGuestsSorted.get()[index])])
-                        },
-                        onClick: (index) =>
-                        {
-                        const main = windowMain.get();
-                        const allGuests = model._allGuestEntities.get();
-                        model._select(allGuests[allGuests.map( e => {return e.name}).indexOf(model._allGuestsSorted.get()[index])])
-                        openSideWindow();
-                        model._allGuestsSelected.set(false);
-                        if (main) main.tabIndex = 0;
-                        }
-                    }),
-                    listview({
-                        columns: ["{WINDOW_COLOUR_2}Name"],
-                        items: model._allStaffSorted,
-                        visibility: model._visibilityListviewWhenStaff,
-                        canSelect: true,
-                        onHighlight: (index) =>
-                        {
-                            const allStaff = model._allStaffEntities.get();
-                            locate(allStaff[allStaff.map( e => {return e.name}).indexOf(model._allStaffSorted.get()[index])])
-                        },
+                                }),
+                                textbox({
+                                    onChange: (text) => {
+                                        filterPeeps("guest", text);
+                                        filterPeeps("staff", text);
+                                    }
+                                }),
+                            ]),
+                            listview({
+                                columns: ["{WINDOW_COLOUR_2}Name"],
+                                items: model._allGuestsSorted,
+                                visibility: model._visibilityListviewWhenGuest,
+                                canSelect: true,
+                                onHighlight: (index) => {
+                                    const allGuests = model._allGuestEntities.get();
+                                    locate(allGuests[allGuests.map(e => { return e.name }).indexOf(model._allGuestsSorted.get()[index])])
+                                },
+                                onClick: (index) => {
+                                    const main = windowMain.get();
+                                    const allGuests = model._allGuestEntities.get();
+                                    model._select(allGuests[allGuests.map(e => { return e.name }).indexOf(model._allGuestsSorted.get()[index])])
+                                    openedSideWindow().focus();
+                                    model._allGuestsSelected.set(false);
+                                    if (main) main.tabIndex = 0;
+                                }
+                            }),
+                            listview({
+                                columns: ["{WINDOW_COLOUR_2}Name"],
+                                items: model._allStaffSorted,
+                                visibility: model._visibilityListviewWhenStaff,
+                                canSelect: true,
+                                onHighlight: (index) => {
+                                    const allStaff = model._allStaffEntities.get();
+                                    locate(allStaff[allStaff.map(e => { return e.name }).indexOf(model._allStaffSorted.get()[index])])
+                                },
 
-                        onClick: (index) =>
-                        {
-                        const main = windowMain.get();
-                        const allStaff = model._allStaffEntities.get();
-                        model._select(allStaff[allStaff.map( e => {return e.name}).indexOf(model._allStaffSorted.get()[index])])
-                        if (main)
-                        {
-                        main.tabIndex = 0;
-                        }
-                        openSideWindow();
-                        }
-                    })
-                ]
-                
-            }),
-            toggle({	//all guests
-                height: buttonSize, width: buttonSize,
-                image: "guests",
-                tooltip: "Select all guests on the map",
-                padding: { top: 2 },
-                isPressed: twoway(model._allGuestsSelected),
-                onChange: (pressed) =>
-                {
-                    model._toggleAllGuests(pressed);
-                    if (pressed)
-                    {
-                        ui.showError("WARNING", "Take caution when you already have frozen peeps in your map");
-                        openSideWindow();
-                    }
-                    else closeSideWindow();
-                }
-            })
-        ])
-        ],
-        onOpen: () =>
-        {
-            model._allGuestEntities.set(map.getAllEntities("guest"));
-            model._allStaffEntities.set(map.getAllEntities("staff"));
-            model._allGuestsSorted.set(alphabetize(model._allGuestEntities.get()))
-            model._allStaffSorted.set(alphabetize(model._allStaffEntities.get()))
-        }}),
+                                onClick: (index) => {
+                                    const main = windowMain.get();
+                                    const allStaff = model._allStaffEntities.get();
+                                    model._select(allStaff[allStaff.map(e => { return e.name }).indexOf(model._allStaffSorted.get()[index])])
+                                    if (main) {
+                                        main.tabIndex = 0;
+                                    }
+                                    openedSideWindow().focus();
+                                }
+                            })
+                        ]
+                    }),
+                ]),
+            ],
+            onOpen: () => {
+                filterPeeps("guest", "");
+                filterPeeps("staff", "");
+            }
+        }),
         tab({   //options
             image: img.gear,
             height: "inherit",
@@ -206,8 +217,7 @@ export const templateWindowMain = tabwindow({
                         checkbox({
                             text: "Side window sticks to main window",
                             isChecked: isSticky,
-                            onChange: (checked) =>
-                            {
+                            onChange: (checked) => {
                                 isSticky.set(checked);
                                 setSticky(checked);
                             }
@@ -215,8 +225,7 @@ export const templateWindowMain = tabwindow({
                         checkbox({
                             text: "Pin to top in menu    {RED}(Requires reload of park)",
                             isChecked: isPinned,
-                            onChange: (checked) =>
-                            {
+                            onChange: (checked) => {
                                 isPinned.set(checked);
                                 setMenuItem(checked);
                             }
@@ -229,24 +238,22 @@ export const templateWindowMain = tabwindow({
                             dropdown({
                                 items: ["Rollercoaster Tycoon 1", "Rollercoaster Tycoon 2"],
                                 selectedIndex: compute(theme, t => t === "rct1" ? 0 : 1),
-                                onChange: (index) =>
-                                {
-                                    switch (index)
-                                    {
+                                onChange: (index) => {
+                                    switch (index) {
                                         case 0:
-                                        {
-                                            setTheme("rct1");
-                                            theme.set("rct1");
-                                            console.log("theme set to rct1");
-                                        }
+                                            {
+                                                setTheme("rct1");
+                                                theme.set("rct1");
+                                                console.log("theme set to rct1");
+                                            }
                                             break;
                                         case 1:
-                                        {
-                                            setTheme("rct2");
-                                            theme.set("rct2");
-                                            console.log("theme set to rct2");
-                                            break;
-                                        }
+                                            {
+                                                setTheme("rct2");
+                                                theme.set("rct2");
+                                                console.log("theme set to rct2");
+                                                break;
+                                            }
                                     }
                                 }
                             })
@@ -257,210 +264,172 @@ export const templateWindowMain = tabwindow({
                     text: "Colours",
                     spacing: 0,
                     content: [
-                        horizontal([
-                            label({text: "Main window:"}),
-                            colourPicker({
-                                colour: colourWindow.primary,
-                                onChange: (colour) =>
-                                {
-                                    colourWindow.primary.set(colour);
-                                    setColour("pe.main.primary", colour);
+                        createColorRow("Main window:", [
+                            { store: colourWindow.primary, key: "pe.main.primary" },
+                            { store: colourWindow.secondary, key: "pe.main.secondary" }
+                        ]),
+                        createColorRow("Side window:", [
+                            { store: colourSideWindow.primary, key: "pe.side.primary" },
+                            {
+                                store: colourSideWindow.secondary,
+                                key: "pe.side.secondary",
+                                extra: (c) => {
+                                    ProgressBarColour.background.set(c);
+                                    setColour("pe.bar.background", c);
                                 }
-                            }),
-                            colourPicker({
-                                colour: colourWindow.secondary,
-                                onChange: (colour) =>
-                                {
-                                    colourWindow.secondary.set(colour);
-                                    setColour("pe.main.secondary", colour);
-                                }
-                            }),
+                            }
                         ]),
                         horizontal([
-                            label({text: "Side window:"}),
-                            colourPicker({
-                                colour: colourSideWindow.primary,
-                                onChange: (colour) =>
-                                {
-                                    colourSideWindow.primary.set(colour);
-                                    setColour("pe.side.primary", colour);
+                            label({ text: "Progress bar:" }),
+                            ...[
+                                { store: ProgressBarColour.bar.safe, key: "pe.bar.safe" },
+                                { store: ProgressBarColour.bar.warning, key: "pe.bar.warning" },
+                                { store: ProgressBarColour.bar.danger, key: "pe.bar.danger" }
+                            ].map(({ store, key }) => colourPicker({
+                                colour: store,
+                                onChange: (colour) => {
+                                    store.set(colour);
+                                    setColour(key, colour);
                                 }
-                            }),
-                            colourPicker({
-                                colour: colourSideWindow.secondary,
-                                onChange: (colour) =>
-                                {
-                                    colourSideWindow.secondary.set(colour);
-                                    setColour("pe.side.secondary", colour);
-                                    ProgressBarColour.background.set(colour);
-                                    setColour("pe.bar.background", colour);
-                                }
-                            }),
-                        ]),
-                        horizontal([
-                            label({text: "Progress bar:"}),
-                            colourPicker({
-                                colour: ProgressBarColour.bar.safe,
-                                onChange: (colour) =>
-                                {
-                                    ProgressBarColour.bar.safe.set(colour);
-                                    setColour("pe.bar.safe", colour);
-                                }
-                            }),
-                            colourPicker({
-                                colour: ProgressBarColour.bar.warning,
-                                onChange: (colour) => 
-                                {
-                                    ProgressBarColour.bar.warning.set(colour);
-                                    setColour("pe.bar.warning", colour);
-                                }
-                            }),
-                            colourPicker({
-                                colour: ProgressBarColour.bar.danger,
-                                onChange: (colour) =>
-                                {
-                                    ProgressBarColour.bar.danger.set(colour);
-                                    setColour("pe.bar.danger", colour);
-                                }
-                            }),
+                            }))
                         ]),
                         button({
                             text: "Reset to default colours",
                             height: 14,
                             width: "60%",
-                            padding: {top: 4, left: "1w"},
+                            padding: { top: 4, left: "1w" },
                             onClick: resetColours
                         })
                     ]
                 }),
             ]
         }),
-		tab({
-			image: img.info,
-			content: [
-				label({ text: "Peep Editor, a plugin for OpenRCT2", alignment: "centred", padding: [4, 0, 8, 0] }),
-				horizontal([
-					label({ text: "Version:" + "\n\nAuthor:" + "\n\nUI:" + "\n\nSpecial\nThanks:" + "\n\n", width: "25%" }),
-					label({ text: versionString() + `\n\n{BLACK}Manticore-007` + `\n\n{BLACK}FlexUI by Basssiiie` + `\n\n{BLACK}Basssiiie, Gymnasiast, ItsSmitty\nSpacek531, AaronVanGeffen` + `\n{BLACK}Sadret, mrmagic2020, Isoitiro\nand Enox`})
-				]),
-				label({ text: "https://github.com/Manticore-007\n/OpenRCT2-PeepEditor", padding: ["90%", 0, 0, 0], alignment: "centred" })
-			]
-		}),
+        tab({
+            image: img.info,
+            content: [
+                label({ text: "Peep Editor, a plugin for OpenRCT2", alignment: "centred", padding: [4, 0, 8, 0] }),
+                horizontal([
+                    label({ text: "Version:" + "\n\nAuthor:" + "\n\nUI:" + "\n\nSpecial\nThanks:" + "\n\n", width: "25%" }),
+                    label({ text: versionString() + `\n\n{BLACK}Manticore-007` + `\n\n{BLACK}FlexUI by Basssiiie` + `\n\n{BLACK}Basssiiie, Gymnasiast, ItsSmitty\nSpacek531, AaronVanGeffen` + `\n{BLACK}Sadret, mrmagic2020, Isoitiro\nand Enox` })
+                ]),
+                label({ text: "https://github.com/Manticore-007\n/OpenRCT2-PeepEditor", padding: ["90%", 0, 0, 0], alignment: "centred" })
+            ]
+        }),
     ],
-    onOpen: () =>{
+    onOpen: () => {
         windowMain.set(getWindow("Peep Editor"));
         model._open();
     },
-    onClose: () =>
-    {
+    onClose: () => {
         model._selectPeepType.set("guest");
         ui.tool?.cancel();
         closeSideWindow();
         model._dispose();
     },
-    onUpdate: () =>
-    {
+    onUpdate: () => {
         const main = windowMain.get();
-        if (main)
-        {
-            main.colours = [ colourWindow.primary.get(), colourWindow.secondary.get(), colourWindow.tertiary.get() ]
+        if (main) {
+            main.colours = [colourWindow.primary.get(), colourWindow.secondary.get(), colourWindow.tertiary.get()]
         }
     },
 });
 
-export function openWindowMain(): void{
-    templateWindowMain.open();
+
+export function openedMainWindow(): OpenWindow { return templateWindowMain.open() };
+
+export function closeWindowMain(): void {
+    openedMainWindow().close();
 }
 
-export function closeWindowMain(): void{
-    templateWindowMain.close();
+function versionString(): string {
+    return isDevelopment ? `{BLACK}${pluginVersion} {BABYBLUE}[BETA]` : `{BLACK}${pluginVersion}`;
 }
 
-function versionString(): string
-{
-    return isDevelopment ? `{BLACK}${pluginVersion} {BABYBLUE}[BETA]`: `{BLACK}${pluginVersion}`;
+function alphabetize(allPeeps: (Guest | BaseStaff)[]): string[] {
+    return allPeeps
+        .filter(peep => peep.getFlag("positionFrozen") || peep.getFlag("animationFrozen"))
+        .map(peep => peep.name)
+        .sort();
 }
 
-function alphabetize(allPeeps: (Guest | BaseStaff)[]): string[]
-{
-    const arr: (Guest | BaseStaff)[] = [];
-    allPeeps.forEach(peep =>
+function rename(peep: Guest | BaseStaff | null): void {
+    if (!peep) return;
+
+    const peepTextConfig: Record<string, { title: string; description: string }> =
     {
-        if (peep.getFlag("positionFrozen") || peep.getFlag("animationFrozen"))
-        {
-            arr.push(peep);
+        guest: {
+            title: "{WHITE}Guest's name",
+            description: "Enter name for this guest:"
+        },
+        staff: {
+            title: "{WHITE}Staff member name",
+            description: "Enter name for this member of staff:"
         }
-        return arr;
+    };
+
+    const config = peepTextConfig[peep.type] ?? { title: "", description: "" };
+
+    ui.showTextInput({
+        title: config.title,
+        description: config.description,
+        initialValue: `${peep.name}`,
+        callback: text => {
+            context.executeAction("pe-rename", renameExecuteArgs(peep.id, text));
+            model._name.set(text);
+        }
     });
-    return arr.map(peep => peep.name).sort()
 }
 
-function rename(peep: Guest|BaseStaff|null): void
-{
-    if (peep !== null)
-    {
-        ui.showTextInput({
-            title: textInputTitle(peep),
-            description: textInputDescription(peep),
-            initialValue: `${peep.name}`,
-            callback: text => {context.executeAction("pe-namepeep", namePeepExecuteArgs(peep.id, text)); model._name.set(text)}
-        });
-    }
-}
-
-function textInputDescription(peep: Guest | BaseStaff | undefined): string {
-	if (peep !== undefined && peep.type === "guest")
-    {
-		return "Enter name for this guest:";
-	}
-	else if (peep !== undefined && peep.type === "staff")
-    {
-		return "Enter name for this member of staff:";
-	}
-	else return "";
-}
-
-function textInputTitle(peep: Guest | BaseStaff): string {
-	if (peep.type === "guest")
-    {
-		return `{WHITE}Guest's name`;
-	}
-	else if (peep.type === "staff")
-    {
-		return `{WHITE}Staff member name`;
-	}
-	else return "";
-}
-    
-function locate(peep: Guest|BaseStaff|null): void
-{
+function locate(peep: Guest | BaseStaff | null): void {
     if (peep !== null) ui.mainViewport.scrollTo({ x: peep.x, y: peep.y, z: peep.z });
 }
-    
-function track(pressed: boolean): void
-{
+
+function track(pressed: boolean): void {
     const guest = model._selectedPeep.get() as Guest
     if (guest !== null) context.executeAction("pe-guestflags", guestFlagsExecuteArgs(guest.id, pressed, "tracking"));
 }
 
-function resetColours(): void
-{
-    const deepWater = Colour.AquaDark;
-    const brown = Colour.LightBrown;
-    colourWindow.primary.set(deepWater);
-    colourWindow.secondary.set(brown);
-    colourSideWindow.primary.set(deepWater);
-    colourSideWindow.secondary.set(brown);
-    ProgressBarColour.background.set(brown);
-    ProgressBarColour.bar.danger.set(Colour.BrightRed);
-    ProgressBarColour.bar.warning.set(Colour.Yellow);
-    ProgressBarColour.bar.safe.set(Colour.BrightGreen);
-    setColour("pe.main.primary", deepWater);
-    setColour("pe.main.secondary", brown);
-    setColour("pe.side.primary", deepWater);
-    setColour("pe.side.secondary", brown);
-    setColour("pe.bar.safe", Colour.BrightGreen);
-    setColour("pe.bar.warning", Colour.Yellow);
-    setColour("pe.bar.danger", Colour.BrightRed);
-    setColour("pe.bar.background", brown);
+function resetColours(): void {
+    function reset(store: { set: (c: number) => void }, key: string | null, colour: number) {
+        store.set(colour);
+        if (key) setColour(key, colour);
+    };
+
+    reset(colourWindow.primary, "pe.main.primary", Colour.AquaDark);
+    reset(colourWindow.secondary, "pe.main.secondary", Colour.LightBrown);
+
+    reset(colourSideWindow.primary, "pe.side.primary", Colour.AquaDark);
+    reset(colourSideWindow.secondary, "pe.side.secondary", Colour.LightBrown);
+
+    reset(ProgressBarColour.background, "pe.bar.background", Colour.LightBrown);
+    reset(ProgressBarColour.bar.danger, "pe.bar.danger", Colour.BrightRed);
+    reset(ProgressBarColour.bar.warning, "pe.bar.warning", Colour.Yellow);
+    reset(ProgressBarColour.bar.safe, "pe.bar.safe", Colour.BrightGreen);
 }
+
+function createColorRow(labelText: string, pickers: { store: WritableStore<number>, key: string, extra?: (c: number) => void }[]) {
+    return horizontal([
+        label({ text: labelText }),
+        ...pickers.map(({ store, key, extra }) => colourPicker({
+            colour: twoway(store),
+            onChange: (colour) => {
+                setColour(key, colour);
+                extra?.(colour);
+            }
+        }))
+    ]);
+}
+
+function filterPeeps(type: "guest" | "staff", text: string): void {
+    const entities = map.getAllEntities(type) as any[];
+    const entityModel = type === "guest" ? model._allGuestEntities : model._allStaffEntities;
+    const sortedModel = type === "guest" ? model._allGuestsSorted : model._allStaffSorted;
+
+    entityModel.set(entities);
+
+    const lowerText = text.toLowerCase();
+    const filtered = alphabetize(entities).filter(item =>
+        String(item).toLowerCase().includes(lowerText)
+    );
+    sortedModel.set(filtered);
+};

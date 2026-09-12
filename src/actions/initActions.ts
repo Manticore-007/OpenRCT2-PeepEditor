@@ -1,31 +1,41 @@
-import { GuestKeysArgs, guestKeysExecute } from "./guestKeys";
-import { GuestFlagsArgs, guestFlagsExecute } from "./guestFlags";
-import { GuestItemRemoveArgs, guestItemRemoveExecute } from "./guestItemRemove";
-import { PeepAnimationArgs, animationPeepExecute } from "./peepAnimation";
-import { PeepAnimationFrameArgs, animationFramePeepExecute } from "./peepAnimationFrame";
-import { PeepColourArgs, colourPeepExecute } from "./peepColour";
-import { PeepMoveArgs, movePeepExecute } from "./peepMover";
-import { PeepNameArgs, namePeepExecute } from "./peepNamer";
-import { PeepRemoveArgs, removePeepExecute } from "./peepRemover";
-import { PeepRotateArgs, peepRotateExecute } from "./peepRotater";
+import { guestKeysExecute } from "./guestKeys";
+import { guestFlagsExecute } from "./guestFlags";
+import { itemRemoveExecute } from "./removeItem";
+import { animationExecute } from "./animation";
+import { animationFrameExecute } from "./animationFrame";
+import { colourExecute } from "./colour";
+import { positionExecute } from "./position";
+import { renameExecute } from "./rename";
+import { removeExecute } from "./remove";
+import { directionExecute } from "./direction";
 import { queryPermissionCheck } from "./permissions";
-import { StaffCostumeArgs, staffCostumeExecute } from "./staffSetCostume";
-import { StaffOrdersArgs, staffOrdersExecute } from "./staffSetOrders";
-import { StaffTypeArgs, staffTypeExecute } from "./staffSetType";
+import { costumeExecute } from "./costume";
+import { ordersExecute } from "./orders";
+import { staffTypeExecute } from "./staffType";
+import { giveItemExecute } from "./giveItem";
 
 export function initActions(): void
 {
-context.registerAction<PeepNameArgs>("pe-namepeep", (args) => queryPermissionCheck(args), (args) => namePeepExecute(args.args));
-context.registerAction<PeepRemoveArgs>("pe-removepeep", (args) => queryPermissionCheck(args), (args) => removePeepExecute(args.args));
-context.registerAction<PeepMoveArgs>("pe-movepeep", (args) => queryPermissionCheck(args), (args) => movePeepExecute(args.args));
-context.registerAction<PeepColourArgs>("pe-colourpeep", (args) => queryPermissionCheck(args), (args) => colourPeepExecute(args.args));
-context.registerAction<StaffTypeArgs>("pe-stafftype", (args) => queryPermissionCheck(args), (args) => staffTypeExecute(args.args));
-context.registerAction<StaffOrdersArgs>("pe-stafforders", (args) => queryPermissionCheck(args), (args) => staffOrdersExecute(args.args));
-context.registerAction<StaffCostumeArgs>("pe-staffcostume", (args) => queryPermissionCheck(args), (args) => staffCostumeExecute(args.args));
-context.registerAction<PeepAnimationArgs>("pe-animationpeep", (args) => queryPermissionCheck(args), (args) => animationPeepExecute(args.args));
-context.registerAction<PeepAnimationFrameArgs>("pe-animationframepeep", (args) => queryPermissionCheck(args), (args) => animationFramePeepExecute(args.args));
-context.registerAction<GuestFlagsArgs>("pe-guestflags", (args) => queryPermissionCheck(args), (args) => guestFlagsExecute(args.args));
-context.registerAction<GuestKeysArgs>("pe-guestkeys", (args) => queryPermissionCheck(args), (args) => guestKeysExecute(args.args));
-context.registerAction<GuestItemRemoveArgs>("pe-guestitemremove", (args) => queryPermissionCheck(args), (args) => guestItemRemoveExecute(args.args));
-context.registerAction<PeepRotateArgs>("pe-peeprotate", (args) => queryPermissionCheck(args), (args) => peepRotateExecute(args.args));
+register("pe-rename", renameExecute);
+register("pe-remove", removeExecute);
+register("pe-position", positionExecute);
+register("pe-colour", colourExecute);
+register("pe-stafftype", staffTypeExecute);
+register("pe-orders", ordersExecute);
+register("pe-costume", costumeExecute);
+register("pe-animation", animationExecute);
+register("pe-animationframe", animationFrameExecute);
+register("pe-guestflags", guestFlagsExecute);
+register("pe-guestkeys", guestKeysExecute);
+register("pe-giveitem", giveItemExecute);
+register("pe-removeitem", itemRemoveExecute);
+register("pe-direction", directionExecute);
 }
+
+const register = <T>(name: string, executeCallback: (args: T) => GameActionResult) => {
+    context.registerAction<T>(
+        name,
+        queryPermissionCheck, // Point-free style simplification
+        (args) => executeCallback(args.args)
+    );
+};

@@ -1,10 +1,10 @@
-export interface PeepMoveArgs {
+export interface PositionArgs {
     id: number | null;
     axis: keyof CoordsXYZ;
     adjustment: number;
 }
 
-export function movePeepExecute(args: PeepMoveArgs): GameActionResult
+export function positionExecute(args: PositionArgs): GameActionResult
 {
     if (args.id === null) return {};
     const entity = map.getEntity(args.id);
@@ -15,6 +15,6 @@ export function movePeepExecute(args: PeepMoveArgs): GameActionResult
     return {};
 }
 
-export function movePeepExecuteArgs(id: number | null, axis: keyof CoordsXYZ, adjustment: number): PeepMoveArgs{
+export function positionExecuteArgs(id: number | null, axis: keyof CoordsXYZ, adjustment: number): PositionArgs{
     return {"id": id, "axis": axis, "adjustment": adjustment};
 }

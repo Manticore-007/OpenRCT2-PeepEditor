@@ -1,12 +1,12 @@
 import { debug } from "../helpers/logger";
 
-export interface StaffOrdersArgs {
+export interface OrdersArgs {
     id: number | null;
     checked: boolean
     staffOrders: number;
 }
 
-export function staffOrdersExecute(args: StaffOrdersArgs): GameActionResult
+export function ordersExecute(args: OrdersArgs): GameActionResult
 {
     if (args.id === null) return {};
     const entity = map.getEntity(args.id);
@@ -17,6 +17,6 @@ export function staffOrdersExecute(args: StaffOrdersArgs): GameActionResult
     return {};
 }
 
-export function staffOrdersExecuteArgs(id: number | null, checked: boolean, staffOrders: number): StaffOrdersArgs{
+export function ordersExecuteArgs(id: number | null, checked: boolean, staffOrders: number): OrdersArgs{
     return {"id": id, "checked": checked, "staffOrders": staffOrders};
 }

@@ -1,5 +1,5 @@
 import { getPeepById } from "../objects/peep";
-import { openSideWindow } from "../ui/sideWindow";
+import { openedSideWindow } from "../ui/sideWindow";
 
 export function togglePeepPicker(isPressed: boolean, onPick: (peep: Guest | BaseStaff) => void, onCancel: () => void): void
 {
@@ -14,7 +14,7 @@ export function togglePeepPicker(isPressed: boolean, onPick: (peep: Guest | Base
         cursor: "cross_hair",
         onDown: args =>
         {
-            let peepToSelect: Guest | BaseStaff | undefined;
+            let peepToSelect: Guest | BaseStaff;
             const entityId = args.entityId;
             if (entityId === undefined)
             {
@@ -28,7 +28,7 @@ export function togglePeepPicker(isPressed: boolean, onPick: (peep: Guest | Base
             }
             peepToSelect = entity;
             onPick(peepToSelect);
-            openSideWindow();
+            openedSideWindow().focus();
             ui.tool?.cancel();
         },
         onFinish: onCancel

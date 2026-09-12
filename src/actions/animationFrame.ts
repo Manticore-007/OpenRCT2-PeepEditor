@@ -1,10 +1,10 @@
-export interface PeepAnimationFrameArgs {
+export interface AnimationFrameArgs {
     id: number | null;
     value: number;
     frame: number;
 }
 
-export function animationFramePeepExecute(args: PeepAnimationFrameArgs): GameActionResult
+export function animationFrameExecute(args: AnimationFrameArgs): GameActionResult
 {
     if (args.id === null) return {};
     const entity = map.getEntity(args.id);
@@ -17,6 +17,6 @@ export function animationFramePeepExecute(args: PeepAnimationFrameArgs): GameAct
     return {};
 }
 
-export function animationFramePeepExecuteArgs(id: number | null, value: number, frame: number): PeepAnimationFrameArgs{
+export function animationFrameExecuteArgs(id: number | null, value: number, frame: number): AnimationFrameArgs{
     return {"id": id, "value": value, "frame": frame};
 }

@@ -1,11 +1,11 @@
 import { debug } from "../helpers/logger";
 
-export interface PeepNameArgs {
+export interface RenameArgs {
     id: number | null;
     name: string;
 }
 
-export function namePeepExecute(args: PeepNameArgs): GameActionResult
+export function renameExecute(args: RenameArgs): GameActionResult
 {
     if (args.id === null) return {};
     const entity = map.getEntity(args.id);
@@ -16,6 +16,6 @@ export function namePeepExecute(args: PeepNameArgs): GameActionResult
     return {};
 }
 
-export function namePeepExecuteArgs(id: number | null, name: string): PeepNameArgs{
+export function renameExecuteArgs(id: number | null, name: string): RenameArgs{
     return {"id": id, "name": name};
 }

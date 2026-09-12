@@ -55,27 +55,31 @@ export const initCustomSprites = (): void => {
 export function drawImage(g: GraphicsContext, image: number, property?: keyof Guest): void
 {
     const img = g.getImage(image);
+
+    if (!img) return;
+
     const guest = <Guest>model._selectedPeep.get();
-	if (model._allGuestsSelected.get())
-	{
-		if (img)
-		{
-			g.paletteId = getColour("pe.side.secondary", Colour.LightBrown);
-			g.image(img.id, 0, 0);
-		}
-	}
-    else if (property === "tshirtColour" || property === "trousersColour" || (property === "hatColour" && guest.hasItem({type: "hat"})) || (property === "umbrellaColour" && guest.hasItem({type: "umbrella"})) || (property === "balloonColour" && guest.hasItem({type: "balloon"})))
+    let paletteId = Colour.Void;
+    
+    if (model._allGuests.get().length > 1)
     {
-        const colour = guest[property];
-        if (img)
-		{
-            g.paletteId = colour;
-            g.image(img.id, 0, 0);
+        paletteId = getColour("pe.side.secondary", Colour.LightBrown);
+    }
+    else if (property)
+    {
+        const isValidItemColour = 
+            property === "tshirtColour" || 
+            property === "trousersColour" || 
+            (property === "hatColour" && guest.hasItem({ type: "hat" })) || 
+            (property === "umbrellaColour" && guest.hasItem({ type: "umbrella" })) || 
+            (property === "balloonColour" && guest.hasItem({ type: "balloon" }));
+
+        if (isValidItemColour)
+        {
+            paletteId = guest[property] as number;
         }
     }
-    else if (img)
-	{
-        g.paletteId = Colour.Void;
-        g.image(img.id, 0, 0);
-    }
+    g.paletteId = paletteId;
+    g.tertiaryColour = Colour.Yellow;
+    g.image(img.id, 0, 0);
 }

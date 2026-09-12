@@ -1,11 +1,11 @@
 import { debug } from "../helpers/logger";
 
-export interface GuestItemRemoveArgs {
+export interface ItemRemoveArgs {
     id: number | null;
     item: GuestItemType;
 }
 
-export function guestItemRemoveExecute(args: GuestItemRemoveArgs): GameActionResult
+export function itemRemoveExecute(args: ItemRemoveArgs): GameActionResult
 {
     if (args.id === null) return{};
     const entity = map.getEntity(args.id);
@@ -16,6 +16,6 @@ export function guestItemRemoveExecute(args: GuestItemRemoveArgs): GameActionRes
     return {};
 }
 
-export function guestItemRemoveExecuteArgs(id: number | null, item: GuestItemType): GuestItemRemoveArgs{
+export function itemRemoveExecuteArgs(id: number | null, item: GuestItemType): ItemRemoveArgs{
     return {"id": id, "item": item};
 }

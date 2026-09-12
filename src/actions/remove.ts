@@ -1,10 +1,10 @@
 import { debug } from "../helpers/logger";
 
-export interface PeepRemoveArgs {
+export interface RemoveArgs {
     id: number | null;
 }
 
-export function removePeepExecute(args: PeepRemoveArgs): GameActionResult
+export function removeExecute(args: RemoveArgs): GameActionResult
 {
     if (args.id === null) return {};
     const entity = map.getEntity(args.id);
@@ -15,6 +15,6 @@ export function removePeepExecute(args: PeepRemoveArgs): GameActionResult
     return {};
 }
 
-export function removePeepExecuteArgs(id: number | null): PeepRemoveArgs{
+export function removeExecuteArgs(id: number | null): RemoveArgs{
     return {"id": id};
 }
