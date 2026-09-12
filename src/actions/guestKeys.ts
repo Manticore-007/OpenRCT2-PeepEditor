@@ -2,8 +2,8 @@ export type GuestKey = "happiness" | "energy" | "hunger" | "thirst" | "nausea" |
 
 export interface GuestKeysArgs {
     id: number | null;
-    adjustment: number;
     key:  GuestKey;
+    adjustment: number;
 }
 
 export function guestKeysExecute(args: GuestKeysArgs): GameActionResult
@@ -18,6 +18,6 @@ export function guestKeysExecute(args: GuestKeysArgs): GameActionResult
     return {};
 }
 
-export function guestKeysExecuteArgs(id: number | null, adjustment: number, key: GuestKey): GuestKeysArgs{
-    return {"id": id, "adjustment": adjustment, "key": key};
+export function guestKeysExecuteArgs(id: number | null, key: GuestKey, adjustment: number): GuestKeysArgs{
+    return {"id": id, "key": key, "adjustment": adjustment};
 }

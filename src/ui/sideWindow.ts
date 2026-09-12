@@ -7,7 +7,6 @@ import { button, horizontal, label, tab, tabwindow, vertical,
 		WritableStore, 
 		Parsed} from "openrct2-flexui";
 import { model } from "../viewmodel/PeepViewModel";
-import { movePeepExecuteArgs } from "../actions/peepMover";
 import { colourPeepExecuteArgs } from "../actions/peepColour";
 import { colourList, GuestColours } from "../helpers/colours";
 import { staffType, staffTypeList } from "../helpers/staffTypes";
@@ -19,7 +18,6 @@ import { guestFlagsExecuteArgs } from "../actions/guestFlags";
 import { percentage, progressBar, ProgressBarColour } from "../helpers/progressBar";
 import { guestItemTypeList, itemImage, itemName } from "../helpers/guestItemTypes";
 import { guestItemRemoveExecuteArgs } from "../actions/guestItemRemove";
-import { peepRotateExecuteArgs } from "../actions/peepRotater";
 import { getWindow } from "../helpers/getWindow";
 import { getColour, theme } from "../helpers/settings";
 import { GuestKey, guestKeysExecuteArgs } from "../actions/guestKeys";
@@ -67,7 +65,7 @@ export const templateWindowSide = tabwindow({
 									padding: {top: 1, right: 10,  bottom: 1},
 									disabled: model._isPositionDisabled,
 									disabledMessage: "Peep not static",
-									onChange: (_, adjustment: number) => model._allGuests.get().forEach(guest => context.executeAction("pe-movepeep",movePeepExecuteArgs(guest.id, "x", (adjustment * multiplier.get()))))
+									onChange: (_, adjustment: number) => model._move("x", adjustment)
 								})
 							]),
 							horizontal([
@@ -85,7 +83,7 @@ export const templateWindowSide = tabwindow({
 									padding: {top: 1, right: 10,  bottom: 1},
 									disabled: model._isPositionDisabled,
 									disabledMessage: "Peep not static",
-									onChange: (_, adjustment: number) => model._allGuests.get().forEach(guest => context.executeAction("pe-movepeep", movePeepExecuteArgs(guest.id, "y", (adjustment * multiplier.get()))))
+									onChange: (_, adjustment: number) => model._move("y", adjustment)
 								})
 							]),
 							horizontal([
@@ -103,7 +101,7 @@ export const templateWindowSide = tabwindow({
 									padding: {top: 1, right: 10,  bottom: 1},
 									disabled: model._isPositionDisabled,
 									disabledMessage: "Peep not static",
-									onChange: (_, adjustment: number) => model._allGuests.get().forEach(guest => context.executeAction("pe-movepeep", movePeepExecuteArgs(guest.id, "z", (adjustment * multiplier.get()))))
+									onChange: (_, adjustment: number) => model._move("z", adjustment)
 								})
 							]),
 							horizontal([
@@ -125,11 +123,7 @@ export const templateWindowSide = tabwindow({
 									disabled: model._isStatic,
 									visibility: model._isVisibleWhen(model._isGuest, false),
 									disabledMessage: "Peep not moving",
-									onChange: (_, adjustment: number) =>
-									{
-										const peep = model._selectedPeep.get();
-										if (peep) context.executeAction("pe-guestkeys", guestKeysExecuteArgs(peep.id, (adjustment * multiplier.get()), "energy"));
-									}
+									onChange: (_, adjustment: number) => model._modifyGuestKey(adjustment, "energy")
 								})
 							]),
 							button({ //rotate peep
@@ -140,12 +134,12 @@ export const templateWindowSide = tabwindow({
 								image: "rotate_arrow",
 								tooltip: "Rotate a static peep",
 								disabled: compute(model._isStatic, s => !s),
-								onClick: () => context.executeAction("pe-peeprotate", peepRotateExecuteArgs())
+								onClick: () => model._rotate()
 							}),
 						]
 					}),
 					vertical({
-						padding: {top: 5, right: 6},
+						padding: {top: 5},
 						content: buttonStyle()
 					}),
 				]),
@@ -310,10 +304,12 @@ export const templateWindowSide = tabwindow({
 										wrapMode: "wrap",
 										onChange: (value, adjustment) =>
 										{
-											const peep = model._selectedPeep.get();
-											if (peep !== null)
+											const allGuests = model._allGuests.get();
+											if (allGuests !== undefined)
+											//const peep = model._selectedPeep.get();
+											if (allGuests !== null)
 											{
-												context.executeAction("pe-animationframepeep", animationFramePeepExecuteArgs(peep.id, value, adjustment));
+												allGuests.forEach( guest => context.executeAction("pe-animationframepeep", animationFramePeepExecuteArgs(guest.id, value, adjustment)));
 											}
 										}
 									})
@@ -925,7 +921,7 @@ function buttonStyle(): WidgetCreator<FlexiblePosition>[]
 			height: buttonSizeSmall,
 			image: compute(model._isFrozen, model._isStatic, (f, s) => f && s ? "rct1_close_on" : "rct1_close_off"),
 			tooltip: "Completely stop a peep from moving",
-			padding: { top: 0, right: -2, bottom: -2, left: 2 },
+			padding: { top: 0, right: 6, bottom: -2, left: 4 },
 			border: true,
 			disabled: model._disabledWhenNoPeepSelected,
 			visibility: compute(theme, t => t === "rct1" ? "visible" : "none"),
@@ -936,7 +932,7 @@ function buttonStyle(): WidgetCreator<FlexiblePosition>[]
 			height: buttonSizeSmall,
 			image: compute(model._isFrozen, model._isStatic, (f, s) => !f && s ? "rct1_test_on" : "rct1_test_off"),
 			tooltip: "Stop a peep in place, animation still works",
-			padding: { top: -2, right: -2, bottom: -2, left: 2 },
+			padding: { top: -2, right: 6, bottom: -2, left: 4 },
 			border: true,
 			disabled: model._disabledWhenNoPeepSelected,
 			visibility: compute(theme, t => t === "rct1" ? "visible" : "none"),
@@ -947,7 +943,7 @@ function buttonStyle(): WidgetCreator<FlexiblePosition>[]
 			height: buttonSizeSmall,
 			image: compute(model._isFrozen, model._isStatic, (f, s) => !f && !s ? "rct1_open_on" : "rct1_open_off"),
 			tooltip: "Let the peep roam freely around",
-			padding: { top: -2, right: -2, bottom: -2, left: 2 },
+			padding: { top: -2, right: 6, bottom: -2, left: 4 },
 			border: true,
 			disabled: model._disabledWhenNoPeepSelected,
 			visibility: compute(theme, t => t === "rct1" ? "visible" : "none"),
@@ -957,7 +953,7 @@ function buttonStyle(): WidgetCreator<FlexiblePosition>[]
 			image: compute(model._isFrozen, model._isStatic, (f, s) => flagButtonImage(f, s)),
 			width: buttonSize,
 			height: buttonSize,
-			padding: { top: 0, left: -2, bottom: -2, right: -2 },
+			padding: { top: 0 },
 			disabled: model._disabledWhenNoPeepSelected,
 			visibility: compute(theme, t => t === "rct2" ? "visible" : "none"),
 			onClick: () =>

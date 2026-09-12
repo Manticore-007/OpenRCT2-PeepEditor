@@ -1,22 +1,19 @@
-import { model } from "../viewmodel/PeepViewModel";
+export interface PeepRotateArgs {
+    id: number | null;
+}
 
-export function peepRotateExecute(): GameActionResult
+export function peepRotateExecute(args: PeepRotateArgs): GameActionResult
 {
-    const allGuests = model._allGuests.get();
     const numDirections = 4;
-    if (allGuests !== undefined) {
-        const firstPeep = <Guest>allGuests[0];
-        const direction = firstPeep.direction;
-        allGuests.forEach(entity => {
-            const peep = <Guest|BaseStaff>entity;
-            if (peep.direction !== direction) peep.direction = direction;
-            peep.direction = <Direction>((peep.direction + 1) % numDirections);
-        });
-    }
-
+    if (args.id === null) return {};
+    const entity = map.getEntity(args.id);
+    if (entity === null) return {};
+    if (entity === null || entity.type !== "guest" && entity.type !== "staff" ) return {} ;
+    const peep = <Guest|BaseStaff>entity;
+    peep.direction = <Direction>((peep.direction + 1) % numDirections);
     return {};
 }
 
-export function peepRotateExecuteArgs(): object{
-    return {};
+export function peepRotateExecuteArgs(id: number | null): PeepRotateArgs{
+    return {"id": id};
 }

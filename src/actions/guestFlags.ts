@@ -1,5 +1,5 @@
-
-export interface GuestFlagsArgs {
+export interface GuestFlagsArgs
+{
     id: number | null;
     checked: boolean;
     flag: PeepFlags;
@@ -16,6 +16,7 @@ export function guestFlagsExecute(args: GuestFlagsArgs): GameActionResult
     return {};
 }
 
-export function guestFlagsExecuteArgs(id: number | null, checked: boolean, flag: PeepFlags): GuestFlagsArgs{
+export function guestFlagsExecuteArgs(id: number | null, checked: boolean, flag: PeepFlags): GuestFlagsArgs
+{
     return {"id": id, "checked": checked, "flag": flag};
 }

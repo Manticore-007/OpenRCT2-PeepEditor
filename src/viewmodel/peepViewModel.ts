@@ -11,6 +11,8 @@ import { getColour } from "../helpers/settings";
 import { staffType } from "../helpers/staffTypes";
 import { multiplier, multiplierIndex, windowTitle } from "../ui/windowConsts";
 import { photo1RideName, photo2RideName, photo3RideName, photo4RideName } from "../helpers/rides";
+import { movePeepExecuteArgs } from "../actions/peepMover";
+import { peepRotateExecuteArgs } from "../actions/peepRotater";
 
 type PeepMotion = "frozen" | "static" | "moving";
 
@@ -19,7 +21,8 @@ const defaultColour = getColour("pe.side.secondary", Colour.LightBrown);
 export class PeepViewModel
 {
     readonly _allGuests = store<Guest[]|BaseStaff[]>([]);
-    readonly _allGuestEntities = store<Guest[]>([])
+    readonly _allGuestEntities = store<Guest[]>([]);
+    public numGuests = 0;
     readonly _allStaffEntities = store<BaseStaff[]>([]);
     readonly _allGuestsSorted = store<string[]>([]);
     readonly _allStaffSorted = store<string[]>([]);
@@ -98,6 +101,7 @@ export class PeepViewModel
     
 
     private _onGameTick?: IDisposable;
+    private _guestGeneration?: IDisposable;
 
     constructor()
     {
@@ -107,6 +111,12 @@ export class PeepViewModel
     _open(): void
     {
         this._onGameTick = context.subscribe("interval.tick", () => this._onGameTickExecuted());
+    //     this._guestGeneration = context.subscribe("guest.generation", () => {
+    //         const allGuests = map.getAllEntities("guest");
+    //         this.numGuests = allGuests.length;
+    //         this._getAllGuests();
+            
+    // });
         this._conversionCheck();
     }
 
@@ -125,6 +135,11 @@ export class PeepViewModel
             this._onGameTick.dispose();
         }
         this._onGameTick = undefined;
+        if (this._guestGeneration)
+        {
+            this._guestGeneration.dispose();
+        }
+        this._guestGeneration = undefined;
     }
 
     _select(peep: Guest | BaseStaff): void
@@ -138,8 +153,12 @@ export class PeepViewModel
     _getAllGuests(): void
     {
         this._allGuests.set(map.getAllEntities("guest"));
+        if (this._allGuests.get().length > 0)
+        {
         this._availableAnimations.set(this._allGuests.get()[0].availableAnimations);
         this._animationLength.set(this._allGuests.get()[0].animationLength);
+        }
+        console.log("getting all guests");
     }
 
     _toggleAllGuests(pressed: boolean): void
@@ -180,9 +199,35 @@ export class PeepViewModel
         });
     }
 
+    _move(axis: keyof CoordsXYZ, adjustment: number): void 
+    {
+        this._execute("pe-movepeep", id => movePeepExecuteArgs(id, axis, (adjustment * multiplier.get())));
+    }
+
+    _rotate(): void
+    {
+        this._execute("pe-peeprotate", id => peepRotateExecuteArgs(id));
+    }
+
     _setItemColour(colour: number, key: GuestColours): void
     {
-        model._allGuests.get().forEach(guest => context.executeAction("pe-colourpeep", colourPeepExecuteArgs(guest.id, colour, key)));
+        this._execute("pe-colourpeep", id => colourPeepExecuteArgs(id, colour, key));
+    }
+
+    _modifyGuestKey(adjustment: number, key: GuestKey): void
+    {
+        this._execute("pe-guestkeys", id => guestKeysExecuteArgs(id, key, (adjustment * multiplier.get())));
+    }
+
+    _execute(actionName: string, getArgs: (guestId: number | null) => any): void 
+    {
+        if (this._allGuestsSelected.get()) {
+            this._getAllGuests();
+        }
+        
+        model._allGuests.get().forEach(guest => {
+            context.executeAction(actionName, getArgs(guest.id));
+        });
     }
 
     _setStafforders(order: number): WritableStore<boolean>
@@ -199,12 +244,6 @@ export class PeepViewModel
         }
     }
 
-    _modifyGuestKey(adjustment: number, key: GuestKey): void
-    {
-        const peep = this._selectedPeep.get();
-        if (peep) context.executeAction("pe-guestkeys", guestKeysExecuteArgs(peep.id, (adjustment * multiplier.get()), key));
-    }
-
     _isVisibleWhen = (check: WritableStore<boolean>, visibleOnTrue: boolean = true) => compute(check, c => (c === visibleOnTrue) ? "visible" : "none");
 
     private _conversionCheck(): void
@@ -214,7 +253,7 @@ export class PeepViewModel
         {
             if (staff.energy === 0)
             {
-                context.executeAction("pe-guestkeys", guestKeysExecuteArgs(staff.id, 96, "energy"));
+                context.executeAction("pe-guestkeys", guestKeysExecuteArgs(staff.id, "energy", 96));
                 context.executeAction("pe-guestflags", guestFlagsExecuteArgs(staff.id, true, "positionFrozen"));
                 context.executeAction("pe-guestflags", guestFlagsExecuteArgs(staff.id, true, "animationFrozen"));
                 debug("Old freezing method converted to new method");
@@ -275,6 +314,11 @@ export class PeepViewModel
 
     private _onGameTickExecuted(): void
     {
+        if (this._allGuestsSelected.get())
+        {
+        const guests = map.getAllEntities("guest");
+        this.numGuests = guests.length;
+        }
         const peep = this._selectedPeep.get();
         if (peep)
         {

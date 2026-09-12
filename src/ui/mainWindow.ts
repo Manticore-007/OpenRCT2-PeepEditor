@@ -1,4 +1,4 @@
-import { button, checkbox, Colour, colourPicker, compute, dropdown, groupbox, horizontal, label, listview, store, tab, tabwindow, toggle, twoway, vertical, viewport } from "openrct2-flexui";
+import { button, checkbox, Colour, colourPicker, compute, dropdown, graphics, groupbox, horizontal, label, listview, store, tab, tabwindow, toggle, twoway, vertical, viewport } from "openrct2-flexui";
 import { model } from "../viewmodel/PeepViewModel";
 import { togglePeepPicker } from "../services/peepPicker";
 import { isDevelopment, pluginVersion } from "../helpers/environment";
@@ -28,7 +28,18 @@ export const templateWindowMain = tabwindow({
             image: img.lens,
             content: [
                 horizontal([
-                    viewport({target: compute(model._selectedPeep, p => p ? p.id : null)}),
+                    viewport({
+                        visibility: compute(model._allGuestsSelected, a => a ? "none" : "visible"),
+                        target: compute(model._selectedPeep, p => p ? p.id : null)
+                    }),
+                    graphics({
+                        visibility: compute(model._allGuestsSelected, a => a ? "visible" : "none"),
+                        onDraw(g) {
+                            g.colour = 55;
+                            g.well(0, 0, 225, 165);
+                            g.text(`{WHITE}Guests selected: ${model.numGuests}`, 6, 6)
+                        },
+                    }),
                     vertical({
                         content: [
                             toggle({	//picker
@@ -168,7 +179,12 @@ export const templateWindowMain = tabwindow({
                 onChange: (pressed) =>
                 {
                     model._toggleAllGuests(pressed);
-                    pressed ? openSideWindow() : closeSideWindow();
+                    if (pressed)
+                    {
+                        ui.showError("WARNING", "Take caution when you already have frozen peeps in your map");
+                        openSideWindow();
+                    }
+                    else closeSideWindow();
                 }
             })
         ])
