@@ -34,7 +34,7 @@ export const shortcutRegister =
         id: shortcutId.open.get(),
         text: shortcutNames.open.get(),
         bindings: shortcutBindings.open.get(),
-        callback: ()  => templateWindowMain.focus()
+        callback: ()  => templateWindowMain.open()
     }),
     select: ui.registerShortcut({
         id: shortcutId.select.get(),

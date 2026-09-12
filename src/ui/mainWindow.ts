@@ -81,7 +81,7 @@ export const templateWindowMain = tabwindow({
                                     }
                                     model._toggleAllGuests(pressed);
                                     ui.showError("WARNING", "Take caution when you already have frozen peeps in your map");
-                                    templateWindowSide.focus();
+                                    templateWindowSide.open();
                                 }
                             }),
                             button({	//nametag
@@ -173,7 +173,7 @@ export const templateWindowMain = tabwindow({
                                     const main = windowMain.get();
                                     const allGuests = model._allGuestEntities.get();
                                     model._select(allGuests[allGuests.map(e => { return e.name }).indexOf(model._allGuestsSorted.get()[index])])
-                                    templateWindowSide.focus();
+                                    templateWindowSide.open();
                                     model._allGuestsSelected.set(false);
                                     if (main) main.tabIndex = 0;
                                 }
@@ -195,7 +195,7 @@ export const templateWindowMain = tabwindow({
                                     if (main) {
                                         main.tabIndex = 0;
                                     }
-                                    templateWindowSide.focus();
+                                    templateWindowSide.open();
                                 }
                             })
                         ]
