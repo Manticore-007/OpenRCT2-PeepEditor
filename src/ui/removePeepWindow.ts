@@ -1,9 +1,9 @@
-import { button, Colour, horizontal, label, window, OpenWindow } from "openrct2-flexui";
+import { button, Colour, horizontal, label, window } from "openrct2-flexui";
 import { removeExecuteArgs } from "../actions/remove";
-import { closeSideWindow } from "./sideWindow";
 import { model } from "../viewmodel/PeepViewModel";
+import { templateWindowSide } from "./sideWindow";
 
-export function openWindowRemovePeep(peep: BaseStaff | Guest): OpenWindow {
+export function openWindowRemovePeep(peep: BaseStaff | Guest) {
 	const removePeepWindow = window({
 		onClose: () => {
 			ui.tool?.cancel();
@@ -30,8 +30,8 @@ export function openWindowRemovePeep(peep: BaseStaff | Guest): OpenWindow {
 					onClick: () => {
 						if (peep)
 							context.executeAction("pe-remove", removeExecuteArgs(peep.id));
-						openedWindow().close();
-                        closeSideWindow();
+						removePeepWindow.close();
+                        templateWindowSide.close();
 						model._allGuests.set([]);
 					}
 				}),
@@ -42,15 +42,13 @@ export function openWindowRemovePeep(peep: BaseStaff | Guest): OpenWindow {
 					text: "Cancel",
 					padding: [0, 4],
 					onClick: () => {
-						openedWindow().close();
+						removePeepWindow.close();
 					}
 				}),
 			])
 		]
 	});
-	function openedWindow(): OpenWindow {return removePeepWindow.open()};
-	return openedWindow();
-}
+	removePeepWindow.open()};
 
 function textRemovePeep(peep: Guest | BaseStaff): string {
 	if (peep.type === "guest") {

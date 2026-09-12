@@ -42,7 +42,7 @@ export const templateWindowSide = tabwindow({
 	title: "Properties",
 	width: 260,
 	height: 230,
-	colours: [colourWindow.primary.get(), colourWindow.secondary.get()],
+	colours: [colourWindow.primary.get(), colourWindow.secondary.get(), colourWindow.primary.get()],
 	padding: 5,
 	tabs: [
 		tab({	//location
@@ -331,7 +331,7 @@ export const templateWindowSide = tabwindow({
 				horizontal([
 					groupbox({
 						text: "Physiology",
-						visibility: "none",
+						visibility: compute(model._isStaff, s => s ? "visible" : "none"),
 						content: [
 							label({
 								text: "All staff members are very happy,",
@@ -502,13 +502,13 @@ export const templateWindowSide = tabwindow({
 	onTabChange: () => ui.tool?.cancel(),
 });
 
-export function openedSideWindow(): OpenWindow {
-	return templateWindowSide.open()
-};
+// export function openedSideWindow(): OpenWindow {
+// 	return templateWindowSide.open()
+// };
 
-export function closeSideWindow(): void {
-	openedSideWindow().close();
-}
+// export function closeSideWindow(): void {
+// 	openedSideWindow().close();
+// }
 
 function openWindowRemoveItem(item: GuestItemType): void {
 	const removeItemWindow: WindowTemplate = window({
@@ -533,7 +533,7 @@ function openWindowRemoveItem(item: GuestItemType): void {
 					padding: [0, 4],
 					onClick: () => {
 						model._removeItem(item);
-						openedRemoveWindow.close();
+						templateWindowSide.close();
 					}
 				}),
 				button({
@@ -542,13 +542,13 @@ function openWindowRemoveItem(item: GuestItemType): void {
 					height: 14,
 					text: "Cancel",
 					padding: [0, 4],
-					onClick: () => openedRemoveWindow.close()
+					onClick: () => templateWindowSide.close()
 				}),
 			])
 		],
 		onClose: () => ui.tool?.cancel(),
 	});
-	const openedRemoveWindow = removeItemWindow.open();
+	removeItemWindow.open();
 }
 
 function createPositionWidget(axis: "x" | "y" | "z", store: Store<number>) {
@@ -785,9 +785,12 @@ function freezeWidgets(): WidgetCreator<FlexiblePosition> {
 				padding: { top: 0 },
 				visibility: compute(theme, t => t === "rct2" ? "visible" : "none"),
 				onClick: () => {
-					if (!model._isFrozen.get() && !model._isStatic.get()) { model._setMotion("frozen"); return; }
-					if (model._isFrozen.get() && model._isStatic.get()) { model._setMotion("static"); return; }
-					if (!model._isFrozen.get() && model._isStatic.get()) { model._setMotion("moving"); return; };
+					const isFrozen = model._isFrozen.get();
+					const isStatic = model._isStatic.get();
+
+					if (!isFrozen && !isStatic) model._setMotion("frozen");
+					else if (isFrozen && isStatic) model._setMotion("static");
+					else model._setMotion("moving");
 				}
 			}),
 		]

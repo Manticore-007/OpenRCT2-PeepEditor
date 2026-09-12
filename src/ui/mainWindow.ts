@@ -1,4 +1,4 @@
-import { button, checkbox, Colour, colourPicker, compute, dropdown, graphics, groupbox, horizontal, label, listview, OpenWindow, store, tab, tabwindow, textbox, toggle, twoway, vertical, viewport, WritableStore } from "openrct2-flexui";
+import { button, checkbox, Colour, colourPicker, compute, dropdown, graphics, groupbox, horizontal, label, listview, store, tab, tabwindow, textbox, toggle, twoway, vertical, viewport, WritableStore } from "openrct2-flexui";
 import { model } from "../viewmodel/PeepViewModel";
 import { selectByTiles } from "../services/selector";
 import { isDevelopment, pluginVersion } from "../helpers/environment";
@@ -7,7 +7,7 @@ import { ProgressBarColour } from "../helpers/progressBar";
 import { getColour, isPinned, isSticky, setColour, setMenuItem, setSticky, setTheme, theme } from "../helpers/settings";
 import { openWindowRemovePeep } from "./removePeepWindow";
 import { buttonSize, img, windowMain } from "./windowConsts";
-import { closeSideWindow, colourWindow as colourSideWindow, openedSideWindow } from "./sideWindow";
+import { colourWindow as colourSideWindow, templateWindowSide } from "./sideWindow";
 import { renameExecuteArgs } from "../actions/rename";
 import { guestFlagsExecuteArgs } from "../actions/guestFlags";
 import { togglePeepPicker } from "../services/peepPicker";
@@ -23,7 +23,7 @@ export const templateWindowMain = tabwindow({
     title: compute(model._name, n => n),
     width: 260,
     height: 230,
-    colours: [colourWindow.primary.get(), colourWindow.secondary.get()],
+    colours: [colourWindow.primary.get(), colourWindow.secondary.get(), colourWindow.primary.get()],
     tabs: [
         tab({ //main tab
             image: img.lens,
@@ -76,12 +76,12 @@ export const templateWindowMain = tabwindow({
                                 isPressed: twoway(model._allGuestsSelected),
                                 onChange: (pressed) => {
                                     if (!pressed) {
-                                        closeSideWindow();
+                                        templateWindowSide.close();
                                         return;
                                     }
                                     model._toggleAllGuests(pressed);
                                     ui.showError("WARNING", "Take caution when you already have frozen peeps in your map");
-                                    openedSideWindow().focus;
+                                    templateWindowSide.focus();
                                 }
                             }),
                             button({	//nametag
@@ -173,7 +173,7 @@ export const templateWindowMain = tabwindow({
                                     const main = windowMain.get();
                                     const allGuests = model._allGuestEntities.get();
                                     model._select(allGuests[allGuests.map(e => { return e.name }).indexOf(model._allGuestsSorted.get()[index])])
-                                    openedSideWindow().focus();
+                                    templateWindowSide.focus();
                                     model._allGuestsSelected.set(false);
                                     if (main) main.tabIndex = 0;
                                 }
@@ -195,7 +195,7 @@ export const templateWindowMain = tabwindow({
                                     if (main) {
                                         main.tabIndex = 0;
                                     }
-                                    openedSideWindow().focus();
+                                    templateWindowSide.focus();
                                 }
                             })
                         ]
@@ -323,7 +323,7 @@ export const templateWindowMain = tabwindow({
     onClose: () => {
         model._selectPeepType.set("guest");
         ui.tool?.cancel();
-        closeSideWindow();
+        templateWindowSide.close();
         model._dispose();
     },
     onUpdate: () => {
@@ -335,11 +335,11 @@ export const templateWindowMain = tabwindow({
 });
 
 
-export function openedMainWindow(): OpenWindow { return templateWindowMain.open() };
+//export function openedMainWindow(): OpenWindow { return templateWindowMain.open() };
 
-export function closeWindowMain(): void {
-    openedMainWindow().close();
-}
+// export function closeWindowMain(): void {
+//     openedMainWindow().close();
+// }
 
 function versionString(): string {
     return isDevelopment ? `{BLACK}${pluginVersion} {BABYBLUE}[BETA]` : `{BLACK}${pluginVersion}`;

@@ -39,7 +39,7 @@ const config = {
 			compress: {
 				passes: 5
 			},
-			format: {
+			output: {
 				comments: false,
 				quote_style: 1,
 				wrap_iife: true,

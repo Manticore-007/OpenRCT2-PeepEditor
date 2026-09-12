@@ -1,8 +1,8 @@
 import { store } from "openrct2-flexui";
 import { model } from "../viewmodel/PeepViewModel";
 import { togglePeepPicker } from "../services/peepPicker";
-import { openedMainWindow } from "../ui/mainWindow";
 import { multiplierIndex } from "../ui/windowConsts";
+import { templateWindowMain } from "../ui/mainWindow";
 
 export const shortcutId =
 {
@@ -34,7 +34,7 @@ export const shortcutRegister =
         id: shortcutId.open.get(),
         text: shortcutNames.open.get(),
         bindings: shortcutBindings.open.get(),
-        callback: ()  => openedMainWindow().focus()
+        callback: ()  => templateWindowMain.focus()
     }),
     select: ui.registerShortcut({
         id: shortcutId.select.get(),
