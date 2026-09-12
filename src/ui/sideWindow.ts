@@ -7,7 +7,6 @@ import {
 	FlexiblePosition, Bindable, ElementVisibility, Padding,
 	WritableStore,
 	Store,
-	OpenWindow,
 	WindowTemplate
 } from "openrct2-flexui";
 
