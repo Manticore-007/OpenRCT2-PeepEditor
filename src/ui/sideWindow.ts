@@ -376,7 +376,7 @@ export const templateWindowSide = tabwindow({
 			spacing: 0,
 			content: [
 				groupbox({
-					text: "Carrying",
+					text: compute(model._allGuests, a => a.length > 1 ? "Number of guests with item" : "Carrying"),
 					padding: { bottom: 4 },
 					spacing: 0,
 					visibility: compute(model._isGuest, g => g ? "visible" : "none"),
@@ -386,7 +386,7 @@ export const templateWindowSide = tabwindow({
 							visibility: compute(model._items, model._allGuests, (i, a) => i.length === 0 && a.length <= 1 ? "visible" : "none"),
 							padding: { top: -2, bottom: -2 }
 						})
-					)							
+					).concat(createItemCounters())
 				}),
 				horizontal([
 					label({
@@ -473,14 +473,24 @@ export const templateWindowSide = tabwindow({
 						}
 					})
 				]),
+				horizontal([
 					button({
-						text: `Give item`,
+						text: compute(model._allGuests, a => a.length > 1 ? `Give items` : `Give item`),
 						visibility: compute(model._isGuest, g => g ? "visible" : "none"),
 						height: 13,
 						padding: {left: "1w"},
 						width: "25%",
 						onClick: () => model._giveItem(model._item.get())
-					})
+					}),
+					button({
+						text: `{RED}Remove Items`,
+						height: 13,
+						border: true,
+						padding: { top: 0, bottom: -2 },
+						visibility : compute(model._allGuests, a => a.length > 1 ? "visible" : "none"),
+						onClick: () => openWindowRemoveItem(model._item.get())
+				})
+			])
 			]
 		})
 	],
@@ -512,7 +522,7 @@ export const templateWindowSide = tabwindow({
 
 function openWindowRemoveItem(item: GuestItemType): void {
 	const removeItemWindow: WindowTemplate = window({
-		title: "Remove item",
+		title: compute(model._allGuests, a => a.length > 1 ? "Remove items" : "Remove item"),
 		width: 200,
 		height: 100,
 		position: { x: ui.width / 2 - 100, y: ui.height / 2 - 50 },
@@ -521,7 +531,9 @@ function openWindowRemoveItem(item: GuestItemType): void {
 			label({
 				width: 200,
 				alignment: "centred",
-				text: `Are you sure you want to remove\n${itemName[guestItemTypeList.indexOf(item)]}\nfrom this guest?`,
+				text: compute(model._allGuests, a => a.length > 1 ?
+					 `Are you sure you want to remove\n${itemName[guestItemTypeList.indexOf(item)]}\nfrom these guests?` :
+					 `Are you sure you want to remove\n${itemName[guestItemTypeList.indexOf(item)]}\nfrom this guest?`),
 				padding: [25, 0, 17, 0]
 			}),
 			horizontal([
@@ -590,7 +602,7 @@ function createFlagCheckboxWidget(flag: PeepFlags, padding?: Padding | undefined
 
 function createItemWidget(): WidgetCreator<FlexiblePosition>[] {
 	return guestItemTypeList.map((item, index) => {
-		const visibility = compute(model._items, i => i.some(el => el.type === item) ? "visible" : "none");
+		const visibility = compute(model._items, model._allGuests, (i, a) => i.some(el => el.type === item) && a.length <= 1 ? "visible" : "none");
 		const name = `{BLACK}${itemName[index]}`;
 		const text = compute(photo1RideName, photo2RideName, photo3RideName, photo4RideName, (p1, p2, p3, p4) => {
 			const photoNames: Record<string, string> = { photo1: p1, photo2: p2, photo3: p3, photo4: p4 };
@@ -620,6 +632,44 @@ function createItemWidget(): WidgetCreator<FlexiblePosition>[] {
 			})
 		]);
 	});
+}
+
+function createItemCounters(): WidgetCreator<FlexiblePosition> {
+	const chunkSize = 5;
+	const columns: (typeof guestItemTypeList)[] = [];
+
+	for (let i = 0; i < guestItemTypeList.length; i += chunkSize) {
+		columns.push(guestItemTypeList.slice(i, i + chunkSize));
+	}
+
+	return horizontal(
+		columns.map(columnItems =>
+			vertical(
+				columnItems.map(item => {
+					// Combine filtering and formatting into a single compute block
+					const countText = compute(model._allGuests, a => {
+						if (a[0] && a[0].type === "staff") return "";
+						const count = a.filter(g => (g as Guest).hasItem({ type: item })).length;
+						return `{TINYFONT}${count}`;
+					});
+
+					return vertical([
+						graphics({
+							height: 20,
+							width: 20,
+							visibility: compute(model._allGuests, a => a.length > 1 ? "visible" : "none"),
+							tooltip: itemName[guestItemTypeList.indexOf(item)],
+							onDraw: g => {
+								g.colour = 2;
+								g.text(countText.get(), 2, 12);
+								itemImage(item, g);
+							}
+						})
+					]);
+				})
+			)
+		)
+	);
 }
 
 function itemList(): string[] {
