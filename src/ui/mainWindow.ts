@@ -29,18 +29,42 @@ export const templateWindowMain = tabwindow({
             image: img.lens,
             content: [
                 horizontal([
-                    viewport({
-                        visibility: compute(model._allGuests, a => a.length > 1 ? "none" : "visible"),
-                        target: compute(model._selectedPeep, p => p ? p.id : null)
-                    }),
-                    graphics({
-                        visibility: compute(model._allGuests, a => a.length > 1 ? "visible" : "none"),
-                        onDraw(g) {
-                            g.colour = 55;
-                            g.well(0, 0, 225, 165);
-                            g.text(`{WHITE}Guests selected: ${model._numGuests.get()}`, 6, 6)
-                        },
-                    }),
+                    vertical([
+                        label({
+                            text: compute(model._numGuests, n => `{BLACK}Guests selected: ${n}`),
+                            visibility: compute(model._allGuests, a => a.length > 1 ? "visible" : "none"),
+                        }),
+                        viewport({
+                            visibility: compute(model._allGuests, a => a.length > 1 ? "none" : "visible"),
+                            target: compute(model._selectedPeep, p => p ? p.id : null)
+                        }),
+                        listview({
+                            columns: ["{WINDOW_COLOUR_2}Name"],
+                            items: compute(model._allGuests, a => a.map(g => g?.name as string).sort()),
+                            visibility: compute(model._allGuests, a => a.length > 1 ? "visible" : "none"),
+                            canSelect: true,
+                            onHighlight: (index) => {
+                                const allGuests = model._allGuests.get() as Guest[];
+                                const allGuestsSorted = allGuests.map(a => a.name).sort();
+                                locate(allGuests[allGuests.map(e => { return e.name }).indexOf(allGuestsSorted[index])])
+                            },
+                            onClick: (index) => {
+                                const allGuests = model._allGuests.get() as Guest[];
+                                const allGuestsSorted = allGuests.map( a => a.name).sort();
+                                model._select(allGuests[allGuests.map(e => { return e.name }).indexOf(allGuestsSorted[index])])
+                                templateWindowSide.open();
+                                model._allGuestsSelected.set(false);
+                            }
+                        }),
+                    ]),
+                    // graphics({
+                    //     visibility: compute(model._allGuests, a => a.length > 1 ? "visible" : "none"),
+                    //     onDraw(g) {
+                    //         g.colour = 55;
+                    //         g.well(0, 0, 225, 165);
+                    //         g.text(`{WHITE}Guests selected: ${model._numGuests.get()}`, 6, 6)
+                    //     },
+                    // }),
                     vertical({
                         content: [
                             toggle({	//picker
@@ -58,13 +82,18 @@ export const templateWindowMain = tabwindow({
                                 tooltip: "Select guests on selected tiles",
                                 isPressed: twoway(model._isSelectingByTiles),
                                 onChange: (pressed) => {
-                                    model._toggleAllGuests(false);
-                                    selectByTiles("guest", pressed, guests => {
+                                    selectByTiles(
+                                        "guest",
+                                        pressed,
+                                        (guests) => {
                                         model._allGuests.set(guests);
                                         model._numGuests.set(guests.length);
                                         if (guests.length === 1) {
                                             model._selectedPeep.set(guests[0]);
-                                        }
+                                        } else {
+                                            model._toggleMultipleGuests(pressed);
+                                            }
+                                            templateWindowSide.open();
                                     }, () => model._isSelectingByTiles.set(false))
                                 }
                             }),
@@ -79,7 +108,7 @@ export const templateWindowMain = tabwindow({
                                         templateWindowSide.close();
                                         return;
                                     }
-                                    model._toggleAllGuests(pressed);
+                                    model._toggleMultipleGuests(pressed);
                                     ui.showError("WARNING", "Take caution when you already have frozen peeps in your map");
                                     templateWindowSide.open();
                                 }

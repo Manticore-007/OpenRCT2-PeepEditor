@@ -720,7 +720,7 @@ function createGuestKeysWidget(key: GuestKey, minimum: number, maximum: number, 
 		}
 	}
 	else {
-		if (compute(model._allGuestsSelected, a => a)) {
+		if (compute(model._allGuests, a => a.length > 1)) {
 			value = compute(keyStoreAverage, k => Math.floor(k.average))
 		} else {
 			value = compute(keyStore, b => b);
@@ -741,7 +741,7 @@ function createGuestKeysWidget(key: GuestKey, minimum: number, maximum: number, 
 				percentFilled: bar,
 				isPositive: isPositive,
 				foreground: bar,
-				visibility: compute(model._isGuest, model._allGuestsSelected, (g, a) => g && !a ? "visible" : "none"),
+				visibility: compute(model._isGuest, model._allGuests, (g, a) => g && (a.length === 1) ? "visible" : "none"),
 			}),
 			boxPlot({
 				median: median,
@@ -752,7 +752,7 @@ function createGuestKeysWidget(key: GuestKey, minimum: number, maximum: number, 
 				whiskerHigh: max,
 				whiskerLow: min,
 				background: colourWindow.secondary,
-				visibility: compute(model._allGuestsSelected, a => a ? "visible" : "none"),
+				visibility: compute(model._allGuests, a => a.length > 1 ? "visible" : "none"),
 			}),
 			spinner({
 				minimum: compute(energy, e => e === "energy" ? 32 : 0),

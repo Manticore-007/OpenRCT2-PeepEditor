@@ -186,80 +186,93 @@ export interface BoxPlotStats {
     outliers: number[];
 }
 
-export function getStatistics(data: Guest[], key: "happiness" | "energy" | "hunger" | "thirst" | "nausea" | "toilet" | "mass"): BoxPlotStats {
+const STAT_KEYS = ["happiness", "energy", "hunger", "thirst", "nausea", "toilet", "mass"] as const;
+type StatKey = typeof STAT_KEYS[number];
+
+export function getAllStatistics(data: Guest[]): Record<StatKey, BoxPlotStats> {
     const n = data.length;
     if (n === 0) {
         throw new Error("Dataset cannot be empty");
     }
 
-    const values = new Float64Array(n);
-    let sum = 0;
+    // 1. Initialize TypedArrays and sums for all metrics simultaneously
+    const storage = {} as Record<StatKey, { values: Float64Array; sum: number }>;
+    for (const key of STAT_KEYS) {
+        storage[key] = { values: new Float64Array(n), sum: 0 };
+    }
 
+    // 2. Single pass over the entire guest array (O(n) instead of O(7n))
     for (let i = 0; i < n; i++) {
-        let val = data[i][key];
+        const guest = data[i];
+        for (const key of STAT_KEYS) {
+            let val = guest[key];
+            if (key === "hunger" || key === "thirst") {
+                val = 255 - val;
+            }
+            storage[key].values[i] = val;
+            storage[key].sum += val;
+        }
+    }
 
-        // Invert hunger and thirst so 0 = starving/dehydrated and 255 = full/satiated 
-        // (or vice versa depending on how you want your UI to read them)
-        if (key === "hunger" || key === "thirst") {
-            val = 255 - val;
+    const result = {} as Record<StatKey, BoxPlotStats>;
+
+    // 3. Compute statistics for each metric
+    for (const key of STAT_KEYS) {
+        const { values, sum } = storage[key];
+        const average = sum / n;
+
+        values.sort();
+
+        const getMedianRange = (start: number, end: number): number => {
+            const length = end - start;
+            if (length === 0) return 0;
+            const mid = start + Math.floor(length / 2);
+            if (length % 2 === 0) {
+                return (values[mid - 1] + values[mid]) / 2;
+            }
+            return values[mid];
+        };
+
+        const median = getMedianRange(0, n);
+        const midIndex = Math.floor(n / 2);
+        const q1 = getMedianRange(0, midIndex);
+        const q3 = getMedianRange(n % 2 === 0 ? midIndex : midIndex + 1, n);
+
+        const iqr = q3 - q1;
+        const lowerFence = q1 - 1.5 * iqr;
+        const upperFence = q3 + 1.5 * iqr;
+
+        let firstValid = 0;
+        while (firstValid < n && values[firstValid] < lowerFence) {
+            firstValid++;
         }
 
-        values[i] = val;
-        sum += val;
-    }
-
-    const average = sum / n;
-
-    values.sort();
-
-    const getMedianRange = (start: number, end: number): number => {
-        const length = end - start;
-        if (length === 0) return 0;
-        const mid = start + Math.floor(length / 2);
-        if (length % 2 === 0) {
-            return (values[mid - 1] + values[mid]) / 2;
+        let lastValid = n - 1;
+        while (lastValid >= 0 && values[lastValid] > upperFence) {
+            lastValid--;
         }
-        return values[mid];
-    };
 
-    const median = getMedianRange(0, n);
+        const min = firstValid <= lastValid ? values[firstValid] : values[0];
+        const max = firstValid <= lastValid ? values[lastValid] : values[n - 1];
 
-    const midIndex = Math.floor(n / 2);
-    const q1 = getMedianRange(0, midIndex);
-    const q3 = getMedianRange(n % 2 === 0 ? midIndex : midIndex + 1, n);
+        const outliers: number[] = [];
+        for (let i = 0; i < firstValid; i++) {
+            outliers.push(values[i]);
+        }
+        for (let i = lastValid + 1; i < n; i++) {
+            outliers.push(values[i]);
+        }
 
-    const iqr = q3 - q1;
-    const lowerFence = q1 - 1.5 * iqr;
-    const upperFence = q3 + 1.5 * iqr;
-
-    let firstValid = 0;
-    while (firstValid < n && values[firstValid] < lowerFence) {
-        firstValid++;
+        result[key] = {
+            min,
+            q1,
+            median,
+            q3,
+            max,
+            average,
+            outliers
+        };
     }
 
-    let lastValid = n - 1;
-    while (lastValid >= 0 && values[lastValid] > upperFence) {
-        lastValid--;
-    }
-
-    const min = firstValid <= lastValid ? values[firstValid] : values[0];
-    const max = firstValid <= lastValid ? values[lastValid] : values[n - 1];
-
-    const outliers: number[] = [];
-    for (let i = 0; i < firstValid; i++) {
-        outliers.push(values[i]);
-    }
-    for (let i = lastValid + 1; i < n; i++) {
-        outliers.push(values[i]);
-    }
-
-    return {
-        min,
-        q1,
-        median,
-        q3,
-        max,
-        average,
-        outliers
-    };
+    return result;
 }

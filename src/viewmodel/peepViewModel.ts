@@ -19,7 +19,7 @@ import { animationExecuteArgs } from "../actions/animation";
 import { animationFrameExecuteArgs } from "../actions/animationFrame";
 import { itemRemoveExecuteArgs } from "../actions/removeItem";
 import { giveItemExecuteArgs } from "../actions/giveItem";
-import { BoxPlotStats, getStatistics } from "../ui/boxPlot";
+import { BoxPlotStats, getAllStatistics } from "../ui/boxPlot";
 
 const peepDirections = ["NE", "SE", "SW", "NW"] as const;
 export type PeepDirection = typeof peepDirections[number];
@@ -119,7 +119,6 @@ export class PeepViewModel {
 
     private _onGameTick?: IDisposable;
     private _guestGeneration?: IDisposable;
-    private _isRefreshing?: boolean;
 
 
 
@@ -172,13 +171,15 @@ export class PeepViewModel {
         }
     }
 
-    _toggleAllGuests(isPressed: boolean): void {
+    _toggleMultipleGuests(isPressed: boolean): void {
         if (isPressed) {
             this._isPicking.set(false);
             this._isGuest.set(true);
             this._isStaff.set(false);
-            this._getAllGuests();
-            this._name.set(`{GREEN}All guests selected`);
+            if (this._allGuestsSelected.get()) {
+                this._getAllGuests();
+                this._name.set(`{GREEN}All guests selected`);
+            }
             ui.tool?.cancel();
         }
         else if (!isPressed) {
@@ -318,7 +319,6 @@ export class PeepViewModel {
     }
 
     private updatePeepInfo(peep: Guest | BaseStaff): void {
-        this._isRefreshing = true;
 
         const guest = peep as Guest;
         const staff = peep as BaseStaff
@@ -355,7 +355,6 @@ export class PeepViewModel {
             this._orders.set(staff.orders);
             this._colour.set(staff.colour);
         }
-        this._isRefreshing = false;
     }
 
     private _updateDynamicDataFromPeep(peep: Guest | BaseStaff): void {
@@ -386,21 +385,37 @@ export class PeepViewModel {
         }
     }
 
+    private _tickCounter = 0;
+
     private _onGameTickExecuted(): void {
-        const guests = map.getAllEntities("guest");
-        if (this._allGuestsSelected.get()) {
-            this._numGuests.set(guests.length);
-            this._averageHappiness.set(getStatistics(guests, "happiness"));
-            this._averageEnergy.set(getStatistics(guests, "energy"));
-            this._averageHunger.set(getStatistics(guests, "hunger"));
-            this._averageThirst.set(getStatistics(guests, "thirst"));
-            this._averageNausea.set(getStatistics(guests, "nausea"));
-            this._averageToilet.set(getStatistics(guests, "toilet"));
-            this._averageMass.set(getStatistics(guests, "mass"));
-        }
         const peep = this._selectedPeep.get();
         if (peep) {
             this._updateDynamicDataFromPeep(peep);
+        }
+
+        if (this._allGuests.get().length <= 1) {
+            return;
+        }
+
+        // Throttle heavy processing to once per second (40 ticks)
+        this._tickCounter++;
+        if (this._tickCounter < 40) {
+            return;
+        }
+        this._tickCounter = 0;
+
+        const guests = this._allGuests.get() as Guest[];
+        this._numGuests.set(guests.length);
+
+        if (guests.length > 1) {
+            const stats = getAllStatistics(guests);
+            this._averageHappiness.set(stats.happiness);
+            this._averageEnergy.set(stats.energy);
+            this._averageHunger.set(stats.hunger);
+            this._averageThirst.set(stats.thirst);
+            this._averageNausea.set(stats.nausea);
+            this._averageToilet.set(stats.toilet);
+            this._averageMass.set(stats.mass);
         }
     }
 
