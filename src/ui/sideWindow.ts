@@ -383,7 +383,7 @@ export const templateWindowSide = tabwindow({
 					content: createItemWidget().concat(
 						label({
 							text: "{BLACK}Nothing",
-							visibility: compute(model._items, i => i.length === 0 ? "visible" : "none"),
+							visibility: compute(model._items, model._allGuests, (i, a) => i.length === 0 && a.length <= 1 ? "visible" : "none"),
 							padding: { top: -2, bottom: -2 }
 						})
 					)							
@@ -533,7 +533,7 @@ function openWindowRemoveItem(item: GuestItemType): void {
 					padding: [0, 4],
 					onClick: () => {
 						model._removeItem(item);
-						templateWindowSide.close();
+						removeItemWindow.close();
 					}
 				}),
 				button({
@@ -542,7 +542,7 @@ function openWindowRemoveItem(item: GuestItemType): void {
 					height: 14,
 					text: "Cancel",
 					padding: [0, 4],
-					onClick: () => templateWindowSide.close()
+					onClick: () => removeItemWindow.close()
 				}),
 			])
 		],
