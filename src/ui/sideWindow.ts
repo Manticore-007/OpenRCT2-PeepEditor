@@ -23,6 +23,7 @@ import { customImageFor, drawImage } from "../helpers/customImages";
 import { StaffOrderLabel, StaffOrders } from "../helpers/staffOrders";
 import { buttonSize, img, multiplierIndex, windowMain, windowSide, windowTitle } from "./windowConsts";
 import { photo1RideName, photo2RideName, photo3RideName, photo4RideName, rideId, rideList, selectedRide } from "../helpers/rides";
+import { boxPlot, BoxPlotStats } from "./boxPlot";
 
 let axis = {
 	x: { lineColour: 172, line: { x1: 21, y1: 45, x2: 50, y2: 30 }, textColour: Colour.SaturatedRed, text: { text: "x", x: 5, y: 40 } },
@@ -356,13 +357,13 @@ export const templateWindowSide = tabwindow({
 						text: "Physiology",
 						visibility: compute(model._isGuest, g => g ? "visible" : "none"),
 						content: [
-							createGuestKeysWidget("happiness", 255, true, model._happiness),
-							createGuestKeysWidget("energy", 128, true, model._energy),
-							createGuestKeysWidget("hunger", 255, false, model._hunger),
-							createGuestKeysWidget("thirst", 255, false, model._thirst),
-							createGuestKeysWidget("nausea", 255, false, model._nausea),
-							createGuestKeysWidget("toilet", 255, false, model._toilet),
-							createGuestKeysWidget("mass", 255, false, model._mass),
+							createGuestKeysWidget("happiness", 0, 255, true, model._happiness, model._averageHappiness),
+							createGuestKeysWidget("energy", 32, 128, true, model._energy, model._averageEnergy),
+							createGuestKeysWidget("hunger", 0, 255, false, model._hunger, model._averageHunger),
+							createGuestKeysWidget("thirst", 0, 255, false, model._thirst, model._averageThirst),
+							createGuestKeysWidget("nausea", 0, 255, false, model._nausea, model._averageNausea),
+							createGuestKeysWidget("toilet", 0, 255, false, model._toilet, model._averageToilet),
+							createGuestKeysWidget("mass", 0, 255, false, model._mass, model._averageMass),
 						]
 					})
 				]),
@@ -697,27 +698,41 @@ function createStaffOrdersWidget(text: string, visibility: Bindable<ElementVisib
 	})
 }
 
-function createGuestKeysWidget(key: GuestKey, maximum: number, isPositive: boolean, keyStore: WritableStore<number>): WidgetCreator<FlexiblePosition> {
+function createGuestKeysWidget(key: GuestKey, minimum: number, maximum: number, isPositive: boolean, keyStore: WritableStore<number>, keyStoreAverage: WritableStore<BoxPlotStats>): WidgetCreator<FlexiblePosition> {
 	const capitalizedKey = key.charAt(0).toUpperCase() + key.slice(1);
 	const energy = store<GuestKey>(key);
 
 	let bar: WritableStore<number>;
 	let value: WritableStore<number>;
 
+	const min = compute(keyStoreAverage, k => k.min);
+	const max = compute(keyStoreAverage, k => k.max);
+	const q1 = compute(keyStoreAverage, k => k.q1);
+	const q3 = compute(keyStoreAverage, k => k.q3);
+	const median = compute(keyStoreAverage, k => k.median);
+
 	if (key === "hunger" || key === "thirst") {
 		bar = compute(keyStore, b => 1 - percentage(b, maximum))
+		if (compute(model._allGuestsSelected, a => a)) {
+			value = compute(keyStoreAverage, k => 255 - Math.floor(k.average))
+		} else {
 		value = compute(keyStore, b => 255 - b);
+		}
 	}
 	else {
+		if (compute(model._allGuestsSelected, a => a)) {
+			value = compute(keyStoreAverage, k => Math.floor(k.average))
+		} else {
+			value = compute(keyStore, b => b);
+		}
 		bar = compute(keyStore, b => percentage(b, maximum))
-		value = compute(keyStore, b => b);
 	}
 	return (
 		horizontal([
 			label({
 				text: "{BLACK}" + capitalizedKey,
 				height: 13,
-				width: "30%",
+				width: "25%",
 				padding: { top: 0, bottom: 0, left: 5 },
 				visibility: compute(model._isGuest, g => g ? "visible" : "none"),
 			}),
@@ -726,7 +741,18 @@ function createGuestKeysWidget(key: GuestKey, maximum: number, isPositive: boole
 				percentFilled: bar,
 				isPositive: isPositive,
 				foreground: bar,
-				visibility: compute(model._isGuest, g => g ? "visible" : "none"),
+				visibility: compute(model._isGuest, model._allGuestsSelected, (g, a) => g && !a ? "visible" : "none"),
+			}),
+			boxPlot({
+				median: median,
+				q1: q1,
+				q3: q3,
+				maxValue: maximum,
+				minValue: minimum,
+				whiskerHigh: max,
+				whiskerLow: min,
+				background: colourWindow.secondary,
+				visibility: compute(model._allGuestsSelected, a => a ? "visible" : "none"),
 			}),
 			spinner({
 				minimum: compute(energy, e => e === "energy" ? 32 : 0),
@@ -735,6 +761,7 @@ function createGuestKeysWidget(key: GuestKey, maximum: number, isPositive: boole
 				value: value,
 				height: 13,
 				width: "25%",
+				padding: { top: 2, bottom: 0, left: 0 },
 				visibility: compute(model._isGuest, g => g ? "visible" : "none"),
 				onChange: (_, adjustment: number) => model._setGuestKey(adjustment, key)
 			})

@@ -50,7 +50,7 @@ function progressBar(
 ): WidgetCreator<FlexiblePosition> {
   return graphics({
     width: params.width ?? "1w",
-    height: params.height ?? 12,
+    height: params.height ?? 14,
     padding: { top: 2 },
     visibility: params.visibility || "visible",
     disabled: params.disabled,
@@ -69,12 +69,12 @@ function progressBar(
           : params.isPositive;
 
       g.colour = background;
-      g.well(0, 0, 88, 11);
+      g.well(0, 0, g.width, g.height);
       if (!disabled) {
         g.colour = colourPogressBar(isPositive, percentFilled);
-        g.box(1, 1, 88 * percentFilled, 11 - 2);
+        g.box(1, 1, (g.width - 2) * percentFilled, g.height - 2);
       } else {
-        g.box(1, 1, 88, 11 - 2);
+        g.box(1, 1, g.width - 2, g.height - 2);
       }
     }
   });

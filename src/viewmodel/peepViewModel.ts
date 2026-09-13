@@ -19,6 +19,7 @@ import { animationExecuteArgs } from "../actions/animation";
 import { animationFrameExecuteArgs } from "../actions/animationFrame";
 import { itemRemoveExecuteArgs } from "../actions/removeItem";
 import { giveItemExecuteArgs } from "../actions/giveItem";
+import { BoxPlotStats, getStatistics } from "../ui/boxPlot";
 
 const peepDirections = ["NE", "SE", "SW", "NW"] as const;
 export type PeepDirection = typeof peepDirections[number];
@@ -80,6 +81,15 @@ export class PeepViewModel {
     readonly _voucherItem = store<GuestItemType | null>(null);
     readonly _voucherType = store<VoucherType | null>(null);
     readonly _availableGuestAnimations = store<GuestAnimation[]>([]);
+
+    readonly _averageHappiness = store<BoxPlotStats>({ max: 0, median: 0, min: 0, outliers: [0], q1: 0, q3: 0, average: 0 });
+    readonly _averageEnergy = store<BoxPlotStats>({ max: 0, median: 0, min: 0, outliers: [0], q1: 0, q3: 0, average: 0 });
+    readonly _averageNausea = store<BoxPlotStats>({ max: 0, median: 0, min: 0, outliers: [0], q1: 0, q3: 0, average: 0 });
+    readonly _averageHunger = store<BoxPlotStats>({ max: 0, median: 0, min: 0, outliers: [0], q1: 0, q3: 0, average: 0 });
+    readonly _averageThirst = store<BoxPlotStats>({ max: 0, median: 0, min: 0, outliers: [0], q1: 0, q3: 0, average: 0 });
+    readonly _averageToilet = store<BoxPlotStats>({ max: 0, median: 0, min: 0, outliers: [0], q1: 0, q3: 0, average: 0 });
+    readonly _averageMass = store<BoxPlotStats>({ max: 0, median: 0, min: 0, outliers: [0], q1: 0, q3: 0, average: 0 });
+
 
     //window
     readonly _selectPeepType = store<EntityType>("guest");
@@ -377,8 +387,16 @@ export class PeepViewModel {
     }
 
     private _onGameTickExecuted(): void {
+        const guests = map.getAllEntities("guest");
         if (this._allGuestsSelected.get()) {
-            this._numGuests.set(map.getAllEntities("guest").length);
+            this._numGuests.set(guests.length);
+            this._averageHappiness.set(getStatistics(guests, "happiness"));
+            this._averageEnergy.set(getStatistics(guests, "energy"));
+            this._averageHunger.set(getStatistics(guests, "hunger"));
+            this._averageThirst.set(getStatistics(guests, "thirst"));
+            this._averageNausea.set(getStatistics(guests, "nausea"));
+            this._averageToilet.set(getStatistics(guests, "toilet"));
+            this._averageMass.set(getStatistics(guests, "mass"));
         }
         const peep = this._selectedPeep.get();
         if (peep) {
