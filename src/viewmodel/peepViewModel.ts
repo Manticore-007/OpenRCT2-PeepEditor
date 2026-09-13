@@ -76,7 +76,7 @@ export class PeepViewModel {
     readonly _toilet = store<number>(0);
     readonly _mass = store<number>(0);
     readonly _items = store<GuestItem[]>([]);
-    readonly _item = store<GuestItemType | null>(null);
+    readonly _item = store<GuestItemType>("balloon");
     readonly _voucher = store<Voucher | null>(null);
     readonly _voucherItem = store<GuestItemType | null>(null);
     readonly _voucherType = store<VoucherType | null>(null);

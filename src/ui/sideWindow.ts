@@ -363,7 +363,7 @@ export const templateWindowSide = tabwindow({
 							createGuestKeysWidget("thirst", 0, 255, false, model._thirst, model._averageThirst),
 							createGuestKeysWidget("nausea", 0, 255, false, model._nausea, model._averageNausea),
 							createGuestKeysWidget("toilet", 0, 255, false, model._toilet, model._averageToilet),
-							createGuestKeysWidget("mass", 0, 255, false, model._mass, model._averageMass),
+							createGuestKeysWidget("mass", 45, 76, false, model._mass, model._averageMass),
 						]
 					})
 				]),

@@ -1,4 +1,4 @@
-import { button, checkbox, Colour, colourPicker, compute, dropdown, graphics, groupbox, horizontal, label, listview, store, tab, tabwindow, textbox, toggle, twoway, vertical, viewport, WritableStore } from "openrct2-flexui";
+import { button, checkbox, Colour, colourPicker, compute, dropdown, groupbox, horizontal, label, listview, store, tab, tabwindow, textbox, toggle, twoway, vertical, viewport, WritableStore } from "openrct2-flexui";
 import { model } from "../viewmodel/PeepViewModel";
 import { selectByTiles } from "../services/selector";
 import { isDevelopment, pluginVersion } from "../helpers/environment";
@@ -57,14 +57,6 @@ export const templateWindowMain = tabwindow({
                             }
                         }),
                     ]),
-                    // graphics({
-                    //     visibility: compute(model._allGuests, a => a.length > 1 ? "visible" : "none"),
-                    //     onDraw(g) {
-                    //         g.colour = 55;
-                    //         g.well(0, 0, 225, 165);
-                    //         g.text(`{WHITE}Guests selected: ${model._numGuests.get()}`, 6, 6)
-                    //     },
-                    // }),
                     vertical({
                         content: [
                             toggle({	//picker
