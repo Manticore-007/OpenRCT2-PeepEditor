@@ -16,14 +16,14 @@ import { colourList, GuestColours } from "../helpers/colours";
 import { staffTypeList } from "../helpers/staffTypes";
 import { guestFlagsExecuteArgs } from "../actions/guestFlags";
 import { percentage, progressBar, ProgressBarColour } from "../helpers/progressBar";
-import { guestItemTypeList, inlineSprites, itemImageIds, itemName } from "../helpers/guestItemTypes";
+import { guestItemTypeList, itemImageIds, itemName } from "../helpers/guestItemTypes";
 import { getWindow } from "../helpers/getWindow";
 import { getColour, theme } from "../helpers/settings";
 import { GuestKey } from "../actions/guestKeys";
-import { colourSprite, createItemImage, customImageFor, drawImage, sprite } from "../helpers/customImages";
+import { colourSprite, customImageFor, drawImage, sprite } from "../helpers/customImages";
 import { StaffOrderLabel, StaffOrders } from "../helpers/staffOrders";
 import { buttonSize, img, multiplierIndex, windowMain, windowSide, windowTitle } from "./windowConsts";
-import { photo1RideName, photo2RideName, photo3RideName, photo4RideName, rideId, rideList, selectedRide } from "../helpers/rides";
+import { rideId, rideList, selectedRide } from "../helpers/rides";
 import { boxPlot, BoxPlotStats } from "./boxPlot";
 
 let axis = {
@@ -31,8 +31,6 @@ let axis = {
 	y: { lineColour: 102, line: { x1: 50, y1: 30, x2: 79, y2: 45 }, textColour: Colour.SaturatedGreen, text: { text: "y", x: 85, y: 40 } },
 	z: { lineColour: 135, line: { x1: 50, y1: 30, x2: 50, y2: 5 }, textColour: Colour.DarkBlue, text: { text: "z", x: 40, y: 0 } }
 }
-
-let startIdx = 0;
 
 export const colourWindow =
 {
@@ -628,96 +626,6 @@ function createFlagCheckboxWidget(flag: PeepFlags, padding?: Padding | undefined
 			});
 		}
 	});
-}
-
-function createItemWidget(): WidgetCreator<FlexiblePosition>[] {
-	return guestItemTypeList.map((item, index) => {
-		const visibility = compute(model._items, model._allGuests, (i, a) => i.some(el => el.type === item) && a.length <= 1 ? "visible" : "none");
-		const name = `{BLACK}${itemName[index]}`;
-		const text = compute(photo1RideName, photo2RideName, photo3RideName, photo4RideName, (p1, p2, p3, p4) => {
-			const photoNames: Record<string, string> = { photo1: p1, photo2: p2, photo3: p3, photo4: p4 };
-			return photoNames[item] ? `${name} ${photoNames[item]}` : name;
-		});
-		return horizontal([
-			graphics({
-				height: 16,
-				width: 16,
-				padding: { top: -2, bottom: -2 },
-				visibility,
-				onDraw: g => createItemImage(item, g),
-			}),
-			label({
-				text,
-				padding: { top: -2, bottom: -2 },
-				visibility,
-			}),
-			button({
-				text: `{RED}x`,
-				height: 10,
-				width: 10,
-				border: true,
-				padding: { top: 0, bottom: -2 },
-				visibility,
-				onClick: () => openWindowRemoveItem(item)
-			})
-		]);
-	});
-}
-
-function createItemCounters(): WidgetCreator<FlexiblePosition>[] {
-	const widgets: WidgetCreator<FlexiblePosition>[] = [];
-
-	// Slice the array to only include indices 0 through 6
-	guestItemTypeList.slice(startIdx, startIdx + 6).forEach((_, index) => {
-		const name = store(itemName[index + startIdx]); // Use index directly instead of indexOf(item)
-
-		widgets.push(vertical([
-			horizontal([
-				graphics({
-					height: 16,
-					width: 16,
-					visibility: compute(model._allGuests, a => a.length > 1 ? "visible" : "none"),
-					tooltip: compute(name, n => n),
-					onDraw: g => {
-						createItemImage(guestItemTypeList[index + startIdx], g);
-					}
-				}),
-				graphics({
-					height: 16,
-					width: 110,
-					visibility: compute(model._allGuests, a => a.length > 1 ? "visible" : "none"),
-					tooltip: compute(name, n => n),
-					onDraw: g => {
-						g.text("{BLACK}" + itemName[index + startIdx], 0, 0);
-					}
-				}),
-				graphics({
-					height: 16,
-					width: 50,
-					visibility: compute(model._allGuests, a => a.length > 1 ? "visible" : "none"),
-					tooltip: compute(name, n => n),
-					onDraw: g => {
-						const countText = model._itemCount.get();
-						g.text("{BLACK}" + countText[index + startIdx].toString(), 10, 0);
-					}
-				}),
-				graphics({
-					height: 16,
-					width: 35,
-					visibility: compute(model._allGuests, a => a.length > 1 ? "visible" : "none"),
-					tooltip: compute(name, n => n),
-					onDraw: g => {
-						const numberOfGuests = model._allGuests.get().length;
-						const countText = model._itemCount.get();
-						const fraction = Math.floor(percentage(countText[index + startIdx], numberOfGuests) * 100);
-						g.text("{BLACK}" + fraction.toString() + "%", 10, 0);
-					}
-				}),
-			])
-		]));
-	});
-
-	return widgets;
 }
 
 function itemList(): string[] {

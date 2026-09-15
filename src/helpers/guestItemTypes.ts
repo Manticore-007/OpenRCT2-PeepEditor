@@ -1,4 +1,4 @@
-import { colourSprite, sprite } from "./customImages";
+import { sprite } from "./customImages";
 
 export const itemImageMap: Record<string, number> = {
     balloon: 5061,            beef_noodles: 5097,       burger: 5067,

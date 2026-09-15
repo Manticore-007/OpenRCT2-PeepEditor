@@ -131,9 +131,6 @@ export class PeepViewModel {
                 this.updatePeepInfo(p);
             }
         });
-        this._allGuests.subscribe(guests => {
-
-        });
     }
 
     _open(): void {
