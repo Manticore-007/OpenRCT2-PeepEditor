@@ -20,7 +20,7 @@ import { animationFrameExecuteArgs } from "../actions/animationFrame";
 import { itemRemoveExecuteArgs } from "../actions/removeItem";
 import { giveItemExecuteArgs } from "../actions/giveItem";
 import { BoxPlotStats, getAllStatistics } from "../ui/boxPlot";
-import { guestItemTypeList } from "../helpers/guestItemTypes";
+import { guestItemTypeList } from "../helpers/items";
 
 const peepDirections = ["NE", "SE", "SW", "NW"] as const;
 export type PeepDirection = typeof peepDirections[number];

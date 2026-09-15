@@ -16,7 +16,7 @@ import { colourList, GuestColours } from "../helpers/colours";
 import { staffTypeList } from "../helpers/staffTypes";
 import { guestFlagsExecuteArgs } from "../actions/guestFlags";
 import { percentage, progressBar, ProgressBarColour } from "../helpers/progressBar";
-import { guestItemTypeList, itemImageIds, itemName } from "../helpers/guestItemTypes";
+import { guestItemTypeList, itemImageIds, itemName } from "../helpers/items";
 import { getWindow } from "../helpers/getWindow";
 import { getColour, theme } from "../helpers/settings";
 import { GuestKey } from "../actions/guestKeys";
