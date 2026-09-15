@@ -410,7 +410,6 @@ export class PeepViewModel {
         this._tickCounter = 0;
 
         let guests= this._allGuests.get() as Guest[];
-        console.log(this._allGuestsSelected.get())
         if (this._allGuestsSelected.get()) {
             guests = map.getAllEntities("guest");
         }
