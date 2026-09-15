@@ -378,49 +378,50 @@ export const templateWindowSide = tabwindow({
 			image: img.items,
 			spacing: 0,
 			content: [
-				groupbox({
-					text: "Carrying",
-					padding: { bottom: 4 },
-					spacing: 0,
+				// groupbox({
+				// 	text: "Carrying",
+				// 	padding: { bottom: 4 },
+				// 	spacing: 0,
+				// 	visibility: compute(model._isGuest, model._allGuests, (g, a) => g && a.length <= 1 ? "visible" : "none"),
+				// 	content: createItemWidget().concat(
+				// 		label({
+				// 			text: "{BLACK}Nothing",
+				// 			visibility: compute(model._items, model._allGuests, (i, a) => i.length === 0 && a.length <= 1 ? "visible" : "none"),
+				// 			padding: { top: -2, bottom: -2 }
+				// 		}),
+				// 		createItemCounters())
+				// }),
+				listview({
+					items: compute(model._selectedPeep, model._items, p => {
+						const arr: Bindable<string[][] | ListViewItem[]> = [];
+						if (p) {
+							// Use 'items' or make sure updating model._items triggers this
+							(p as Guest).items.forEach((value) => {
+								arr.push(createListviewItems(guestItemTypeList.indexOf(value.type)));
+							});
+						}
+						return arr;
+					}),
+					columns: [{ width: 20 }, { header: "Item", width: "1w" }],
+					canSelect: false,
 					visibility: compute(model._isGuest, model._allGuests, (g, a) => g && a.length <= 1 ? "visible" : "none"),
-					content: createItemWidget().concat(
-						label({
-							text: "{BLACK}Nothing",
-							visibility: compute(model._items, model._allGuests, (i, a) => i.length === 0 && a.length <= 1 ? "visible" : "none"),
-							padding: { top: -2, bottom: -2 }
-						})
-					).concat(
-						button({
-							height: 9,
-							width: 11,
-							padding: {left: "1w"},
-							text: "{BLACK}▲",
-							onClick() {
-								if (startIdx === 0) return;
-								startIdx--;
-							},
-						}),
-						createItemCounters(),
-						button({
-							height: 9,
-							width: 11,
-							padding: { left: "1w" },
-							text: "{BLACK}▼",
-							onClick() {
-								if (startIdx === 44) return;
-								startIdx++;
-							},
-					}))
+					padding: { bottom: 4 },
+					height: 135,
+					onClick(item) {
+						openWindowRemoveItem((model._selectedPeep.get() as Guest).items[item].type)
+
+					}
 				}),
 				listview({
 					items: compute(model._itemCount, model._allGuests, (c, a) => {
 						const arr: Bindable<string[][] | ListViewItem[]> = []
 						c.forEach( (value, index) => {
-							arr.push(createListviewItems(value, index, a as Guest[]))})
+							arr.push(createListviewItems(index, value, a as Guest[]))})
 							return arr
 				}),
 					columns: [{width: 20}, {header: "Item", width: "1w"}, {header: "#", width: 30}, {header: "%", width: 40}],
 					canSelect: false,
+					visibility: compute(model._allGuests, a => a.length > 1 ? "visible" : "none"),
 					padding: {bottom: 4},
 					height: 135,
 
@@ -959,12 +960,40 @@ function checkMapRotation(): void {
 	}
 }
 
-function createListviewItems(value: number, i: number, allGuests: Guest[]): string[] {
+function createListviewItems(i: number, value?: number, allGuests?: Guest[]): string[] {
+	const guest = model._selectedPeep.get() as Guest;
+	const itemType = guestItemTypeList[i];
 
-	return [
-		sprite(colourSprite(itemImageIds[i], Colour.LightBlue)),
-		itemName[i],
-		value.toString(),
-		(Math.floor(percentage(value, allGuests.length)*100)).toString() + "%"
-	];
+	let itemColor = Colour.LightBlue;
+
+	if (guest) {
+		switch (itemType) {
+			case 'tshirt':
+				itemColor = guest.tshirtColour;
+				break;
+			case 'hat':
+				itemColor = guest.hatColour;
+				break;
+			case 'balloon':
+				itemColor = guest.balloonColour;
+				break;
+			case 'umbrella':
+				itemColor = guest.umbrellaColour;
+				break;
+		}
+	}
+
+	if (allGuests && value !== undefined) {
+		return [
+			sprite(colourSprite(itemImageIds[i], itemColor)),
+			itemName[i],
+			value.toString(),
+			(Math.floor(percentage(value, allGuests.length) * 100)).toString() + "%"
+		];
+	} else {
+		return [
+			sprite(colourSprite(itemImageIds[i], itemColor)),
+			itemName[i],
+		];
+	}
 }
