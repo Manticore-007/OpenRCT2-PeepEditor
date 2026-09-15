@@ -1,7 +1,7 @@
 import { Colour } from "openrct2-flexui";
 import { model } from "../viewmodel/PeepViewModel";
 import { getColour } from "./settings";
-import { itemImageMap } from "./guestItemTypes";
+import { itemImageIds, itemImageMap } from "./guestItemTypes";
 
 enum ImageMoniker {
     "trousers",
@@ -22,6 +22,15 @@ type ImageData = {
     data: string;
 };
 
+
+export const inlineSprites = itemImageIds.map(item => sprite(item))
+
+export function createItemImage(item: GuestItemType, g: GraphicsContext): void {
+    const colouredItems = new Set(["balloon", "hat", "tshirt", "umbrella"]);
+    const property = colouredItems.has(item) ? `${item}Colour` as keyof Guest : undefined;
+
+    drawImage(g, itemImageMap[item], property);
+}
 /**
  * Call this function once to initialize the custom sprites, probably in your main.ts file
  */
@@ -83,13 +92,6 @@ export function drawImage(g: GraphicsContext, image: number, property?: keyof Gu
     g.paletteId = paletteId;
     g.tertiaryColour = Colour.Yellow;
     g.image(img.id, 0, 0);
-}
-
-export function createItemImage(item: GuestItemType, g: GraphicsContext): void {
-    const colouredItems = new Set(["balloon", "hat", "tshirt", "umbrella"]);
-    const property = colouredItems.has(item) ? `${item}Colour` as keyof Guest : undefined;
-
-    drawImage(g, itemImageMap[item], property);
 }
 
 export function sprite(id: number, colour?: Colour): string {

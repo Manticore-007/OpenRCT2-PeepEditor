@@ -64,9 +64,13 @@ export const templateWindowMain = tabwindow({
                                 image: "eyedropper",
                                 tooltip: "Select a peep on the map",
                                 isPressed: twoway(model._isPicking),
-                                disabled: model._allGuestsSelected,
+                                //disabled: model._allGuestsSelected,
                                 padding: { top: 0, left: -2, bottom: -2, right: -2 },
-                                onChange: (pressed) => togglePeepPicker(pressed, p => model._select(p), () => model._isPicking.set(false))
+                                onChange: (pressed) => {
+                                    model._allGuestsSelected.set(false);
+                                    templateWindowSide.close();
+                                    togglePeepPicker(pressed, p => model._select(p), () => model._isPicking.set(false));
+                                }
                             }),
                             toggle({
                                 height: buttonSize, width: buttonSize,
@@ -301,20 +305,6 @@ export const templateWindowMain = tabwindow({
                                 }
                             }
                         ]),
-                        horizontal([
-                            label({ text: "Progress bar:" }),
-                            ...[
-                                { store: ProgressBarColour.bar.safe, key: "pe.bar.safe" },
-                                { store: ProgressBarColour.bar.warning, key: "pe.bar.warning" },
-                                { store: ProgressBarColour.bar.danger, key: "pe.bar.danger" }
-                            ].map(({ store, key }) => colourPicker({
-                                colour: store,
-                                onChange: (colour) => {
-                                    store.set(colour);
-                                    setColour(key, colour);
-                                }
-                            }))
-                        ]),
                         button({
                             text: "Reset to default colours",
                             height: 14,
@@ -332,7 +322,7 @@ export const templateWindowMain = tabwindow({
                 label({ text: "Peep Editor, a plugin for OpenRCT2", alignment: "centred", padding: [4, 0, 8, 0] }),
                 horizontal([
                     label({ text: "Version:" + "\n\nAuthor:" + "\n\nUI:" + "\n\nSpecial\nThanks:" + "\n\n", width: "25%" }),
-                    label({ text: versionString() + `\n\n{BLACK}Manticore-007` + `\n\n{BLACK}FlexUI by Basssiiie` + `\n\n{BLACK}Basssiiie, Gymnasiast, ItsSmitty\nSpacek531, AaronVanGeffen` + `\n{BLACK}Sadret, mrmagic2020, Isoitiro\nand Enox` })
+                    label({ text: versionString() + `\n\n{BLACK}Manticore-007` + `\n\n{BLACK}FlexUI by Basssiiie` + `\n\n{BLACK}Basssiiie, Gymnasiast, ItsSmitty\nSpacek531, AaronVanGeffen` + `\n{BLACK}Sadret, mrmagic2020, Isoitiro\nand MaxArceus` })
                 ]),
                 label({ text: "https://github.com/Manticore-007\n/OpenRCT2-PeepEditor", padding: ["90%", 0, 0, 0], alignment: "centred" })
             ]

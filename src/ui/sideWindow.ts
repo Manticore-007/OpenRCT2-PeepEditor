@@ -23,7 +23,7 @@ import { GuestKey } from "../actions/guestKeys";
 import { colourSprite, customImageFor, drawImage, sprite } from "../helpers/customImages";
 import { StaffOrderLabel, StaffOrders } from "../helpers/staffOrders";
 import { buttonSize, img, multiplierIndex, windowMain, windowSide, windowTitle } from "./windowConsts";
-import { rideId, rideList, selectedRide } from "../helpers/rides";
+import { photo1RideName, photo2RideName, photo3RideName, photo4RideName, rideId, rideList, selectedRide } from "../helpers/rides";
 import { boxPlot, BoxPlotStats } from "./boxPlot";
 
 let axis = {
@@ -376,35 +376,31 @@ export const templateWindowSide = tabwindow({
 			image: img.items,
 			spacing: 0,
 			content: [
-				// groupbox({
-				// 	text: "Carrying",
-				// 	padding: { bottom: 4 },
-				// 	spacing: 0,
-				// 	visibility: compute(model._isGuest, model._allGuests, (g, a) => g && a.length <= 1 ? "visible" : "none"),
-				// 	content: createItemWidget().concat(
-				// 		label({
-				// 			text: "{BLACK}Nothing",
-				// 			visibility: compute(model._items, model._allGuests, (i, a) => i.length === 0 && a.length <= 1 ? "visible" : "none"),
-				// 			padding: { top: -2, bottom: -2 }
-				// 		}),
-				// 		createItemCounters())
-				// }),
+				groupbox({
+					height: 230 - 28 - 14 - 12,
+					content: [label({ text: ""})],
+					visibility: compute(model._isStaff, s => s ? "visible" : "none"),
+				}),
 				listview({
 					items: compute(model._selectedPeep, model._items, p => {
 						const arr: Bindable<string[][] | ListViewItem[]> = [];
-						if (p) {
-							// Use 'items' or make sure updating model._items triggers this
-							(p as Guest).items.forEach((value) => {
-								arr.push(createListviewItems(guestItemTypeList.indexOf(value.type)));
-							});
+						if (p && p.type != "staff") {
+							if ((p as Guest).items.length === 0) {
+								arr.push(["", "Nothing"]);
+							} else {
+								(p as Guest).items.forEach((value) => {
+									arr.push(createListviewItems(guestItemTypeList.indexOf(value.type)));
+								});
+							}
 						}
 						return arr;
 					}),
-					columns: [{ width: 20 }, { header: "Item", width: "1w" }],
+					columns: [{ width: 20 }, { header: "Carrying", width: "1w" }],
 					canSelect: false,
 					visibility: compute(model._isGuest, model._allGuests, (g, a) => g && a.length <= 1 ? "visible" : "none"),
 					padding: { bottom: 4 },
 					height: 135,
+					tooltip: "Click to remove",
 					onClick(item) {
 						openWindowRemoveItem((model._selectedPeep.get() as Guest).items[item].type)
 
@@ -417,13 +413,15 @@ export const templateWindowSide = tabwindow({
 							arr.push(createListviewItems(index, value, a as Guest[]))})
 							return arr
 				}),
-					columns: [{width: 20}, {header: "Item", width: "1w"}, {header: "#", width: 30}, {header: "%", width: 40}],
+					columns: [{width: 20}, {header: "Item", width: "1w"}, {header: "#", width: 35}, {header: "%", width: 40}],
 					canSelect: false,
 					visibility: compute(model._allGuests, a => a.length > 1 ? "visible" : "none"),
 					padding: {bottom: 4},
 					height: 135,
-
-					//visibility: compute(model._allGuests, a => a.length > 1 ? "visible" : "none"),
+					tooltip: "Click to remove",
+					onClick(item) {
+						openWindowRemoveItem(guestItemTypeList[item])
+					}
 				}),
 				horizontal([
 					label({
@@ -518,14 +516,7 @@ export const templateWindowSide = tabwindow({
 						padding: {top: 7, left: "1w"},
 						width: "25%",
 						onClick: () => model._giveItem(model._item.get())
-					}),
-					button({
-						text: `{RED}Remove Items`,
-						height: 13,
-						padding: { top: 7, bottom: -2 },
-						visibility : compute(model._allGuests, a => a.length > 1 ? "visible" : "none"),
-						onClick: () => openWindowRemoveItem(model._item.get())
-				})
+					})
 			])
 			]
 		}),
@@ -873,6 +864,7 @@ function createListviewItems(i: number, value?: number, allGuests?: Guest[]): st
 	const itemType = guestItemTypeList[i];
 
 	let itemColor = Colour.LightBlue;
+	let name = itemName[i]; // Copy original name so we can append to it if needed
 
 	if (guest) {
 		switch (itemType) {
@@ -891,17 +883,43 @@ function createListviewItems(i: number, value?: number, allGuests?: Guest[]): st
 		}
 	}
 
+	// Check if the item is an on-ride photo and append the corresponding ride name
+	// (Adjust 'photo' or the index matching logic to match how your item types are structured)
+	if (itemType === 'photo1' || itemType === 'photo2' || itemType === 'photo3' || itemType === 'photo4') {
+		let rideName = "";
+
+		// Map the photo item to its respective store based on index or identifier
+		switch (itemType) {
+			case "photo1":
+				rideName = photo1RideName.get();
+				break;
+			case "photo2":
+				rideName = photo2RideName.get();
+				break;
+			case "photo3":
+				rideName = photo3RideName.get();
+				break;
+			case "photo4":
+				rideName = photo4RideName.get();
+				break;
+		}
+
+		if (rideName) {
+			name = `${itemName[i]} ${rideName}`;
+		}
+	}
+
 	if (allGuests && value !== undefined) {
 		return [
 			sprite(colourSprite(itemImageIds[i], itemColor)),
-			itemName[i],
+			name = itemName[i],
 			value.toString(),
 			(Math.floor(percentage(value, allGuests.length) * 100)).toString() + "%"
 		];
 	} else {
 		return [
 			sprite(colourSprite(itemImageIds[i], itemColor)),
-			itemName[i],
+			name,
 		];
 	}
 }

@@ -1,4 +1,3 @@
-import { sprite } from "./customImages";
 
 export const itemImageMap: Record<string, number> = {
     balloon: 5061,            beef_noodles: 5097,       burger: 5067,
@@ -27,8 +26,6 @@ for (const key in itemImageMap) {
         itemImageIds.push(itemImageMap[key]);
     }
 }
-
-export const inlineSprites = itemImageIds.map( item => sprite(item))
 
 export const guestItemTypeList: GuestItemType[] = [
     "balloon",            "beef_noodles",       "burger",

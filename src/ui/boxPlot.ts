@@ -25,9 +25,9 @@ function boxPlot(
     params: BoxChartParams & FlexiblePosition
 ): WidgetCreator<FlexiblePosition> {
     const colour = {
-        main: 18,
-        shadow: 15,
-        box: 1
+        main: 21,
+        shadow: 11,
+        box: 54
     }
     return graphics({
         width: params.width ?? "1w",
@@ -111,23 +111,25 @@ function boxPlot(
                 width * normalize(q1) + hOffset,
                 height / 2 - vOffset
             )
-            g.colour = colour.box;
 
+            g.fill = 0;
+            g.stroke = 10;
             // Draw the box.
-            g.box(
-                width * normalize(q1) + hOffset,
-                1,
-                width * ((q3 - q1) / safeSpan),
+            g.rect(
+                width * normalize(q1) + hOffset + 1,
+                1 + 1,
+                width * ((q3 - q1) / safeSpan) - 1,
                 height - 2
             )
 
-            g.stroke = read(params.stroke) || colour.shadow
+            g.fill = 0;
+            g.stroke = 21;
 
-            // Draw the median.
-            g.line(
-                width * normalize(median) + hOffset,
+            // Draw the box.
+            g.rect(
+                width * normalize(q1) + hOffset,
                 1,
-                width * normalize(median) + hOffset,
+                width * ((q3 - q1) / safeSpan) -1,
                 height - 2
             )
 
@@ -135,11 +137,22 @@ function boxPlot(
 
             // Draw the median shadow.
             g.line(
+                width * normalize(median) + hOffset,
+                1 + 1,
+                width * normalize(median) + hOffset,
+                height - 2
+            )
+
+            g.stroke = read(params.stroke) || colour.shadow
+
+            // Draw the median.
+            g.line(
                 width * normalize(median) + hOffset + 1,
-                1,
+                1 + 1,
                 width * normalize(median) + hOffset + 1,
                 height - 2
             )
+
             g.stroke = read(params.stroke) || colour.main
 
             // Draw the line from the third quartile to the high whisker.

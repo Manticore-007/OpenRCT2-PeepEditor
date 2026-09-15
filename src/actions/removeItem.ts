@@ -1,5 +1,3 @@
-import { debug } from "../helpers/logger";
-
 export interface ItemRemoveArgs {
     id: number | null;
     item: GuestItemType;
@@ -12,7 +10,6 @@ export function itemRemoveExecute(args: ItemRemoveArgs): GameActionResult
     if (entity === null) return {};
     const guest = <Guest>entity;
     guest.removeItem({type: args.item});
-    debug(`Guest item removed`);
     return {};
 }
 
