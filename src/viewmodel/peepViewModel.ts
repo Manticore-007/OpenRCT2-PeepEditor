@@ -398,50 +398,50 @@ export class PeepViewModel {
             this._updateDynamicDataFromPeep(peep);
         }
 
-        if (this._allGuests.get().length <= 1) {
-            return;
-        }
-
-        // Throttle heavy processing to once per second (40 ticks)
         this._tickCounter++;
         if (this._tickCounter < 40) {
             return;
         }
         this._tickCounter = 0;
 
-        let guests= this._allGuests.get() as Guest[];
-        if (this._allGuestsSelected.get()) {
-            guests = map.getAllEntities("guest");
+        const rawGuests = this._allGuestsSelected.get()
+            ? map.getAllEntities("guest")
+            : this._allGuests.get() as Guest[];
+
+        if (rawGuests.length <= 1) {
+            return;
         }
-        let count: number[] = [];
 
-        if (guests.length > 1) {
-            const stats = getAllStatistics(guests);
-            const updatedGuests = guests.filter(guest => {
-                // 1. Safely extract the ID, handling numbers or objects
-                const id = typeof guest === 'number' ? guest : guest?.id;
+        const validGuests = rawGuests.filter(guest => {
+            const id = typeof guest === 'number' ? guest : guest?.id;
+            if (id === null || id === undefined) {
+                return false;
+            }
 
-                // 2. If the ID is null or undefined, filter it out immediately
-                if (id === null || id === undefined) {
-                    return false;
-                }
+            const entity = map.getEntity(id);
+            return entity !== null && entity.type === 'guest';
+        });
 
-                // 3. Now TypeScript knows 'id' is definitely a number
-                const entity = map.getEntity(id);
-                return entity !== null && entity.type === 'guest';
-            });
-            this._averageHappiness.set(stats.happiness);
-            this._averageEnergy.set(stats.energy);
-            this._averageHunger.set(stats.hunger);
-            this._averageThirst.set(stats.thirst);
-            this._averageNausea.set(stats.nausea);
-            this._averageToilet.set(stats.toilet);
-            this._averageMass.set(stats.mass);
-            guestItemTypeList.forEach(item => count.push(guests.filter(guest => guest.hasItem({type: item})).length));
-            this._itemCount.set(count);
-            this._allGuests.set(updatedGuests);
-            this._numGuests.set(updatedGuests.length);
+        this._allGuests.set(validGuests);
+        this._numGuests.set(validGuests.length);
+
+        if (validGuests.length <= 1) {
+            return;
         }
+
+        const stats = getAllStatistics(validGuests);
+        this._averageHappiness.set(stats.happiness);
+        this._averageEnergy.set(stats.energy);
+        this._averageHunger.set(stats.hunger);
+        this._averageThirst.set(stats.thirst);
+        this._averageNausea.set(stats.nausea);
+        this._averageToilet.set(stats.toilet);
+        this._averageMass.set(stats.mass);
+
+        const itemCount = guestItemTypeList.map(item =>
+            validGuests.filter(guest => guest.hasItem({ type: item })).length
+        );
+        this._itemCount.set(itemCount);
     }
 
     private _getPhotoRideName(guest: Guest): void {
