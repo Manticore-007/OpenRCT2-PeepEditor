@@ -1,14 +1,6 @@
-import { drawImage } from "./customImages";
+import { colourSprite, sprite } from "./customImages";
 
-const colouredItems = new Set(["balloon", "hat", "tshirt", "umbrella"]);
-
-export function itemImage(item: GuestItemType, g: GraphicsContext): void {
-    const property = colouredItems.has(item) ? `${item}Colour` as keyof Guest : undefined;
-    
-    drawImage(g, itemImageMap[item], property);
-}
-
-const itemImageMap: Record<string, number> = {
+export const itemImageMap: Record<string, number> = {
     balloon: 5061,            beef_noodles: 5097,       burger: 5067,
     candyfloss: 5070,         chicken: 5085,            chips: 5068,
     chocolate: 5093,          coffee: 5083,             cookie: 5105,
@@ -27,6 +19,16 @@ const itemImageMap: Record<string, number> = {
     toy: 5062,                tshirt: 5081,             umbrella: 5065,
     voucher: 5075,            wonton_soup: 5099
 };
+
+export const itemImageIds: number[] = [];
+
+for (const key in itemImageMap) {
+    if (Object.prototype.hasOwnProperty.call(itemImageMap, key)) {
+        itemImageIds.push(itemImageMap[key]);
+    }
+}
+
+export const inlineSprites = itemImageIds.map( item => sprite(item))
 
 export const guestItemTypeList: GuestItemType[] = [
     "balloon",            "beef_noodles",       "burger",

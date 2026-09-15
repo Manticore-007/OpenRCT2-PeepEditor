@@ -1,6 +1,7 @@
 import { Colour } from "openrct2-flexui";
 import { model } from "../viewmodel/PeepViewModel";
 import { getColour } from "./settings";
+import { itemImageMap } from "./guestItemTypes";
 
 enum ImageMoniker {
     "trousers",
@@ -82,4 +83,32 @@ export function drawImage(g: GraphicsContext, image: number, property?: keyof Gu
     g.paletteId = paletteId;
     g.tertiaryColour = Colour.Yellow;
     g.image(img.id, 0, 0);
+}
+
+export function createItemImage(item: GuestItemType, g: GraphicsContext): void {
+    const colouredItems = new Set(["balloon", "hat", "tshirt", "umbrella"]);
+    const property = colouredItems.has(item) ? `${item}Colour` as keyof Guest : undefined;
+
+    drawImage(g, itemImageMap[item], property);
+}
+
+export function sprite(id: number, colour?: Colour): string {
+    if (colour) {
+        id |= (colour << 19) | (1 << 29);
+    }
+
+    return "{INLINE_SPRITE}{" + (id & 0xFF) + "}{" + ((id >> 8) & 0xFF) + "}{" + ((id >> 16) & 0xFF) + "}{" + ((id >> 24) & 0xFF) + "}";
+}
+
+export function colourSprite(spriteId: number, colour: Colour): number {
+    let id = ui.imageManager.allocate(1);
+    if (id != undefined) {
+        ui.imageManager.draw(id.start.valueOf(), { width: 16, height: 16 }, ctx => {
+            ctx.colour = colour;
+            ctx.tertiaryColour = Colour.Yellow;
+            ctx.image(spriteId, 0, 0);
+        });
+        return id.start.valueOf();
+    }
+    return 0;
 }

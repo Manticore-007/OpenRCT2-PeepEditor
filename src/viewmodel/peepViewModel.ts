@@ -20,6 +20,7 @@ import { animationFrameExecuteArgs } from "../actions/animationFrame";
 import { itemRemoveExecuteArgs } from "../actions/removeItem";
 import { giveItemExecuteArgs } from "../actions/giveItem";
 import { BoxPlotStats, getAllStatistics } from "../ui/boxPlot";
+import { guestItemTypeList } from "../helpers/guestItemTypes";
 
 const peepDirections = ["NE", "SE", "SW", "NW"] as const;
 export type PeepDirection = typeof peepDirections[number];
@@ -81,6 +82,7 @@ export class PeepViewModel {
     readonly _voucherItem = store<GuestItemType | null>(null);
     readonly _voucherType = store<VoucherType | null>(null);
     readonly _availableGuestAnimations = store<GuestAnimation[]>([]);
+    readonly _itemCount = store<number[]>(new Array(50).fill(0));
 
     readonly _averageHappiness = store<BoxPlotStats>({ max: 0, median: 0, min: 0, outliers: [0], q1: 0, q3: 0, average: 0 });
     readonly _averageEnergy = store<BoxPlotStats>({ max: 0, median: 0, min: 0, outliers: [0], q1: 0, q3: 0, average: 0 });
@@ -128,6 +130,9 @@ export class PeepViewModel {
                 this._allGuests.set([p] as Guest[] | BaseStaff[])
                 this.updatePeepInfo(p);
             }
+        });
+        this._allGuests.subscribe(guests => {
+
         });
     }
 
@@ -404,11 +409,28 @@ export class PeepViewModel {
         }
         this._tickCounter = 0;
 
-        const guests = this._allGuests.get() as Guest[];
-        this._numGuests.set(guests.length);
+        let guests= this._allGuests.get() as Guest[];
+        console.log(this._allGuestsSelected.get())
+        if (this._allGuestsSelected.get()) {
+            guests = map.getAllEntities("guest");
+        }
+        let count: number[] = [];
 
         if (guests.length > 1) {
             const stats = getAllStatistics(guests);
+            const updatedGuests = guests.filter(guest => {
+                // 1. Safely extract the ID, handling numbers or objects
+                const id = typeof guest === 'number' ? guest : guest?.id;
+
+                // 2. If the ID is null or undefined, filter it out immediately
+                if (id === null || id === undefined) {
+                    return false;
+                }
+
+                // 3. Now TypeScript knows 'id' is definitely a number
+                const entity = map.getEntity(id);
+                return entity !== null && entity.type === 'guest';
+            });
             this._averageHappiness.set(stats.happiness);
             this._averageEnergy.set(stats.energy);
             this._averageHunger.set(stats.hunger);
@@ -416,6 +438,10 @@ export class PeepViewModel {
             this._averageNausea.set(stats.nausea);
             this._averageToilet.set(stats.toilet);
             this._averageMass.set(stats.mass);
+            guestItemTypeList.forEach(item => count.push(guests.filter(guest => guest.hasItem({type: item})).length));
+            this._itemCount.set(count);
+            this._allGuests.set(updatedGuests);
+            this._numGuests.set(updatedGuests.length);
         }
     }
 

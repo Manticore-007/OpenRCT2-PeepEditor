@@ -7,7 +7,8 @@ import {
 	FlexiblePosition, Bindable, ElementVisibility, Padding,
 	WritableStore,
 	Store,
-	WindowTemplate
+	WindowTemplate,
+	listview
 } from "openrct2-flexui";
 
 import { model, PeepDirection } from "../viewmodel/PeepViewModel";
@@ -15,11 +16,11 @@ import { colourList, GuestColours } from "../helpers/colours";
 import { staffTypeList } from "../helpers/staffTypes";
 import { guestFlagsExecuteArgs } from "../actions/guestFlags";
 import { percentage, progressBar, ProgressBarColour } from "../helpers/progressBar";
-import { guestItemTypeList, itemImage, itemName } from "../helpers/guestItemTypes";
+import { guestItemTypeList, inlineSprites, itemImageIds, itemName } from "../helpers/guestItemTypes";
 import { getWindow } from "../helpers/getWindow";
 import { getColour, theme } from "../helpers/settings";
 import { GuestKey } from "../actions/guestKeys";
-import { customImageFor, drawImage } from "../helpers/customImages";
+import { colourSprite, createItemImage, customImageFor, drawImage, sprite } from "../helpers/customImages";
 import { StaffOrderLabel, StaffOrders } from "../helpers/staffOrders";
 import { buttonSize, img, multiplierIndex, windowMain, windowSide, windowTitle } from "./windowConsts";
 import { photo1RideName, photo2RideName, photo3RideName, photo4RideName, rideId, rideList, selectedRide } from "../helpers/rides";
@@ -30,6 +31,8 @@ let axis = {
 	y: { lineColour: 102, line: { x1: 50, y1: 30, x2: 79, y2: 45 }, textColour: Colour.SaturatedGreen, text: { text: "y", x: 85, y: 40 } },
 	z: { lineColour: 135, line: { x1: 50, y1: 30, x2: 50, y2: 5 }, textColour: Colour.DarkBlue, text: { text: "z", x: 40, y: 0 } }
 }
+
+let startIdx = 0;
 
 export const colourWindow =
 {
@@ -371,35 +374,70 @@ export const templateWindowSide = tabwindow({
 			]
 		}),
 		tab({
-			height: "inherit",
+			height: "auto",
 			image: img.items,
 			spacing: 0,
 			content: [
 				groupbox({
-					text: compute(model._allGuests, a => a.length > 1 ? "Number of guests with item" : "Carrying"),
+					text: "Carrying",
 					padding: { bottom: 4 },
 					spacing: 0,
-					visibility: compute(model._isGuest, g => g ? "visible" : "none"),
+					visibility: compute(model._isGuest, model._allGuests, (g, a) => g && a.length <= 1 ? "visible" : "none"),
 					content: createItemWidget().concat(
 						label({
 							text: "{BLACK}Nothing",
 							visibility: compute(model._items, model._allGuests, (i, a) => i.length === 0 && a.length <= 1 ? "visible" : "none"),
 							padding: { top: -2, bottom: -2 }
 						})
-					).concat(createItemCounters())
+					).concat(
+						button({
+							height: 9,
+							width: 11,
+							padding: {left: "1w"},
+							text: "{BLACK}▲",
+							onClick() {
+								if (startIdx === 0) return;
+								startIdx--;
+							},
+						}),
+						createItemCounters(),
+						button({
+							height: 9,
+							width: 11,
+							padding: { left: "1w" },
+							text: "{BLACK}▼",
+							onClick() {
+								if (startIdx === 44) return;
+								startIdx++;
+							},
+					}))
+				}),
+				listview({
+					items: compute(model._itemCount, model._allGuests, (c, a) => {
+						const arr: Bindable<string[][] | ListViewItem[]> = []
+						c.forEach( (value, index) => {
+							arr.push(createListviewItems(value, index, a as Guest[]))})
+							return arr
+				}),
+					columns: [{width: 20}, {header: "Item", width: "1w"}, {header: "#", width: 30}, {header: "%", width: 40}],
+					canSelect: false,
+					padding: {bottom: 4},
+					height: 135,
+
+					//visibility: compute(model._allGuests, a => a.length > 1 ? "visible" : "none"),
 				}),
 				horizontal([
 					label({
 						text: "Item:",
 						height: 13,
 						visibility: compute(model._isGuest, g => g ? "visible" : "none"),
-						padding: { bottom: 4 },
+						padding: { top: 0, bottom: 4 },
 					}),
 					dropdown({
 						items: itemList(),
 						height: 13,
 						width: "75%",
-						padding: { bottom: 4 },
+						padding: { top: 0, bottom: 4 },
 						visibility: compute(model._isGuest, g => g ? "visible" : "none"),
 						onChange: (index) => {
 							const item = guestItemTypeList[index];
@@ -478,21 +516,20 @@ export const templateWindowSide = tabwindow({
 						text: compute(model._allGuests, a => a.length > 1 ? `Give items` : `Give item`),
 						visibility: compute(model._isGuest, g => g ? "visible" : "none"),
 						height: 13,
-						padding: {left: "1w"},
+						padding: {top: 7, left: "1w"},
 						width: "25%",
 						onClick: () => model._giveItem(model._item.get())
 					}),
 					button({
 						text: `{RED}Remove Items`,
 						height: 13,
-						border: true,
-						padding: { top: 0, bottom: -2 },
+						padding: { top: 7, bottom: -2 },
 						visibility : compute(model._allGuests, a => a.length > 1 ? "visible" : "none"),
 						onClick: () => openWindowRemoveItem(model._item.get())
 				})
 			])
 			]
-		})
+		}),
 	],
 	onOpen: () => {
 		windowMain.set(getWindow(model._name.get()));
@@ -511,14 +548,6 @@ export const templateWindowSide = tabwindow({
 	},
 	onTabChange: () => ui.tool?.cancel(),
 });
-
-// export function openedSideWindow(): OpenWindow {
-// 	return templateWindowSide.open()
-// };
-
-// export function closeSideWindow(): void {
-// 	openedSideWindow().close();
-// }
 
 function openWindowRemoveItem(item: GuestItemType): void {
 	const removeItemWindow: WindowTemplate = window({
@@ -614,7 +643,7 @@ function createItemWidget(): WidgetCreator<FlexiblePosition>[] {
 				width: 16,
 				padding: { top: -2, bottom: -2 },
 				visibility,
-				onDraw: g => itemImage(item, g),
+				onDraw: g => createItemImage(item, g),
 			}),
 			label({
 				text,
@@ -634,42 +663,60 @@ function createItemWidget(): WidgetCreator<FlexiblePosition>[] {
 	});
 }
 
-function createItemCounters(): WidgetCreator<FlexiblePosition> {
-	const chunkSize = 5;
-	const columns: (typeof guestItemTypeList)[] = [];
+function createItemCounters(): WidgetCreator<FlexiblePosition>[] {
+	const widgets: WidgetCreator<FlexiblePosition>[] = [];
 
-	for (let i = 0; i < guestItemTypeList.length; i += chunkSize) {
-		columns.push(guestItemTypeList.slice(i, i + chunkSize));
-	}
+	// Slice the array to only include indices 0 through 6
+	guestItemTypeList.slice(startIdx, startIdx + 6).forEach((_, index) => {
+		const name = store(itemName[index + startIdx]); // Use index directly instead of indexOf(item)
 
-	return horizontal(
-		columns.map(columnItems =>
-			vertical(
-				columnItems.map(item => {
-					// Combine filtering and formatting into a single compute block
-					const countText = compute(model._allGuests, a => {
-						if (a[0] && a[0].type === "staff") return "";
-						const count = a.filter(g => (g as Guest).hasItem({ type: item })).length;
-						return `{TINYFONT}${count}`;
-					});
+		widgets.push(vertical([
+			horizontal([
+				graphics({
+					height: 16,
+					width: 16,
+					visibility: compute(model._allGuests, a => a.length > 1 ? "visible" : "none"),
+					tooltip: compute(name, n => n),
+					onDraw: g => {
+						createItemImage(guestItemTypeList[index + startIdx], g);
+					}
+				}),
+				graphics({
+					height: 16,
+					width: 110,
+					visibility: compute(model._allGuests, a => a.length > 1 ? "visible" : "none"),
+					tooltip: compute(name, n => n),
+					onDraw: g => {
+						g.text("{BLACK}" + itemName[index + startIdx], 0, 0);
+					}
+				}),
+				graphics({
+					height: 16,
+					width: 50,
+					visibility: compute(model._allGuests, a => a.length > 1 ? "visible" : "none"),
+					tooltip: compute(name, n => n),
+					onDraw: g => {
+						const countText = model._itemCount.get();
+						g.text("{BLACK}" + countText[index + startIdx].toString(), 10, 0);
+					}
+				}),
+				graphics({
+					height: 16,
+					width: 35,
+					visibility: compute(model._allGuests, a => a.length > 1 ? "visible" : "none"),
+					tooltip: compute(name, n => n),
+					onDraw: g => {
+						const numberOfGuests = model._allGuests.get().length;
+						const countText = model._itemCount.get();
+						const fraction = Math.floor(percentage(countText[index + startIdx], numberOfGuests) * 100);
+						g.text("{BLACK}" + fraction.toString() + "%", 10, 0);
+					}
+				}),
+			])
+		]));
+	});
 
-					return vertical([
-						graphics({
-							height: 20,
-							width: 20,
-							visibility: compute(model._allGuests, a => a.length > 1 ? "visible" : "none"),
-							tooltip: itemName[guestItemTypeList.indexOf(item)],
-							onDraw: g => {
-								g.colour = 2;
-								g.text(countText.get(), 2, 12);
-								itemImage(item, g);
-							}
-						})
-					]);
-				})
-			)
-		)
-	);
+	return widgets;
 }
 
 function itemList(): string[] {
@@ -910,4 +957,14 @@ function checkMapRotation(): void {
 		axis.y.line = { x1: 50, y1: 30, x2: 79, y2: 45 };
 		axis.y.text = { text: "y", x: 85, y: 40 };
 	}
+}
+
+function createListviewItems(value: number, i: number, allGuests: Guest[]): string[] {
+
+	return [
+		sprite(colourSprite(itemImageIds[i], Colour.LightBlue)),
+		itemName[i],
+		value.toString(),
+		(Math.floor(percentage(value, allGuests.length)*100)).toString() + "%"
+	];
 }

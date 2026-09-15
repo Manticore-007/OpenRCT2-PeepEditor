@@ -51,7 +51,7 @@ export const templateWindowMain = tabwindow({
                             onClick: (index) => {
                                 const allGuests = model._allGuests.get() as Guest[];
                                 const allGuestsSorted = allGuests.map( a => a.name).sort();
-                                model._select(allGuests[allGuests.map(e => { return e.name }).indexOf(allGuestsSorted[index])])
+                                model._select(allGuests[allGuests.map(e => { return e.name }).indexOf(allGuestsSorted[index])]);
                                 templateWindowSide.open();
                                 model._allGuestsSelected.set(false);
                             }
@@ -74,6 +74,7 @@ export const templateWindowMain = tabwindow({
                                 tooltip: "Select guests on selected tiles",
                                 isPressed: twoway(model._isSelectingByTiles),
                                 onChange: (pressed) => {
+                                    model._allGuestsSelected.set(false);
                                     selectByTiles(
                                         "guest",
                                         pressed,
