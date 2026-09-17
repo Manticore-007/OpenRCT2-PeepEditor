@@ -5,11 +5,11 @@ import { pluginVersion } from "./helpers/environment";
 
 
 registerPlugin({
-	name: "Peep Editor",
+	name: "Peep Editor Flex UI",
 	version: pluginVersion,
 	authors: ["Manticore-007"],
 	type: "remote",
 	licence: "MIT",
-	targetApiVersion: 77,
+	targetApiVersion: 122,
 	main,
 });

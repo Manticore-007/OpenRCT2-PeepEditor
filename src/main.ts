@@ -1,25 +1,27 @@
+import { initActions } from "./actions/initActions";
+import { initCustomSprites } from "./helpers/customImages";
 import { isUiAvailable } from "./helpers/environment";
 import { debug } from "./helpers/logger";
-import { PeepEditorWindow } from "./ui/mainWindow";
-import { initCustomSprites } from "./helpers/customImages";
-import { initActions } from "./gameActions/initActions";
-
-const window = new PeepEditorWindow();
+import { initSettings, menuLabel } from "./helpers/settings";
+import { initShortcuts } from "./helpers/initShortcutKeys";
+import { initRides } from "./helpers/rides";
+import { templateWindowMain } from "./ui/mainWindow";
 
 /**
  * Entry point of the plugin.
  */
 export function main(): void
 {
-	debug("Plugin started.");
+	debug("\x1b[1;33m" + "Peep Editor initialized" + "\x1b[0m");
 
 	if (!isUiAvailable)
 	{
 		return;
 	}
-
 	initActions();
+	initSettings();
+	initRides();
 	initCustomSprites();
-
-	ui.registerMenuItem("Peep Editor", () => window.open());
+	initShortcuts();
+	ui.registerMenuItem(menuLabel.get(), () => templateWindowMain.open());
 }
