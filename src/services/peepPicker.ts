@@ -14,7 +14,6 @@ export function togglePeepPicker(isPressed: boolean, onPick: (peep: Guest | Base
         cursor: "cross_hair",
         onDown: args =>
         {
-            let peepToSelect: Guest | BaseStaff;
             const entityId = args.entityId;
             if (entityId === undefined)
             {
@@ -26,7 +25,7 @@ export function togglePeepPicker(isPressed: boolean, onPick: (peep: Guest | Base
                 console.log("[PeepPicker] Invalid entity id selected:", entityId);
                 return;
             }
-            peepToSelect = entity;
+            const peepToSelect: Guest | BaseStaff = entity;
             onPick(peepToSelect);
             templateWindowSide.open();
             ui.tool?.cancel();

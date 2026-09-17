@@ -26,16 +26,15 @@ import { buttonSize, img, multiplierIndex, windowMain, windowSide, windowTitle }
 import { photo1RideName, photo2RideName, photo3RideName, photo4RideName, rideId, rideList, selectedRide } from "../helpers/rides";
 import { boxPlot, BoxPlotStats } from "./boxPlot";
 
-let axis = {
+const axis = {
 	x: { lineColour: 172, line: { x1: 21, y1: 45, x2: 50, y2: 30 }, textColour: Colour.SaturatedRed, text: { text: "x", x: 5, y: 40 } },
 	y: { lineColour: 102, line: { x1: 50, y1: 30, x2: 79, y2: 45 }, textColour: Colour.SaturatedGreen, text: { text: "y", x: 85, y: 40 } },
 	z: { lineColour: 135, line: { x1: 50, y1: 30, x2: 50, y2: 5 }, textColour: Colour.DarkBlue, text: { text: "z", x: 40, y: 0 } }
-}
+};
 
 const hideCheckbox = store(false);
 
-export const colourWindow =
-{
+export const colourWindow = {
 	primary: store<Colour>(getColour("pe.side.primary", Colour.DarkYellow)),
 	secondary: store<Colour>(getColour("pe.side.secondary", Colour.DarkYellow)),
 	tertiary: store<Colour>(Colour.DarkYellow),
@@ -431,7 +430,7 @@ export const templateWindowSide = tabwindow({
 					height: 135,
 					tooltip: "Click to remove",
 					onClick(item) {
-						openWindowRemoveItem((model._selectedPeep.get() as Guest).items[item].type)
+						openWindowRemoveItem((model._selectedPeep.get() as Guest).items[item].type);
 
 					}
 				}),
@@ -453,7 +452,7 @@ export const templateWindowSide = tabwindow({
 					height: 135,
 					tooltip: "Click to remove",
 					onClick(item) {
-						openWindowRemoveItem(guestItemTypeList[item])
+						openWindowRemoveItem(guestItemTypeList[item]);
 					}
 				}),
 				horizontal([
@@ -549,7 +548,7 @@ export const templateWindowSide = tabwindow({
 						visibility: compute(model._allGuests, a => a.length > 1 ? "visible" : "none"),
 						isChecked: twoway(hideCheckbox),
 						onChange(isChecked) {
-							hideCheckbox.set(isChecked)
+							hideCheckbox.set(isChecked);
 						},
 					}),
 					button({
@@ -594,8 +593,8 @@ function openWindowRemoveItem(item: GuestItemType): void {
 				width: 200,
 				alignment: "centred",
 				text: compute(model._allGuests, a => a.length > 1 ?
-					 `Are you sure you want to remove\n${itemName[guestItemTypeList.indexOf(item)]}\nfrom these guests?` :
-					 `Are you sure you want to remove\n${itemName[guestItemTypeList.indexOf(item)]}\nfrom this guest?`),
+					`Are you sure you want to remove\n${itemName[guestItemTypeList.indexOf(item)]}\nfrom these guests?` :
+					`Are you sure you want to remove\n${itemName[guestItemTypeList.indexOf(item)]}\nfrom this guest?`),
 				padding: [25, 0, 17, 0]
 			}),
 			horizontal([
@@ -625,7 +624,7 @@ function openWindowRemoveItem(item: GuestItemType): void {
 	removeItemWindow.open();
 }
 
-function createPositionWidget(axis: "x" | "y" | "z", store: Store<number>) {
+function createPositionWidget(axis: "x" | "y" | "z", store: Store<number>): WidgetCreator<FlexiblePosition> {
 	return horizontal([
 		label({
 			text: `${axis}:`,
@@ -705,7 +704,7 @@ function createColourPickerWidget(callback: (g: GraphicsContext) => void, key: G
 				onChange: (colour) => model._setColour(colour, key)
 			})
 		])
-	)
+	);
 }
 
 function widgetMultiplier(padding: Padding): WidgetCreator<FlexiblePosition> {
@@ -725,7 +724,7 @@ function widgetMultiplier(padding: Padding): WidgetCreator<FlexiblePosition> {
 				selectedIndex: twoway(multiplierIndex)
 			})
 		]
-	})
+	});
 }
 
 function createStaffOrdersWidget(text: string, visibility: Bindable<ElementVisibility>, orders: number): WidgetCreator<FlexiblePosition> {
@@ -735,7 +734,7 @@ function createStaffOrdersWidget(text: string, visibility: Bindable<ElementVisib
 		padding: { left: 10 },
 		isChecked: model._checkStaffOrders(orders),
 		onChange: (check) => model._setStaffOrders(check, orders)
-	})
+	});
 }
 
 function createGuestKeysWidget(key: GuestKey, minimum: number, maximum: number, isPositive: boolean, keyStore: WritableStore<number>, keyStoreAverage: WritableStore<BoxPlotStats>): WidgetCreator<FlexiblePosition> {
@@ -752,20 +751,20 @@ function createGuestKeysWidget(key: GuestKey, minimum: number, maximum: number, 
 	const median = compute(keyStoreAverage, k => k.median);
 
 	if (key === "hunger" || key === "thirst") {
-		bar = compute(keyStore, b => 1 - percentage(b, maximum))
+		bar = compute(keyStore, b => 1 - percentage(b, maximum));
 		if (compute(model._allGuestsSelected, a => a)) {
-			value = compute(keyStoreAverage, k => 255 - Math.floor(k.average))
+			value = compute(keyStoreAverage, k => 255 - Math.floor(k.average));
 		} else {
 		value = compute(keyStore, b => 255 - b);
 		}
 	}
 	else {
 		if (compute(model._allGuests, a => a.length > 1)) {
-			value = compute(keyStoreAverage, k => Math.floor(k.average))
+			value = compute(keyStoreAverage, k => Math.floor(k.average));
 		} else {
 			value = compute(keyStore, b => b);
 		}
-		bar = compute(keyStore, b => percentage(b, maximum))
+		bar = compute(keyStore, b => percentage(b, maximum));
 	}
 	return (
 		horizontal([
@@ -806,7 +805,7 @@ function createGuestKeysWidget(key: GuestKey, minimum: number, maximum: number, 
 				onChange: (_, adjustment: number) => model._setGuestKey(adjustment, key)
 			})
 		])
-	)
+	);
 }
 
 function freezeWidgets(): WidgetCreator<FlexiblePosition> {
@@ -860,7 +859,7 @@ function freezeWidgets(): WidgetCreator<FlexiblePosition> {
 				}
 			}),
 		]
-	})
+	});
 }
 
 function flagButtonImage(f: boolean, s: boolean): IconName {
@@ -870,8 +869,7 @@ function flagButtonImage(f: boolean, s: boolean): IconName {
 	return "closed";
 }
 
-function createRotateButton(dir: PeepDirection) {
-	// If direction ends with 'W' (West/Left), use left padding. Otherwise, use right padding.
+function createRotateButton(dir: PeepDirection): WidgetCreator<FlexiblePosition> {
 	const pad: Padding = dir.endsWith("W") ? [-2, -2, -2, "1w"] : [-2, "1w", -2, -2];
 
 	return button({
@@ -884,7 +882,7 @@ function createRotateButton(dir: PeepDirection) {
 		disabled: compute(model._isStatic, s => !s),
 		onClick: () => model._setDirection(dir)
 	});
-};
+}
 
 function checkMapRotation(): void {
 	const orientation = ui.mainViewport.rotation;
@@ -896,7 +894,7 @@ function checkMapRotation(): void {
 	}
 	else {
 		axis.x.line = { x1: 21, y1: 45, x2: 50, y2: 30 };
-		axis.x.text = { text: "x", x: 5, y: 40 }
+		axis.x.text = { text: "x", x: 5, y: 40 };
 		axis.y.line = { x1: 50, y1: 30, x2: 79, y2: 45 };
 		axis.y.text = { text: "y", x: 85, y: 40 };
 	}

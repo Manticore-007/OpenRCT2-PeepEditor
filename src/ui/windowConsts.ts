@@ -9,8 +9,7 @@ export const windowTitle = "Peep Editor";
 //button properties
 export const buttonSize = 24;
 
-export const img =
-{
+export const img = {
     lens:  { frameBase: context.getIcon("search"), frameCount: 1, frameDuration: 4, offset: { x: 4, y: 1 } },
     peeps:  { frameBase: 5568, frameCount: 8, frameDuration: 4, colour: 12 },
     info:  { frameBase: 5367, frameCount: 8, frameDuration: 4,  },
@@ -24,4 +23,4 @@ export const img =
     arrow: { NW: 5638, NE: 5635, SE: 5636, SW: 5637 },
     staff: 5628,
     guest: 6810
-}
+};

@@ -9,7 +9,7 @@ export function costumeExecute(args: CostumeArgs): GameActionResult
     const entity = map.getEntity(args.id);
     if (entity === null || entity.type === "guest") return {};
     const staff = entity as BaseStaff;
-    if (staff.staffType !== "entertainer") return {}
+    if (staff.staffType !== "entertainer") return {};
     staff.costume = args.costume;
     return {};
 }

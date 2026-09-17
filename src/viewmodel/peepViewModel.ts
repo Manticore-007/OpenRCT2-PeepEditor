@@ -39,7 +39,7 @@ export class PeepViewModel {
     readonly _numGuests = store<number>(0);
 
     //general
-    readonly _name = store<string>(windowTitle)
+    readonly _name = store<string>(windowTitle);
     readonly _energy = store<number>(0);
     readonly _x = store<number>(0);
     readonly _y = store<number>(0);
@@ -49,13 +49,13 @@ export class PeepViewModel {
     readonly _animationFrame = store<number>(0);
     readonly _animationLength = store<number>(0);
     readonly _animationItems = compute(this._availableAnimations, a => a.map(animationList));
-    readonly _animationIndex = this._computePeepProperty<Guest | BaseStaff, number>(peep => peep.availableAnimations.indexOf(peep.animation as any), 0)
+    readonly _animationIndex = this._computePeepProperty<Guest | BaseStaff, number>(peep => peep.availableAnimations.indexOf(peep.animation as any), 0);
 
     //staff
     readonly _staffTypeIndex = this._computePeepProperty<BaseStaff, number>(staff => staffType.indexOf(staff.staffType), 0, "staff");
-    readonly _staffType = store<StaffType | null>(null)
-    readonly _availableCostumes = store<StaffCostume[]>([])
-    readonly _availableCostumeStrings = store<string[]>([])
+    readonly _staffType = store<StaffType | null>(null);
+    readonly _availableCostumes = store<StaffCostume[]>([]);
+    readonly _availableCostumeStrings = store<string[]>([]);
     readonly _costumeIndex = store<number>(0);
     readonly _costume = store<StaffCostume | null>(null);
     readonly _colour = store<Colour>(defaultColour);
@@ -112,7 +112,7 @@ export class PeepViewModel {
 
 
     readonly _isPositionDisabled = compute(this._isFrozen, this._isStatic, (f, s) => !f && !s);
-    readonly _visibleRideDropdown = compute(this._isGuest, this._item, this._voucherType, (g, i, v) => g && (i === "photo1" || i === "photo2" || i === "photo3" || i === "photo4" || (i === "voucher" && v === "ride_free")) ? "visible" : "none")
+    readonly _visibleRideDropdown = compute(this._isGuest, this._item, this._voucherType, (g, i, v) => g && (i === "photo1" || i === "photo2" || i === "photo3" || i === "photo4" || (i === "voucher" && v === "ride_free")) ? "visible" : "none");
     readonly _disabledWhenNoSinglePeepSelected = compute(this._isPeepSelected, this._allGuests, (p, a) => !p || a.length > 1);
     readonly _disabledWhenNoPeepSelected = compute(this._isPeepSelected, this._allGuests, (p, a) => !p && a.length <= 1);
     readonly _visibilityListviewWhenGuest = compute(this._selectPeepType, p => p === "guest" ? "visible" : "none");
@@ -127,7 +127,7 @@ export class PeepViewModel {
     constructor() {
         this._selectedPeep.subscribe(p => {
             if (p) {
-                this._allGuests.set([p] as Guest[] | BaseStaff[])
+                this._allGuests.set([p] as Guest[] | BaseStaff[]);
                 this.updatePeepInfo(p);
             }
         });
@@ -254,7 +254,7 @@ export class PeepViewModel {
 
     _giveItem(item: GuestItemType | null): void {
         const currentRideId = rideId.get();
-        const currentRide = map.getRide(currentRideId)
+        const currentRide = map.getRide(currentRideId);
         const itemType = this._item.get();
 
         if (!currentRide && item !== null && (item.startsWith("photo") || model._voucherType.get() === "ride_free")) {
@@ -294,7 +294,7 @@ export class PeepViewModel {
     }
 
     _checkStaffOrders(order: number): WritableStore<boolean> {
-        return compute(this._orders, o => (o & order) !== 0)
+        return compute(this._orders, o => (o & order) !== 0);
     }
 
     _isVisibleWhen(check: Store<boolean>): Bindable<ElementVisibility> {
@@ -307,7 +307,7 @@ export class PeepViewModel {
             const id = staff.id;
             context.executeAction("pe-guestkeys", guestKeysExecuteArgs(id, "energy", 96));
             ["positionFrozen", "animationFrozen"].forEach(flag => {
-                context.executeAction("pe-guestflags", guestFlagsExecuteArgs(id, true, flag as any));
+                context.executeAction("pe-guestflags", guestFlagsExecuteArgs(id, true, flag as PeepFlags));
             });
             debug("Old freezing method converted to new method");
         }
@@ -323,7 +323,7 @@ export class PeepViewModel {
     private updatePeepInfo(peep: Guest | BaseStaff): void {
 
         const guest = peep as Guest;
-        const staff = peep as BaseStaff
+        const staff = peep as BaseStaff;
 
         const isGuest = peep.type === "guest";
         const isStaff = peep.type === "staff";

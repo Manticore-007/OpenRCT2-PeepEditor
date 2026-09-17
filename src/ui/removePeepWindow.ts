@@ -3,7 +3,7 @@ import { removeExecuteArgs } from "../actions/remove";
 import { model } from "../viewmodel/PeepViewModel";
 import { templateWindowSide } from "./sideWindow";
 
-export function openWindowRemovePeep(peep: BaseStaff | Guest) {
+export function openWindowRemovePeep(peep: BaseStaff | Guest): void {
 	const removePeepWindow = window({
 		onClose: () => {
 			ui.tool?.cancel();
@@ -48,7 +48,8 @@ export function openWindowRemovePeep(peep: BaseStaff | Guest) {
 			])
 		]
 	});
-	removePeepWindow.open()};
+	removePeepWindow.open();
+}
 
 function textRemovePeep(peep: Guest | BaseStaff): string {
 	if (peep.type === "guest") {

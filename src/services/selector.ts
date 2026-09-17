@@ -43,7 +43,7 @@ export function selectByTiles(peepType: "guest" | "staff", isPressed: boolean, o
             startTile = endTile = COORD_NULL;
         },
         onFinish: onCancel
-    })
+    });
 }
 
 function calculateRange(): MapRange {
@@ -64,7 +64,7 @@ function calculateRange(): MapRange {
 function getPeepsOnSelection(peepType: "guest" | "staff", selection: MapRange | null): Guest[] | BaseStaff[] {
     if (!selection) return [];
 
-    let peeps: Guest[] | BaseStaff[] = [];
+    const peeps: Guest[] | BaseStaff[] = [];
     const { leftTop, rightBottom } = selection;
 
     for (let x = leftTop.x; x <= rightBottom.x; x += 32) {

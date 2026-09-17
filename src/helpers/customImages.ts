@@ -23,7 +23,7 @@ type ImageData = {
 };
 
 
-export const inlineSprites = itemImageIds.map(item => sprite(item))
+export const inlineSprites = itemImageIds.map(item => sprite(item));
 
 export function createItemImage(item: GuestItemType, g: GraphicsContext): void {
     const colouredItems = new Set(["balloon", "hat", "tshirt", "umbrella"]);
@@ -103,7 +103,7 @@ export function sprite(id: number, colour?: Colour): string {
 }
 
 export function colourSprite(spriteId: number, colour: Colour): number {
-    let id = ui.imageManager.allocate(1);
+    const id = ui.imageManager.allocate(1);
     if (id != undefined) {
         ui.imageManager.draw(id.start.valueOf(), { width: 16, height: 16 }, ctx => {
             ctx.colour = colour;

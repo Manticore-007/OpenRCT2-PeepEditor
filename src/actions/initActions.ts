@@ -32,7 +32,7 @@ register("pe-removeitem", itemRemoveExecute);
 register("pe-direction", directionExecute);
 }
 
-const register = <T>(name: string, executeCallback: (args: T) => GameActionResult) => {
+const register = <T>(name: string, executeCallback: (args: T) => GameActionResult): void => {
     context.registerAction<T>(
         name,
         queryPermissionCheck, // Point-free style simplification

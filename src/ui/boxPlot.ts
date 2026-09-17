@@ -7,7 +7,7 @@ import {
     WidgetCreator,
     graphics,
     read,
-} from "openrct2-flexui"
+} from "openrct2-flexui";
 
 interface BoxChartParams extends ElementParams {
     q1: Store<number>
@@ -28,7 +28,7 @@ function boxPlot(
         main: 21,
         shadow: 11,
         box: 54
-    }
+    };
     return graphics({
         width: params.width ?? "1w",
         height: params.height ?? 14,
@@ -36,31 +36,29 @@ function boxPlot(
         disabled: params.disabled,
         padding: { top: 2 },
         onDraw: (g) => {
-            const q1 = read(params.q1)
-            const q3 = read(params.q3)
-            const median = read(params.median)
-            const whiskerLow = read(params.whiskerLow)
-            const whiskerHigh = read(params.whiskerHigh)
+            const q1 = read(params.q1);
+            const q3 = read(params.q3);
+            const median = read(params.median);
+            const whiskerLow = read(params.whiskerLow);
+            const whiskerHigh = read(params.whiskerHigh);
 
-            // Dynamic bounds on both ends
-            const minValue = read(params.minValue)
-            const maxValue = read(params.maxValue)
+            const minValue = read(params.minValue);
+            const maxValue = read(params.maxValue);
             const span = maxValue - minValue;
-            const safeSpan = span === 0 ? 1 : span; // Prevent division by zero
+            const safeSpan = span === 0 ? 1 : span;
 
-            // Helper to normalize any value into a 0 to 1 scale based on dynamic bounds
-            const normalize = (val: number) => (val - minValue) / safeSpan;
+            const normalize = (val: number): number => (val - minValue) / safeSpan;
 
-            const width = g.width
-            const hOffset = 1
-            const height = g.height
-            const vOffset = g.height * 0.025 // offset the graph towards the top to make space for labels
+            const width = g.width;
+            const hOffset = 1;
+            const height = g.height;
+            const vOffset = g.height * 0.025;
 
             // Draw the well containing the box chart.
-            g.colour = read(params.background)
-            g.well(0, 0, g.width, g.height)
+            g.colour = read(params.background);
+            g.well(0, 0, g.width, g.height);
 
-            g.stroke = colour.shadow
+            g.stroke = colour.shadow;
 
             // Draw the low whisker shadow.
             g.line(
@@ -68,7 +66,7 @@ function boxPlot(
                 1 + 1,
                 width * normalize(whiskerLow) + hOffset + 2,
                 height - 1 + 1
-            )
+            );
 
             // Draw the shadow line from the low whisker to the first quartile.
             g.line(
@@ -76,7 +74,7 @@ function boxPlot(
                 height / 2 - vOffset + 1,
                 width * normalize(q1) + hOffset + 1,
                 height / 2 - vOffset + 1
-            )
+            );
 
             // Draw the shadow line from the third quartile to the high whisker.
             g.line(
@@ -84,7 +82,7 @@ function boxPlot(
                 height / 2 - vOffset + 1,
                 width * normalize(whiskerHigh) + hOffset - 2,
                 height / 2 - vOffset + 1
-            )
+            );
 
             // Draw the high whisker shadow.
             g.line(
@@ -92,7 +90,7 @@ function boxPlot(
                 1 + 1,
                 width * normalize(whiskerHigh) + hOffset - 2,
                 height - 1 + 1
-            )
+            );
 
             g.stroke = read(params.stroke) || colour.main
 
@@ -102,7 +100,7 @@ function boxPlot(
                 1,
                 width * normalize(whiskerLow) + hOffset + 1,
                 height - 2
-            )
+            );
 
             // Draw the line from the low whisker to the first quartile.
             g.line(
@@ -110,7 +108,7 @@ function boxPlot(
                 height / 2 - vOffset,
                 width * normalize(q1) + hOffset,
                 height / 2 - vOffset
-            )
+            );
 
             g.fill = 0;
             g.stroke = 10;
@@ -120,7 +118,7 @@ function boxPlot(
                 1 + 1,
                 width * ((q3 - q1) / safeSpan) - 1,
                 height - 2
-            )
+            );
 
             g.fill = 0;
             g.stroke = 21;
@@ -131,9 +129,9 @@ function boxPlot(
                 1,
                 width * ((q3 - q1) / safeSpan) -1,
                 height - 2
-            )
+            );
 
-            g.stroke = colour.main
+            g.stroke = colour.main;
 
             // Draw the median shadow.
             g.line(
@@ -141,9 +139,9 @@ function boxPlot(
                 1 + 1,
                 width * normalize(median) + hOffset,
                 height - 2
-            )
+            );
 
-            g.stroke = read(params.stroke) || colour.shadow
+            g.stroke = read(params.stroke) || colour.shadow;
 
             // Draw the median.
             g.line(
@@ -151,9 +149,9 @@ function boxPlot(
                 1 + 1,
                 width * normalize(median) + hOffset + 1,
                 height - 2
-            )
+            );
 
-            g.stroke = read(params.stroke) || colour.main
+            g.stroke = read(params.stroke) || colour.main;
 
             // Draw the line from the third quartile to the high whisker.
             g.line(
@@ -161,7 +159,7 @@ function boxPlot(
                 height / 2 - vOffset,
                 width * normalize(whiskerHigh) + hOffset - 3,
                 height / 2 - vOffset
-            )
+            );
 
             // Draw the high whisker.
             g.line(
@@ -169,9 +167,9 @@ function boxPlot(
                 1,
                 width * normalize(whiskerHigh) + hOffset - 3,
                 height - 2
-            )
+            );
         }
-    })
+    });
 }
 
 export { type BoxChartParams, boxPlot }

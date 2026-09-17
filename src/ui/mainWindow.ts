@@ -1,4 +1,4 @@
-import { button, checkbox, Colour, colourPicker, compute, dropdown, groupbox, horizontal, label, listview, store, tab, tabwindow, textbox, toggle, twoway, vertical, viewport, WritableStore } from "openrct2-flexui";
+import { button, checkbox, Colour, colourPicker, compute, dropdown, FlexiblePosition, groupbox, horizontal, label, listview, store, tab, tabwindow, textbox, toggle, twoway, vertical, viewport, WidgetCreator, WritableStore } from "openrct2-flexui";
 import { model } from "../viewmodel/PeepViewModel";
 import { selectByTiles } from "../services/selector";
 import { isDevelopment, pluginVersion } from "../helpers/environment";
@@ -46,7 +46,9 @@ export const templateWindowMain = tabwindow({
                             onClick: (index) => {
                                 const allGuests = model._allGuests.get() as Guest[];
                                 const allGuestsSorted = allGuests.map( a => a.name).sort();
-                                model._select(allGuests[allGuests.map(e => { return e.name }).indexOf(allGuestsSorted[index])]);
+                                model._select(allGuests[allGuests.map(e => {
+                                    return e.name;
+                                }).indexOf(allGuestsSorted[index])]);
                                 templateWindowSide.open();
                                 model._allGuestsSelected.set(false);
                             }
@@ -86,7 +88,7 @@ export const templateWindowMain = tabwindow({
                                             model._toggleMultipleGuests(pressed);
                                             }
                                             templateWindowSide.open();
-                                    }, () => model._isSelectingByTiles.set(false))
+                                    }, () => model._isSelectingByTiles.set(false));
                                 }
                             }),
                             toggle({	//all guests
@@ -188,12 +190,12 @@ export const templateWindowMain = tabwindow({
                                 canSelect: true,
                                 onHighlight: (index) => {
                                     const allGuests = model._allGuestEntities.get();
-                                    locate(allGuests[allGuests.map(e => { return e.name }).indexOf(model._allGuestsSorted.get()[index])])
+                                    locate(allGuests[allGuests.map(e => { return e.name }).indexOf(model._allGuestsSorted.get()[index])]);
                                 },
                                 onClick: (index) => {
                                     const main = windowMain.get();
                                     const allGuests = model._allGuestEntities.get();
-                                    model._select(allGuests[allGuests.map(e => { return e.name }).indexOf(model._allGuestsSorted.get()[index])])
+                                    model._select(allGuests[allGuests.map(e => { return e.name }).indexOf(model._allGuestsSorted.get()[index])]);
                                     templateWindowSide.open();
                                     model._allGuestsSelected.set(false);
                                     if (main) main.tabIndex = 0;
@@ -206,13 +208,15 @@ export const templateWindowMain = tabwindow({
                                 canSelect: true,
                                 onHighlight: (index) => {
                                     const allStaff = model._allStaffEntities.get();
-                                    locate(allStaff[allStaff.map(e => { return e.name }).indexOf(model._allStaffSorted.get()[index])])
+                                    locate(allStaff[allStaff.map(e => { return e.name }).indexOf(model._allStaffSorted.get()[index])]);
                                 },
 
                                 onClick: (index) => {
                                     const main = windowMain.get();
                                     const allStaff = model._allStaffEntities.get();
-                                    model._select(allStaff[allStaff.map(e => { return e.name }).indexOf(model._allStaffSorted.get()[index])])
+                                    model._select(allStaff[allStaff.map(e => {
+                                        return e.name;
+                                    }).indexOf(model._allStaffSorted.get()[index])]);
                                     if (main) {
                                         main.tabIndex = 0;
                                     }
@@ -341,13 +345,6 @@ export const templateWindowMain = tabwindow({
     },
 });
 
-
-//export function openedMainWindow(): OpenWindow { return templateWindowMain.open() };
-
-// export function closeWindowMain(): void {
-//     openedMainWindow().close();
-// }
-
 function versionString(): string {
     return isDevelopment ? `{BLACK}${pluginVersion} {BABYBLUE}[BETA]` : `{BLACK}${pluginVersion}`;
 }
@@ -414,7 +411,7 @@ function resetColours(): void {
     reset(ProgressBarColour.bar.safe, "pe.bar.safe", Colour.BrightGreen);
 }
 
-function createColorRow(labelText: string, pickers: { store: WritableStore<number>, key: string, extra?: (c: number) => void }[]) {
+function createColorRow(labelText: string, pickers: { store: WritableStore<number>, key: string, extra?: (c: number) => void }[]): WidgetCreator<FlexiblePosition> {
     return horizontal([
         label({ text: labelText }),
         ...pickers.map(({ store, key, extra }) => colourPicker({
@@ -439,4 +436,4 @@ function filterPeeps(type: "guest" | "staff", text: string): void {
         String(item).toLowerCase().includes(lowerText)
     );
     sortedModel.set(filtered);
-};
+}
