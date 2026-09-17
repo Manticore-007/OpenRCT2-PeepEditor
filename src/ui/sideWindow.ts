@@ -459,7 +459,6 @@ export const templateWindowSide = tabwindow({
 						let visibleIndex = 0;
 						let originalIndex = -1;
 
-						// Walk through the counts array using the same filter logic
 						for (let i = 0; i < counts.length; i++) {
 							const value = counts[i];
 							if (!(value === 0 && h)) {
