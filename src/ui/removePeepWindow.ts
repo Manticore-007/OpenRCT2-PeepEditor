@@ -30,8 +30,8 @@ export function openWindowRemovePeep(peep: BaseStaff | Guest): void {
 					onClick: () => {
 						if (peep)
 							context.executeAction("pe-remove", removeExecuteArgs(peep.id));
-						removePeepWindow.close();
-                        templateWindowSide.close();
+						openedRemovePeepWindow.close();
+                        templateWindowSide.open().close();
 						model._allGuests.set([]);
 					}
 				}),
@@ -42,13 +42,13 @@ export function openWindowRemovePeep(peep: BaseStaff | Guest): void {
 					text: "Cancel",
 					padding: [0, 4],
 					onClick: () => {
-						removePeepWindow.close();
+						openedRemovePeepWindow.close();
 					}
 				}),
 			])
 		]
 	});
-	removePeepWindow.open();
+	const openedRemovePeepWindow = removePeepWindow.open();
 }
 
 function textRemovePeep(peep: Guest | BaseStaff): string {

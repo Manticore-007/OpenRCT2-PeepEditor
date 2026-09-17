@@ -23,7 +23,7 @@ export const templateWindowMain = tabwindow({
     title: compute(model._name, n => n),
     width: 260,
     height: 230,
-    colours: [colourWindow.primary.get(), colourWindow.secondary.get(), colourWindow.primary.get()],
+    colours: [colourWindow.primary.get(), colourWindow.secondary.get()],
     tabs: [
         tab({ //main tab
             image: img.lens,
@@ -65,7 +65,7 @@ export const templateWindowMain = tabwindow({
                                 padding: { top: 0, left: -2, bottom: -2, right: -2 },
                                 onChange: (pressed) => {
                                     model._allGuestsSelected.set(false);
-                                    templateWindowSide.close();
+                                    templateWindowSide.open().close();
                                     togglePeepPicker(pressed, p => model._select(p), () => model._isPicking.set(false));
                                 }
                             }),
@@ -99,7 +99,7 @@ export const templateWindowMain = tabwindow({
                                 isPressed: twoway(model._allGuestsSelected),
                                 onChange: (pressed) => {
                                     if (!pressed) {
-                                        templateWindowSide.close();
+                                        templateWindowSide.open().close();
                                         return;
                                     }
                                     model._toggleMultipleGuests(pressed);
@@ -190,12 +190,12 @@ export const templateWindowMain = tabwindow({
                                 canSelect: true,
                                 onHighlight: (index) => {
                                     const allGuests = model._allGuestEntities.get();
-                                    locate(allGuests[allGuests.map(e => { return e.name }).indexOf(model._allGuestsSorted.get()[index])]);
+                                    locate(allGuests[allGuests.map(e => { return e.name; }).indexOf(model._allGuestsSorted.get()[index])]);
                                 },
                                 onClick: (index) => {
                                     const main = windowMain.get();
                                     const allGuests = model._allGuestEntities.get();
-                                    model._select(allGuests[allGuests.map(e => { return e.name }).indexOf(model._allGuestsSorted.get()[index])]);
+                                    model._select(allGuests[allGuests.map(e => { return e.name; }).indexOf(model._allGuestsSorted.get()[index])]);
                                     templateWindowSide.open();
                                     model._allGuestsSelected.set(false);
                                     if (main) main.tabIndex = 0;
@@ -208,7 +208,7 @@ export const templateWindowMain = tabwindow({
                                 canSelect: true,
                                 onHighlight: (index) => {
                                     const allStaff = model._allStaffEntities.get();
-                                    locate(allStaff[allStaff.map(e => { return e.name }).indexOf(model._allStaffSorted.get()[index])]);
+                                    locate(allStaff[allStaff.map(e => { return e.name; }).indexOf(model._allStaffSorted.get()[index])]);
                                 },
 
                                 onClick: (index) => {
@@ -334,7 +334,7 @@ export const templateWindowMain = tabwindow({
     onClose: () => {
         model._selectPeepType.set("guest");
         ui.tool?.cancel();
-        templateWindowSide.close();
+        templateWindowSide.open().close();
         model._dispose();
     },
     onUpdate: () => {

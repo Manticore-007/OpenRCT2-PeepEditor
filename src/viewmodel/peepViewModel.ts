@@ -1,4 +1,4 @@
-import { Bindable, Colour, compute, ElementVisibility, Store, store, WritableStore } from "openrct2-flexui";
+import { Bindable, Colour, compute, Visibility, Store, store, WritableStore } from "openrct2-flexui";
 import { guestFlagsExecuteArgs } from "../actions/guestFlags";
 import { debug } from "../helpers/logger";
 import { GuestKey, guestKeysExecuteArgs } from "../actions/guestKeys";
@@ -297,7 +297,7 @@ export class PeepViewModel {
         return compute(this._orders, o => (o & order) !== 0);
     }
 
-    _isVisibleWhen(check: Store<boolean>): Bindable<ElementVisibility> {
+    _isVisibleWhen(check: Store<boolean>): Bindable<Visibility> {
         return compute(check, c => c ? "visible" : "none");
     }
 

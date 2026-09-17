@@ -92,7 +92,7 @@ function boxPlot(
                 height - 1 + 1
             );
 
-            g.stroke = read(params.stroke) || colour.main
+            g.stroke = read(params.stroke) || colour.main;
 
             // Draw the low whisker.
             g.line(
@@ -172,7 +172,7 @@ function boxPlot(
     });
 }
 
-export { type BoxChartParams, boxPlot }
+export { type BoxChartParams, boxPlot };
 
 export interface BoxPlotStats {
     min: number;
