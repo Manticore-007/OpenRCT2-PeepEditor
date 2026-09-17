@@ -277,15 +277,15 @@ export const templateWindowSide = tabwindow({
 						gap: { top: 16, bottom: 16 },
 						visibility: compute(model._isStaff, s => s ? "visible" : "none"),
 						content: [
-							createStaffOrdersWidget(StaffOrderLabel.SweepFootpaths, model._isVisibleWhen(compute(model._staffType, type => type === "handyman")), StaffOrders.SweepFootpaths),
-							createStaffOrdersWidget(StaffOrderLabel.WaterGardens, model._isVisibleWhen(compute(model._staffType, type => type === "handyman")), StaffOrders.WaterGardens),
-							createStaffOrdersWidget(StaffOrderLabel.EmptyLitterBins, model._isVisibleWhen(compute(model._staffType, type => type === "handyman")), StaffOrders.EmptyLitterBins),
-							createStaffOrdersWidget(StaffOrderLabel.MowGrass, model._isVisibleWhen(compute(model._staffType, type => type === "handyman")), StaffOrders.MowGrass),
-							createStaffOrdersWidget(StaffOrderLabel.InspectRides, model._isVisibleWhen(compute(model._staffType, type => type === "mechanic")), StaffOrders.InspectRides),
-							createStaffOrdersWidget(StaffOrderLabel.FixRides, model._isVisibleWhen(compute(model._staffType, type => type === "mechanic")), StaffOrders.FixRides),
+							createStaffOrdersWidget(StaffOrderLabel.SweepFootpaths, model._isVisibleWhen(compute(model._isStaff, model._staffType, (s, type) => s && type === "handyman")), StaffOrders.SweepFootpaths),
+							createStaffOrdersWidget(StaffOrderLabel.WaterGardens, model._isVisibleWhen(compute(model._isStaff, model._staffType, (s, type) => s && type === "handyman")), StaffOrders.WaterGardens),
+							createStaffOrdersWidget(StaffOrderLabel.EmptyLitterBins, model._isVisibleWhen(compute(model._isStaff, model._staffType, (s, type) => s && type === "handyman")), StaffOrders.EmptyLitterBins),
+							createStaffOrdersWidget(StaffOrderLabel.MowGrass, model._isVisibleWhen(compute(model._isStaff, model._staffType, (s, type) => s && type === "handyman")), StaffOrders.MowGrass),
+							createStaffOrdersWidget(StaffOrderLabel.InspectRides, model._isVisibleWhen(compute(model._isStaff, model._staffType, (s, type) => s && type === "mechanic")), StaffOrders.InspectRides),
+							createStaffOrdersWidget(StaffOrderLabel.FixRides, model._isVisibleWhen(compute(model._isStaff, model._staffType, (s, type) => s && type === "mechanic")), StaffOrders.FixRides),
 							checkbox({
 								text: "{INLINE_SPRITE}{253}{19}{0}{0} Surveilling park",
-								visibility: model._isVisibleWhen(compute(model._staffType, type => type === "security")),
+								visibility: model._isVisibleWhen(compute(model._isStaff, model._staffType, (s, type) => s && type === "security")),
 								padding: { left: 10 },
 								isChecked: twoway(model._securityOrders),
 								onChange: (checked) => {
