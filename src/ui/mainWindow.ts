@@ -23,7 +23,7 @@ export const templateWindowMain = tabwindow({
     title: compute(model._name, n => n),
     width: 260,
     height: 230,
-    colours: [colourWindow.primary.get(), colourWindow.secondary.get()],
+    colours: [colourWindow.primary.get(), colourWindow.secondary.get(), colourWindow.primary.get()],
     tabs: [
         tab({ //main tab
             image: img.lens,
@@ -65,7 +65,7 @@ export const templateWindowMain = tabwindow({
                                 padding: { top: 0, left: -2, bottom: -2, right: -2 },
                                 onChange: (pressed) => {
                                     model._allGuestsSelected.set(false);
-                                    templateWindowSide.open().close();
+                                    templateWindowSide.close();
                                     togglePeepPicker(pressed, p => model._select(p), () => model._isPicking.set(false));
                                 }
                             }),
@@ -99,7 +99,7 @@ export const templateWindowMain = tabwindow({
                                 isPressed: twoway(model._allGuestsSelected),
                                 onChange: (pressed) => {
                                     if (!pressed) {
-                                        templateWindowSide.open().close();
+                                        templateWindowSide.close();
                                         return;
                                     }
                                     model._toggleMultipleGuests(pressed);
@@ -298,7 +298,7 @@ export const templateWindowMain = tabwindow({
                             {
                                 store: colourSideWindow.secondary,
                                 key: "pe.side.secondary",
-                                extra: (c) => {
+                                extra: (c): void => {
                                     ProgressBarColour.background.set(c);
                                     setColour("pe.bar.background", c);
                                 }
@@ -334,13 +334,13 @@ export const templateWindowMain = tabwindow({
     onClose: () => {
         model._selectPeepType.set("guest");
         ui.tool?.cancel();
-        templateWindowSide.open().close();
+        templateWindowSide.close();
         model._dispose();
     },
     onUpdate: () => {
         const main = windowMain.get();
         if (main) {
-            main.colours = [colourWindow.primary.get(), colourWindow.secondary.get(), colourWindow.tertiary.get()]
+            main.colours = [colourWindow.primary.get(), colourWindow.secondary.get(), colourWindow.tertiary.get()];
         }
     },
 });
@@ -389,15 +389,15 @@ function locate(peep: Guest | BaseStaff | null): void {
 }
 
 function track(pressed: boolean): void {
-    const guest = model._selectedPeep.get() as Guest
+    const guest = model._selectedPeep.get() as Guest;
     if (guest !== null) context.executeAction("pe-guestflags", guestFlagsExecuteArgs(guest.id, pressed, "tracking"));
 }
 
 function resetColours(): void {
-    function reset(store: { set: (c: number) => void }, key: string | null, colour: number) {
+    function reset(store: { set: (c: number) => void }, key: string | null, colour: number): void {
         store.set(colour);
         if (key) setColour(key, colour);
-    };
+    }
 
     reset(colourWindow.primary, "pe.main.primary", Colour.AquaDark);
     reset(colourWindow.secondary, "pe.main.secondary", Colour.LightBrown);
@@ -425,15 +425,26 @@ function createColorRow(labelText: string, pickers: { store: WritableStore<numbe
 }
 
 function filterPeeps(type: "guest" | "staff", text: string): void {
-    const entities = map.getAllEntities(type) as any[];
-    const entityModel = type === "guest" ? model._allGuestEntities : model._allStaffEntities;
-    const sortedModel = type === "guest" ? model._allGuestsSorted : model._allStaffSorted;
+    
+    const entities = map.getAllEntities(type);
 
-    entityModel.set(entities);
+    if (type === "guest") {
+        const guestEntities = entities as Guest[];
+        model._allGuestEntities.set(guestEntities);
 
-    const lowerText = text.toLowerCase();
-    const filtered = alphabetize(entities).filter(item =>
-        String(item).toLowerCase().includes(lowerText)
-    );
-    sortedModel.set(filtered);
+        const lowerText = text.toLowerCase();
+        const filtered = alphabetize(guestEntities).filter(item =>
+            String(item).toLowerCase().includes(lowerText)
+        );
+        model._allGuestsSorted.set(filtered);
+    } else {
+        const staffEntities = entities as BaseStaff[];
+        model._allStaffEntities.set(staffEntities);
+
+        const lowerText = text.toLowerCase();
+        const filtered = alphabetize(staffEntities).filter(item =>
+            String(item).toLowerCase().includes(lowerText)
+        );
+        model._allStaffSorted.set(filtered);
+    }
 }

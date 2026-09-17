@@ -61,18 +61,32 @@ function calculateRange(): MapRange {
     };
 }
 
+
+function getPeepsOnSelection(peepType: "guest", selection: MapRange | null): Guest[];
+function getPeepsOnSelection(peepType: "staff", selection: MapRange | null): BaseStaff[];
+function getPeepsOnSelection(peepType: "guest" | "staff", selection: MapRange | null): Guest[] | BaseStaff[];
 function getPeepsOnSelection(peepType: "guest" | "staff", selection: MapRange | null): Guest[] | BaseStaff[] {
     if (!selection) return [];
 
-    const peeps: Guest[] | BaseStaff[] = [];
     const { leftTop, rightBottom } = selection;
 
-    for (let x = leftTop.x; x <= rightBottom.x; x += 32) {
-        for (let y = leftTop.y; y <= rightBottom.y; y += 32) {
-            const tilePeeps = map.getAllEntitiesOnTile(peepType, { x, y });
-            peeps.push(...tilePeeps as any);
+    if (peepType === "guest") {
+        const peeps: Guest[] = [];
+        for (let x = leftTop.x; x <= rightBottom.x; x += 32) {
+            for (let y = leftTop.y; y <= rightBottom.y; y += 32) {
+                const tilePeeps = map.getAllEntitiesOnTile("guest", { x, y });
+                peeps.push(...tilePeeps);
+            }
         }
+        return peeps;
+    } else {
+        const peeps: BaseStaff[] = [];
+        for (let x = leftTop.x; x <= rightBottom.x; x += 32) {
+            for (let y = leftTop.y; y <= rightBottom.y; y += 32) {
+                const tilePeeps = map.getAllEntitiesOnTile("staff", { x, y });
+                peeps.push(...tilePeeps);
+            }
+        }
+        return peeps;
     }
-
-    return peeps;
 }

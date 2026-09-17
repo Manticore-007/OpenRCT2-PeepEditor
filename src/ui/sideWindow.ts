@@ -9,7 +9,7 @@ import {
 	Store,
 	WindowTemplate,
 	listview,
-	Visibility
+	ElementVisibility
 } from "openrct2-flexui";
 
 import { model, PeepDirection } from "../viewmodel/PeepViewModel";
@@ -45,7 +45,7 @@ export const templateWindowSide = tabwindow({
 	title: "Properties",
 	width: 260,
 	height: 230,
-	colours: [colourWindow.primary.get(), colourWindow.secondary.get()],
+	colours: [colourWindow.primary.get(), colourWindow.secondary.get(), colourWindow.primary.get()],
 	padding: 5,
 	tabs: [
 		tab({	//location
@@ -607,7 +607,7 @@ function openWindowRemoveItem(item: GuestItemType): void {
 					padding: [0, 4],
 					onClick: () => {
 						model._removeItem(item);
-						openedRemoveItemWindow.close();
+						removeItemWindow.close();
 					}
 				}),
 				button({
@@ -616,13 +616,12 @@ function openWindowRemoveItem(item: GuestItemType): void {
 					height: 14,
 					text: "Cancel",
 					padding: [0, 4],
-					onClick: () => openedRemoveItemWindow.close()
+					onClick: () => removeItemWindow.close()
 				}),
 			])
 		],
 		onClose: () => ui.tool?.cancel(),
 	});
-	const openedRemoveItemWindow = removeItemWindow.open();
 }
 
 function createPositionWidget(axis: "x" | "y" | "z", store: Store<number>): WidgetCreator<FlexiblePosition> {
@@ -728,7 +727,7 @@ function widgetMultiplier(padding: Padding): WidgetCreator<FlexiblePosition> {
 	});
 }
 
-function createStaffOrdersWidget(text: string, visibility: Bindable<Visibility>, orders: number): WidgetCreator<FlexiblePosition> {
+function createStaffOrdersWidget(text: string, visibility: Bindable<ElementVisibility>, orders: number): WidgetCreator<FlexiblePosition> {
 	return checkbox({
 		text: text,
 		visibility: visibility,

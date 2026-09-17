@@ -1,4 +1,4 @@
-import { Bindable, Colour, compute, Visibility, Store, store, WritableStore } from "openrct2-flexui";
+import { Bindable, Colour, compute, ElementVisibility, Store, store, WritableStore } from "openrct2-flexui";
 import { guestFlagsExecuteArgs } from "../actions/guestFlags";
 import { debug } from "../helpers/logger";
 import { GuestKey, guestKeysExecuteArgs } from "../actions/guestKeys";
@@ -49,7 +49,10 @@ export class PeepViewModel {
     readonly _animationFrame = store<number>(0);
     readonly _animationLength = store<number>(0);
     readonly _animationItems = compute(this._availableAnimations, a => a.map(animationList));
-    readonly _animationIndex = this._computePeepProperty<Guest | BaseStaff, number>(peep => peep.availableAnimations.indexOf(peep.animation as any), 0);
+    readonly _animationIndex = this._computePeepProperty<Guest | BaseStaff, number>(
+        peep => (peep.availableAnimations as readonly string[]).indexOf(peep.animation),
+        0
+    );
 
     //staff
     readonly _staffTypeIndex = this._computePeepProperty<BaseStaff, number>(staff => staffType.indexOf(staff.staffType), 0, "staff");
@@ -253,6 +256,7 @@ export class PeepViewModel {
     }
 
     _giveItem(item: GuestItemType | null): void {
+
         const currentRideId = rideId.get();
         const currentRide = map.getRide(currentRideId);
         const itemType = this._item.get();
@@ -262,10 +266,10 @@ export class PeepViewModel {
             return;
         }
 
-        let payload: any;
+        let payload: GuestItem;
 
         if (itemType === "voucher") {
-            payload = this._voucher.get();
+            payload = this._voucher.get() as unknown as GuestItem;
         }
         else if (itemType !== null && itemType.startsWith("photo")) {
             payload = <GuestPhoto>{ type: itemType, rideId: currentRideId };
@@ -277,19 +281,22 @@ export class PeepViewModel {
             if (itemType === "photo4") photo4RideName.set(rideName);
         }
         else {
-            payload = { type: item };
+            // Asserting here satisfies GuestItem since item can technically be null in the parameter type
+            payload = { type: item as GuestItemType } as GuestItem;
         }
+
         this._execute("pe-giveitem", id => giveItemExecuteArgs(id, payload));
     }
 
-    private _execute(actionName: string, getArgs: (guestId: number | null) => any): void {
+    private _execute<TArgs extends object>(actionName: string, getArgs: (guestId: number | null) => TArgs): void {
         if (this._allGuestsSelected.get()) {
             this._getAllGuests();
         }
 
         this._allGuests.get().forEach(guest => {
-            if (guest)
-                context.executeAction(actionName, getArgs(guest.id));
+            if (guest) {
+                context.executeAction(actionName as ActionType, getArgs(guest.id));
+            }
         });
     }
 
@@ -297,7 +304,7 @@ export class PeepViewModel {
         return compute(this._orders, o => (o & order) !== 0);
     }
 
-    _isVisibleWhen(check: Store<boolean>): Bindable<Visibility> {
+    _isVisibleWhen(check: Store<boolean>): Bindable<ElementVisibility> {
         return compute(check, c => c ? "visible" : "none");
     }
 
@@ -315,7 +322,7 @@ export class PeepViewModel {
 
     private _computePeepProperty<P, T>(extractor: (peep: P) => T, fallback: T, expectedType?: string): WritableStore<T> {
         return compute(this._selectedPeep, p => {
-            const isValid = p && (!expectedType || (p as any).peepType === expectedType);
+            const isValid = p && (!expectedType || (p as { peepType?: string }).peepType === expectedType);
             return isValid ? extractor(p as unknown as P) : fallback;
         });
     }
