@@ -453,7 +453,27 @@ export const templateWindowSide = tabwindow({
 					height: 135,
 					tooltip: "Click to remove",
 					onClick(item) {
-						openWindowRemoveItem(guestItemTypeList[item]);
+						const counts = model._itemCount.get();
+						const h = hideCheckbox.get();
+
+						let visibleIndex = 0;
+						let originalIndex = -1;
+
+						// Walk through the counts array using the same filter logic
+						for (let i = 0; i < counts.length; i++) {
+							const value = counts[i];
+							if (!(value === 0 && h)) {
+								if (visibleIndex === item) {
+									originalIndex = i;
+									break;
+								}
+								visibleIndex++;
+							}
+						}
+
+						if (originalIndex !== -1) {
+							openWindowRemoveItem(guestItemTypeList[originalIndex]);
+						}
 					}
 				}),
 				horizontal([
