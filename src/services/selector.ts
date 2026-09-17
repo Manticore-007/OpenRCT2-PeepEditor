@@ -1,5 +1,3 @@
-import { templateWindowSide } from "../ui/sideWindow";
-
 const COORD_NULL = {x: 0, y: 0}; 
 let startTile: CoordsXY = COORD_NULL;
 let endTile: CoordsXY = COORD_NULL;
@@ -39,7 +37,6 @@ export function selectByTiles(peepType: "guest" | "staff", isPressed: boolean, o
             if (peeps.length > 0)
             {
             onSelection(peeps);
-            templateWindowSide.focus();
             }
             ui.mainViewport.visibilityFlags &= ~(1 << 7);
             ui.tool?.cancel();

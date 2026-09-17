@@ -78,9 +78,9 @@ export class PeepViewModel {
     readonly _mass = store<number>(0);
     readonly _items = store<GuestItem[]>([]);
     readonly _item = store<GuestItemType>("balloon");
-    readonly _voucher = store<Voucher | null>(null);
-    readonly _voucherItem = store<GuestItemType | null>(null);
-    readonly _voucherType = store<VoucherType | null>(null);
+    readonly _voucher = store<Voucher>({type: "voucher", voucherType: "entry_free"});
+    readonly _voucherItem = store<GuestItemType>("voucher");
+    readonly _voucherType = store<VoucherType>("entry_free");
     readonly _availableGuestAnimations = store<GuestAnimation[]>([]);
     readonly _itemCount = store<number[]>(new Array(50).fill(0));
 
@@ -112,7 +112,7 @@ export class PeepViewModel {
 
 
     readonly _isPositionDisabled = compute(this._isFrozen, this._isStatic, (f, s) => !f && !s);
-    readonly _visibleRideDropdown = compute(this._item, this._voucherType, (i, v) => (i === "photo1" || i === "photo2" || i === "photo3" || i === "photo4" || (i === "voucher" && v === "ride_free")) ? "visible" : "none")
+    readonly _visibleRideDropdown = compute(this._isGuest, this._item, this._voucherType, (g, i, v) => g && (i === "photo1" || i === "photo2" || i === "photo3" || i === "photo4" || (i === "voucher" && v === "ride_free")) ? "visible" : "none")
     readonly _disabledWhenNoSinglePeepSelected = compute(this._isPeepSelected, this._allGuests, (p, a) => !p || a.length > 1);
     readonly _disabledWhenNoPeepSelected = compute(this._isPeepSelected, this._allGuests, (p, a) => !p && a.length <= 1);
     readonly _visibilityListviewWhenGuest = compute(this._selectPeepType, p => p === "guest" ? "visible" : "none");
@@ -212,7 +212,7 @@ export class PeepViewModel {
         this._execute("pe-guestflags", id => guestFlagsExecuteArgs(id, isFrozen, "animationFrozen"));
     }
 
-    _SetPosition(axis: keyof CoordsXYZ, adjustment: number): void {
+    _setPosition(axis: keyof CoordsXYZ, adjustment: number): void {
         this._execute("pe-position", id => positionExecuteArgs(id, axis, (adjustment * multiplier.get())));
     }
 
@@ -460,4 +460,4 @@ export class PeepViewModel {
     }
 }
 
-export const model = new PeepViewModel;
+export const model = new PeepViewModel();

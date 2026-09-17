@@ -32,6 +32,8 @@ let axis = {
 	z: { lineColour: 135, line: { x1: 50, y1: 30, x2: 50, y2: 5 }, textColour: Colour.DarkBlue, text: { text: "z", x: 40, y: 0 } }
 }
 
+const hideCheckbox = store(false);
+
 export const colourWindow =
 {
 	primary: store<Colour>(getColour("pe.side.primary", Colour.DarkYellow)),
@@ -376,10 +378,37 @@ export const templateWindowSide = tabwindow({
 			image: img.items,
 			spacing: 0,
 			content: [
-				groupbox({
-					height: 230 - 28 - 14 - 12,
-					content: [label({ text: ""})],
+				listview({
+					items: compute(model._selectedPeep, p => {
+						const arr: Bindable<string[][] | ListViewItem[]> = [];
+						if (p) {
+							switch((p as BaseStaff).staffType) {
+								case "handyman":
+									arr.push([sprite(5114), "Lawns mowed", (p as Handyman).lawnsMown.toString()]);
+									arr.push([sprite(5112), "Gardens watered", (p as Handyman).gardensWatered.toString()]);
+									arr.push([sprite(5111), "Litter swept", (p as Handyman).litterSwept.toString()]);
+									arr.push([sprite(5113), "Bins emptied", (p as Handyman).binsEmptied.toString()]);
+									break;
+								case "mechanic":
+									arr.push([sprite(5115), "Rides inspected", (p as Mechanic).ridesInspected.toString()]);
+									arr.push([sprite(5116), "Rides fixed", (p as Mechanic).ridesFixed.toString()]);
+									break;
+								case "security":
+									arr.push([sprite(5498), "Vandals stopped", (p as Security).vandalsStopped.toString()]);
+									break;
+								case "entertainer":
+									arr.push([sprite(5492), "Guests entertained", "0"]); //(p as Entertainer).guestsEntertained.toString()]);
+									break;
+								}
+							}
+						return arr;
+					}),
+					columns: [{ width: 20 }, { header: "Tasks", width: "1w" }, {header: "#", width: 50}],
+					canSelect: false,
 					visibility: compute(model._isStaff, s => s ? "visible" : "none"),
+					padding: { bottom: 4 },
+					height: 230 - 30 - 14 - 14,
+					scrollbars: "none"
 				}),
 				listview({
 					items: compute(model._selectedPeep, model._items, p => {
@@ -407,13 +436,17 @@ export const templateWindowSide = tabwindow({
 					}
 				}),
 				listview({
-					items: compute(model._itemCount, model._allGuests, (c, a) => {
-						const arr: Bindable<string[][] | ListViewItem[]> = []
-						c.forEach( (value, index) => {
-							arr.push(createListviewItems(index, value, a as Guest[]))})
-							return arr
-				}),
-					columns: [{width: 20}, {header: "Item", width: "1w"}, {header: "#", width: 35}, {header: "%", width: 40}],
+					items: compute(model._itemCount, model._allGuests, hideCheckbox, (c, a, h) => {
+						const arr: Bindable<string[][] | ListViewItem[]> = [];
+						c.forEach((value, index) => {
+							// Skip only if count is 0 AND hidecheck is true
+							if (!(value === 0 && h)) {
+								arr.push(createListviewItems(index, value, a as Guest[]));
+							}
+						});
+						return arr;
+					}),
+					columns: [{width: 20}, {header: "Item", width: "1w"}, {header: "#", width: 35}, {header: "%", width: 45}],
 					canSelect: false,
 					visibility: compute(model._allGuests, a => a.length > 1 ? "visible" : "none"),
 					padding: {bottom: 4},
@@ -447,14 +480,14 @@ export const templateWindowSide = tabwindow({
 						text: "Voucher:",
 						height: 13,
 						padding: { bottom: 4 },
-						visibility: compute(model._item, i => (i === "voucher") ? "visible" : "none"),
+						visibility: compute(model._isGuest, model._item, (g, i) => g && (i === "voucher") ? "visible" : "none"),
 					}),
 					dropdown({
 						items: ["Free entry", "Half-priced entry", "Free food/drink", "Free ride"],
 						height: 13,
 						width: "75%",
 						padding: { bottom: 4 },
-						visibility: compute(model._item, i => (i === "voucher") ? "visible" : "none"),
+						visibility: compute(model._isGuest, model._item, (g, i) => g && (i === "voucher") ? "visible" : "none"),
 						onChange: (index) => {
 							switch (index) {
 								case 0: model._voucher.set(<Voucher>{ type: "voucher", voucherType: "entry_free" }); model._voucherType.set("entry_free"); break;
@@ -493,14 +526,14 @@ export const templateWindowSide = tabwindow({
 						text: "Free item:",
 						height: 13,
 						padding: { bottom: 4 },
-						visibility: compute(model._item, model._voucherType, (i, v) => (v === "food_drink_free" && i === "voucher") ? "visible" : "none"),
+						visibility: compute(model._isGuest, model._item, model._voucherType, (g, i, v) => g && (v === "food_drink_free" && i === "voucher") ? "visible" : "none"),
 					}),
 					dropdown({
 						items: itemList(),
 						height: 13,
 						padding: { bottom: 4 },
 						width: "75%",
-						visibility: compute(model._item, model._voucherType, (i, v) => (v === "food_drink_free" && i === "voucher") ? "visible" : "none"),
+						visibility: compute(model._isGuest, model._item, model._voucherType, (g, i, v) => g && (v === "food_drink_free" && i === "voucher") ? "visible" : "none"),
 						onChange: (index) => {
 							const item = guestItemTypeList[index];
 							model._voucherItem.set(item);
@@ -509,6 +542,16 @@ export const templateWindowSide = tabwindow({
 					})
 				]),
 				horizontal([
+					checkbox({
+						text: "Hide when no guests have item",
+						width: "75%",
+						padding: { top: 6 },
+						visibility: compute(model._allGuests, a => a.length > 1 ? "visible" : "none"),
+						isChecked: twoway(hideCheckbox),
+						onChange(isChecked) {
+							hideCheckbox.set(isChecked)
+						},
+					}),
 					button({
 						text: compute(model._allGuests, a => a.length > 1 ? `Give items` : `Give item`),
 						visibility: compute(model._isGuest, g => g ? "visible" : "none"),
@@ -598,7 +641,7 @@ function createPositionWidget(axis: "x" | "y" | "z", store: Store<number>) {
 			padding: { top: 1, right: 10, bottom: 1 },
 			disabled: model._isPositionDisabled,
 			disabledMessage: "N/A",
-			onChange: (_, adjustment: number) => model._SetPosition(axis, adjustment)
+			onChange: (_, adjustment: number) => model._setPosition(axis, adjustment)
 		})
 	]);
 }

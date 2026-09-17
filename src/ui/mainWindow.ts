@@ -43,11 +43,6 @@ export const templateWindowMain = tabwindow({
                             items: compute(model._allGuests, a => a.map(g => g?.name as string).sort()),
                             visibility: compute(model._allGuests, a => a.length > 1 ? "visible" : "none"),
                             canSelect: true,
-                            onHighlight: (index) => {
-                                const allGuests = model._allGuests.get() as Guest[];
-                                const allGuestsSorted = allGuests.map(a => a.name).sort();
-                                locate(allGuests[allGuests.map(e => { return e.name }).indexOf(allGuestsSorted[index])])
-                            },
                             onClick: (index) => {
                                 const allGuests = model._allGuests.get() as Guest[];
                                 const allGuestsSorted = allGuests.map( a => a.name).sort();
