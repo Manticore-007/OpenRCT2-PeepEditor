@@ -622,6 +622,7 @@ function openWindowRemoveItem(item: GuestItemType): void {
 		],
 		onClose: () => ui.tool?.cancel(),
 	});
+	removeItemWindow.open();
 }
 
 function createPositionWidget(axis: "x" | "y" | "z", store: Store<number>): WidgetCreator<FlexiblePosition> {
