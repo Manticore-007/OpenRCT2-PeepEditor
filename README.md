@@ -48,7 +48,7 @@ The options should be self-explanatory.
 
 ### About
 
-<img width="266" height="232" alt="image" src="https://github.com/user-attachments/assets/caa84e19-2ff7-4db8-a0fd-29a57ff223bc" />
+<img width="266" height="234" alt="image" src="https://github.com/user-attachments/assets/18eead2d-94d1-4d62-a81e-bfbced1e993a" />
 
 Info about the plugin, and special thanks to the people that helped me one way or another.
 
