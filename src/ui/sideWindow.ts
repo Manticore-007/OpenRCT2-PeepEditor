@@ -160,7 +160,9 @@ export const templateWindowSide = tabwindow({
 								padding: { right: 10 },
 								items: staffTypeList,
 								selectedIndex: twoway(model._staffTypeIndex),
-								onChange: (index) => model._setStaffType(index)
+								onChange: (index) => {
+									model._setStaffType(index);
+								}
 							})
 						]),
 						horizontal([
@@ -379,28 +381,29 @@ export const templateWindowSide = tabwindow({
 			spacing: 0,
 			content: [
 				listview({
-					items: compute(model._selectedPeep, p => {
-						const arr: Bindable<string[][] | ListViewItem[]> = [];
-						if (p) {
-							switch((p as BaseStaff).staffType) {
+					items: compute(model._selectedPeep, model._staffType, (p, currentStaffType) => {
+						const arr: string[][] = [];
+
+						if (p && p.type === "staff") {
+							switch (currentStaffType) {
 								case "handyman":
-									arr.push([sprite(5114), "Lawns mowed", (p as Handyman).lawnsMown.toString()]);
-									arr.push([sprite(5112), "Gardens watered", (p as Handyman).gardensWatered.toString()]);
-									arr.push([sprite(5111), "Litter swept", (p as Handyman).litterSwept.toString()]);
-									arr.push([sprite(5113), "Bins emptied", (p as Handyman).binsEmptied.toString()]);
+									arr.push([sprite(5114), "Lawns mowed", ((p as Handyman).lawnsMown ?? 0).toString()]);
+									arr.push([sprite(5112), "Gardens watered", ((p as Handyman).gardensWatered ?? 0).toString()]);
+									arr.push([sprite(5111), "Litter swept", ((p as Handyman).litterSwept ?? 0).toString()]);
+									arr.push([sprite(5113), "Bins emptied", ((p as Handyman).binsEmptied ?? 0).toString()]);
 									break;
 								case "mechanic":
-									arr.push([sprite(5115), "Rides inspected", (p as Mechanic).ridesInspected.toString()]);
-									arr.push([sprite(5116), "Rides fixed", (p as Mechanic).ridesFixed.toString()]);
+									arr.push([sprite(5115), "Rides inspected", ((p as Mechanic).ridesInspected ?? 0).toString()]);
+									arr.push([sprite(5116), "Rides fixed", ((p as Mechanic).ridesFixed ?? 0).toString()]);
 									break;
 								case "security":
-									arr.push([sprite(5498), "Vandals stopped", (p as Security).vandalsStopped.toString()]);
+									arr.push([sprite(5498), "Vandals stopped", ((p as Security).vandalsStopped ?? 0).toString()]);
 									break;
 								case "entertainer":
-									arr.push([sprite(5492), "Guests entertained", "0"]); //(p as Entertainer).guestsEntertained.toString()]);
+									arr.push([sprite(5492), "Guests entertained", "0"]); // Update if entertainer stats exist
 									break;
-								}
 							}
+						}
 						return arr;
 					}),
 					columns: [{ width: 20 }, { header: "Tasks", width: "1w" }, {header: "#", width: 50}],

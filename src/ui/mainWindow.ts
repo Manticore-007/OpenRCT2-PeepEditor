@@ -65,8 +65,10 @@ export const templateWindowMain = tabwindow({
                                 padding: { top: 0, left: -2, bottom: -2, right: -2 },
                                 onChange: (pressed) => {
                                     model._allGuestsSelected.set(false);
-                                    templateWindowSide.close();
-                                    togglePeepPicker(pressed, p => model._select(p), () => model._isPicking.set(false));
+                                    togglePeepPicker(pressed, p => {
+                                        templateWindowSide.close();
+                                        model._select(p);
+                                    }, () => model._isPicking.set(false));
                                 }
                             }),
                             toggle({
