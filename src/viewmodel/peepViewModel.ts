@@ -46,8 +46,8 @@ export class PeepViewModel {
     readonly _z = store<number>(0);
     readonly _availableAnimations = store<GuestAnimation[] | StaffAnimation[]>([]);
     readonly _animation = store<GuestAnimation | StaffAnimation>("walking");
-    readonly _animationFrame = store<number>(0);
-    readonly _animationLength = store<number>(0);
+    readonly _animationFrame = this._computePeepProperty<Guest | BaseStaff, number>(peep => peep.animationOffset, 0);
+    readonly _animationLength = this._computePeepProperty<Guest | BaseStaff, number>(peep => peep.animationLength, 0);
     readonly _animationItems = compute(this._availableAnimations, a => a.map(animationList));
     readonly _animationIndex = this._computePeepProperty<Guest | BaseStaff, number>(
         peep => (peep.availableAnimations as readonly string[]).indexOf(peep.animation),
@@ -56,7 +56,7 @@ export class PeepViewModel {
 
     //staff
     readonly _staffTypeIndex = this._computePeepProperty<BaseStaff, number>(staff => staffType.indexOf(staff.staffType), 0, "staff");
-    readonly _staffType = store<StaffType | null>(null);
+    readonly _staffType = this._computePeepProperty<BaseStaff, StaffType | undefined>(staff => staff.staffType, undefined, "staff");
     readonly _availableCostumes = store<StaffCostume[]>([]);
     readonly _availableCostumeStrings = store<string[]>([]);
     readonly _costumeIndex = store<number>(0);
@@ -98,12 +98,11 @@ export class PeepViewModel {
 
     //window
     readonly _selectPeepType = store<EntityType>("guest");
-    //readonly _allGuestsSelected = compute(this._allGuests, g => g.length > 1);
     readonly _allGuestsSelected = store<boolean>(false);
 
     //custom
-    readonly _isGuest = store<boolean>(false);
-    readonly _isStaff = store<boolean>(false);
+    readonly _isGuest = compute(this._selectedPeep, p => p !== null && p.type === "guest");
+    readonly _isStaff = compute(this._selectedPeep, p => p !== null && p.type === "staff");
     readonly _isEntertainer = store<boolean>(false);
     readonly _isPicking = store<boolean>(false);
     readonly _isFrozen = store<boolean>(false);
@@ -190,7 +189,6 @@ export class PeepViewModel {
         else if (!isPressed) {
             this._allGuests.set([]);
             this._selectedPeep.set(null);
-            this._staffType.set(null);
             this._isGuest.set(false);
             this._name.set(windowTitle);
         }
@@ -248,7 +246,7 @@ export class PeepViewModel {
     }
 
     _setStaffOrders(check: boolean, order: number): void {
-        this._execute("pe-stafforders", id => ordersExecuteArgs(id, check, order));
+        this._execute("pe-orders", id => ordersExecuteArgs(id, check, order));
     }
 
     _removeItem(item: GuestItemType): void {
@@ -337,10 +335,6 @@ export class PeepViewModel {
         const _isEntertainer = staff.staffType === "entertainer";
 
         this._name.set(peep.name);
-        this._animation.set(peep.animation);
-        this._animationLength.set(peep.animationLength);
-        this._animationFrame.set(peep.animationOffset);
-        this._availableAnimations.set(peep.availableAnimations);
         this._isFrozen.set(peep.getFlag("animationFrozen"));
         this._isStatic.set(peep.getFlag("positionFrozen"));
 
@@ -378,6 +372,10 @@ export class PeepViewModel {
         this._y.set(peep.y);
         this._z.set(peep.z);
         this._energy.set(peep.energy);
+        this._animation.set(peep.animation);
+        this._animationLength.set(peep.animationLength);
+        this._animationFrame.set(peep.animationOffset);
+        this._availableAnimations.set(peep.availableAnimations);
 
         if (peep.type === "guest") {
             const guest = peep as Guest;
@@ -391,6 +389,17 @@ export class PeepViewModel {
             this._getPhotoRideName(guest);
             this._isTracking.set((guest.getFlag("tracking")));
             this._items.set(guest.items);
+        } else if (peep.type === "staff") {
+            const staff = peep as BaseStaff;
+            this._staffType.set(staff.staffType);
+            this._isEntertainer.set(staff.staffType === "entertainer");
+            this._costume.set(staff.costume as StaffCostume);
+            this._availableCostumes.set(staff.availableCostumes);
+            this._availableCostumeStrings.set(staff.getCostumeStrings());
+            const costume = this._costume.get();
+            if (costume !== null) {
+            this._costumeIndex.set(this._availableCostumes.get().indexOf(costume));
+            }
         }
     }
 
@@ -401,6 +410,8 @@ export class PeepViewModel {
         if (peep) {
             this._updateDynamicDataFromPeep(peep);
         }
+
+        
 
         this._tickCounter++;
         if (this._tickCounter < 40) {
