@@ -1,3 +1,8 @@
+import { Colour } from "openrct2-flexui";
+import { model } from "../viewmodel/PeepViewModel";
+import { getColour } from "./settings";
+import { itemImageIds, itemImageMap } from "./items";
+
 enum ImageMoniker {
     "trousers",
 }
@@ -17,6 +22,15 @@ type ImageData = {
     data: string;
 };
 
+
+export const inlineSprites = itemImageIds.map(item => sprite(item));
+
+export function createItemImage(item: GuestItemType, g: GraphicsContext): void {
+    const colouredItems = new Set(["balloon", "hat", "tshirt", "umbrella"]);
+    const property = colouredItems.has(item) ? `${item}Colour` as keyof Guest : undefined;
+
+    drawImage(g, itemImageMap[item], property);
+}
 /**
  * Call this function once to initialize the custom sprites, probably in your main.ts file
  */
@@ -47,3 +61,56 @@ export const initCustomSprites = (): void => {
  export const customImageFor = (image: ImageStringNames): number => {
     return imageMap[ImageMoniker[image]];
 };
+
+export function drawImage(g: GraphicsContext, image: number, property?: keyof Guest): void
+{
+    const img = g.getImage(image);
+
+    if (!img) return;
+
+    const guest = <Guest>model._selectedPeep.get();
+    let paletteId = Colour.Void;
+    
+    if (model._allGuests.get().length > 1)
+    {
+        paletteId = getColour("pe.side.secondary", Colour.LightBrown);
+    }
+    else if (property)
+    {
+        const isValidItemColour = 
+            property === "tshirtColour" || 
+            property === "trousersColour" || 
+            (property === "hatColour" && guest.hasItem({ type: "hat" })) || 
+            (property === "umbrellaColour" && guest.hasItem({ type: "umbrella" })) || 
+            (property === "balloonColour" && guest.hasItem({ type: "balloon" }));
+
+        if (isValidItemColour)
+        {
+            paletteId = guest[property] as number;
+        }
+    }
+    g.paletteId = paletteId;
+    g.tertiaryColour = Colour.Yellow;
+    g.image(img.id, 0, 0);
+}
+
+export function sprite(id: number, colour?: Colour): string {
+    if (colour) {
+        id |= (colour << 19) | (1 << 29);
+    }
+
+    return "{INLINE_SPRITE}{" + (id & 0xFF) + "}{" + ((id >> 8) & 0xFF) + "}{" + ((id >> 16) & 0xFF) + "}{" + ((id >> 24) & 0xFF) + "}";
+}
+
+export function colourSprite(spriteId: number, colour: Colour): number {
+    const id = ui.imageManager.allocate(1);
+    if (id != undefined) {
+        ui.imageManager.draw(id.start.valueOf(), { width: 16, height: 16 }, ctx => {
+            ctx.colour = colour;
+            ctx.tertiaryColour = Colour.Yellow;
+            ctx.image(spriteId, 0, 0);
+        });
+        return id.start.valueOf();
+    }
+    return 0;
+}

@@ -1,60 +1,97 @@
 # PeepEditor plugin for OpenRCT2
 
-This plugin lets you modify the properties of your park guests and staff members.
+This plugin lets you modify and monitor the properties of your park guests and staff members.
 
 
-### The Main Window:
+## The main window:
+### Overview
 
-![(The main window of Peep Editor)](https://raw.githubusercontent.com/Manticore-007/OpenRCT2-PeepEditor/main/img/main%20window.png)
+<img width="262" height="232" alt="image" src="https://github.com/user-attachments/assets/aa786306-39f3-4870-b09c-38d7571413dd" />
 
 Here you can see the most basic information about the peep you've selected. The buttons do the following:
 
-![(Select a peep)](https://raw.githubusercontent.com/Manticore-007/OpenRCT2-PeepEditor/main/img/pipette.png)
-Activates the tool to select a guest or staff member.
+<img width="28" height="26" alt="image" src="https://github.com/user-attachments/assets/c81b1c36-31e1-4b8b-8d6d-51c3a84340f7" />
+Activates the tool to select a guest or staff member.<br>
 
-![(Select a peep)](https://raw.githubusercontent.com/Manticore-007/OpenRCT2-PeepEditor/main/img/freeze.png)
-Toggles wether a staff member is frozen in place or moving. Unfreezing sets the speed of the staff member automatically to 90.
+<img width="24" height="24" alt="image" src="https://github.com/user-attachments/assets/6362ce93-e922-4227-b691-aa5c18700020" />
+Selects multiple guests on a grid of tiles.<br>
 
-![(Select a peep)](https://raw.githubusercontent.com/Manticore-007/OpenRCT2-PeepEditor/main/img/rename.png)
-Opens a text box where you can put in a new (longer than normally) name for your guest or staff member.
+<img width="26" height="28" alt="image" src="https://github.com/user-attachments/assets/4d5ea335-ad35-458d-bb9b-7e97451f183f" />
+All the guests on the map will be selected, except the ones on rides.<br>
 
-![(Select a peep)](https://raw.githubusercontent.com/Manticore-007/OpenRCT2-PeepEditor/main/img/locate.png)
-When you press this button, the screen will focus on the selected guest or staff member.
+<img width="26" height="26" alt="image" src="https://github.com/user-attachments/assets/7d075f02-59ab-4db9-af20-b8e3f52b1051" />
+Opens a text box where you can put in a new (longer than normally) name for your guest or staff member.<br>
 
-![(Select a peep)](https://raw.githubusercontent.com/Manticore-007/OpenRCT2-PeepEditor/main/img/remove.png)
-Remove the selected guest or staff member.
+<img width="26" height="26" alt="image" src="https://github.com/user-attachments/assets/d233132c-9b93-4041-b699-1bef0835a4ac" />
+When you press this button, the screen will focus on the selected guest or staff member.<br>
 
-![(Select a peep)](https://raw.githubusercontent.com/Manticore-007/OpenRCT2-PeepEditor/main/img/allguests.png)
-All the guests on the map will be selected, except the ones on rides.
+<img width="26" height="26" alt="image" src="https://github.com/user-attachments/assets/16ec5cde-5178-48e9-8a33-0879eb668b32" />
+Remove the selected guest or staff member.<br>
+
+<img width="26" height="24" alt="image" src="https://github.com/user-attachments/assets/d0896a23-aa57-4820-882f-e40f5c9b6c54" />
+Turn on/off tracking information for this guest - (If tracking is on, guest’s movements will be reported in the message area).<br>
 
 
-### Staff member properties
+### Frozen peeps list
 
-<img src= "https://raw.githubusercontent.com/Manticore-007/OpenRCT2-PeepEditor/main/img/staff.png" align="left" />
+<img width="264" height="234" alt="image" src="https://github.com/user-attachments/assets/069b51c9-6222-4495-98bb-0bfe82e9533e" />
+
+Here you have two lists of frozen peeps; guests and staff members. A nice overview of where you can find your peeps used for peep scenes. Highlighting the peep will make the main viewport scroll to its location. Clicking it will make it editable like when using the pipette. On the dropdown menu, you can switch between guests and staff members. With the textbox next to it, you can filter by name; it is not case sensitive and it may be a part of the name.
+
+
+### Options
+
+<img width="262" height="232" alt="image" src="https://github.com/user-attachments/assets/08f2e67c-80ef-4c5d-8051-2a807e384c92" />
+
+The options should be self-explanatory.
+
+
+### About
+
+<img width="266" height="234" alt="image" src="https://github.com/user-attachments/assets/18eead2d-94d1-4d62-a81e-bfbced1e993a" />
+
+Info about the plugin, and special thanks to the people that helped me one way or another.
+
+
+## The side window
+### Placement
+
+<img width="264" height="234" alt="image" src="https://github.com/user-attachments/assets/f61f29e8-6b91-4a0d-a7ef-492828205c39" /><img width="266" height="236" alt="image" src="https://github.com/user-attachments/assets/9a5cdb14-098f-493c-993f-d0c5229e3be6" />
+
+This window is to position and set the direction of the selected peep. Freezing the peep (traffic lights or flags) has been moved to this tab, since it is a part of positioning. When moving or directing a peep, don't worry about the rotation of the map, the interface rotates along with it. I even added a nice little axis widget to assist you which axis is wich way.
+
+
+### Appearance
+
+<img width="266" height="234" alt="image" src="https://github.com/user-attachments/assets/d8195c92-f8d9-418b-b17e-f34eeed382fa" /> <img width="262" height="234" alt="image" src="https://github.com/user-attachments/assets/c4a20595-ff07-40d5-8b2a-22c58b938685" /><br>
+Staff member appearance. Every type of staff member has their own options. Here you can modify their staff type, uniform colour and costume. Below that you can pick the animation they are showing an if the are completely frozen, you can also set the frame of the animation.
+
+
+<img width="262" height="232" alt="image" src="https://github.com/user-attachments/assets/110a3555-fe18-475e-b316-af3abac91cff" /><br>
+Guest appearance. For a guest you can select the colours of their t-shirt, trousers, hat, balloon and umbrella respectively. The animation section is the same as with a staff member.
+
+
+### Actions
+
+<img width="262" height="232" alt="image" src="https://github.com/user-attachments/assets/b04802ad-aa26-45bf-b1b2-080e73c1ad7b" /><img width="260" height="232" alt="image" src="https://github.com/user-attachments/assets/9c421bf6-be4d-4614-8a3f-b4317bdfdb81" /><br>
+Here you can set actions for guests like make them leave the park or blast them to bits. For staff members you can set their orders, like the staff member windows ingame. This sections needs some work...
+
+
+
+### Physiology
+
+<img width="262" height="232" alt="image" src="https://github.com/user-attachments/assets/0878fb53-3de2-40c7-bf83-454175abe1a4" /><img width="262" height="232" alt="image" src="https://github.com/user-attachments/assets/e29a6830-32b7-4718-874d-277e5200226b" /><img width="262" height="230" alt="image" src="https://github.com/user-attachments/assets/c7497538-8d65-40aa-b6a6-566310730024" />
 <br>
-Type: let's you change what kind of staff member it is.<br>
-Costume: changes the how the staff member looks, you can even turn them into guests!<br>
-Colour: changes the colour of the selected staff member's outfit, if possible.<br>
-<br>
-X position: moves the selected staff member along the X axis on the map.<br>
-Y position: moves the selected staff member along the Y axis on the map.<br>
-Z position: moves the selected staff member along the Z axis on the map.<br>
-Speed: adjusts how fast a staff member is walking, adjustable from 1 to 255.<br>
-<br>
-The multiplier lets you set increments by 1, 10 or 100 respectively.<br>
-<br clear="left"/>
+For the guests you can see and modify how they are feeling. It is kind of similar as the guest window ingame. When multiple guests are selected you will see box plots for each property so you can see how the overall mood in the park is. Staff members don't have anything to show here, they are taken care of very well.
 
-### Guest properties
 
-<img src= "https://raw.githubusercontent.com/Manticore-007/OpenRCT2-PeepEditor/main/img/guest.png" align="left" />
-<br>
-Here you can change the colours of the attributes of the selected guest.<br>
-<br>
-By checking the flags you can -for instance- force a guest to leave the park, or let him explode or let him paint a picture. Be sure to play around with all of the possibilities.
-<br><br><br><br><br>
-<br clear="left"/>
+### Items
 
-This window looks the same when the "all guests" button is pressed. The results are the same, but for ALL guests on the map, except for those on rides.
+<img width="262" height="232" alt="image" src="https://github.com/user-attachments/assets/fcc87e89-7075-428a-a8fc-360af04b36a5" /><img width="262" height="232" alt="image" src="https://github.com/user-attachments/assets/ee18cd00-0c97-4fb6-93a9-df5178e77703" /><img width="260" height="232" alt="image" src="https://github.com/user-attachments/assets/683092a7-8603-48e5-ad94-a7999c12c3b2" /><br>
+Feeling generous or greedy? On this tab you can manage the items guests possess. When multiple guests are selected you can see how many guests on the map have respective item, here you can also give them selected item. In both cases you can remove the items by clicking it, don't worry... you will get a popup to finalize the removal. For the staff members you can see how they are doing what they are payed to do.
+
+
+
 
 
 ### Multiplayer
@@ -109,4 +146,5 @@ This project supports the [OpenRCT2 hot reload feature](https://github.com/OpenR
 
 Don't touch `app.js`, even though it's just an empty file. Its existence makes Nodemon happy, and Nodemon is what watches your files for changes & fires off new dev builds for hot reloading.
 
-Thanks to [wisnia74](https://github.com/wisnia74/openrct2-typescript-mod-template) for providing the template for this mod and readme.
+Thanks to [wisnia74](https://github.com/wisnia74/openrct2-typescript-mod-template) for providing the template for this mod and readme.<br>
+Built with [Basssiiie's OpenRCT2-FlexUI](https://github.com/Basssiiie/OpenRCT2-FlexUI) user interface library for creating windows in OpenRCT2 plugins.

@@ -1,3 +1,4 @@
+import resolve from "@rollup/plugin-node-resolve";
 import replace from "@rollup/plugin-replace";
 import typescript from "@rollup/plugin-typescript";
 import getPath from "platform-folders";
@@ -10,7 +11,7 @@ const build = process.env.BUILD || "development";
 const isDev = (build === "development");
 
 const output = (isDev)
-	? `${getPath("documents")}/OpenRCT2/plugin/PeepEditor_alpha.js`
+	? `${getPath("documents")}/OpenRCT2/plugin/PeepEditor-UI.js`
 	: "./dist/PeepEditor.js";
 
 
@@ -24,6 +25,7 @@ const config = {
 		format: "iife",
 	},
 	plugins: [
+		resolve(),
 		replace({
 			include: "./src/helpers/environment.ts",
 			preventAssignment: true,
@@ -37,13 +39,13 @@ const config = {
 			compress: {
 				passes: 5
 			},
-			format: {
+			output: {
 				comments: false,
 				quote_style: 1,
 				wrap_iife: true,
 				preamble: "// Get the latest version: https://github.com/Manticore-007/OpenRCT2-PeepEditor",
 
-				beautify: true,
+				beautify: isDev,
 			},
 			mangle: {
 				properties: {

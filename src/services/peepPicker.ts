@@ -1,0 +1,35 @@
+import { getPeepById } from "../objects/peep";
+import { templateWindowSide } from "../ui/sideWindow";
+
+export function togglePeepPicker(isPressed: boolean, onPick: (peep: Guest | BaseStaff) => void, onCancel: () => void): void
+{
+    if (!isPressed)
+    {
+        ui.tool?.cancel();
+        return;
+    }
+
+    ui.activateTool({
+        id: "peep-picker",
+        cursor: "cross_hair",
+        onDown: args =>
+        {
+            const entityId = args.entityId;
+            if (entityId === undefined)
+            {
+                return;
+            }
+            const entity = getPeepById(entityId);
+            if (entity === undefined)
+            {
+                console.log("[PeepPicker] Invalid entity id selected:", entityId);
+                return;
+            }
+            const peepToSelect: Guest | BaseStaff = entity;
+            onPick(peepToSelect);
+            templateWindowSide.open();
+            ui.tool?.cancel();
+        },
+        onFinish: onCancel
+    });
+}
